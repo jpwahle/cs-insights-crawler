@@ -1,0 +1,173 @@
+NLP Scholar: The State of Natural Language Processing Literature
+----------------------------------------------------------------
+
+Contact: Saif M. Mohammad (uvgotsaif@gmail.com, saif.mohammad@nrc-cnrc.gc.ca)
+Date last updated: June 2020
+
+
+PROJECT OVERVIEW
+
+This work examines Natural Language Processing (NLP) research literature to
+identify broad trends in productivity, focus, and impact. To do so, we
+extracted and aligned the information in the ACL Anthology (AA) and Google
+Scholar (GS).  We present the analyses in a sequence of questions and answers.
+The goal is to record the state of the NLP literature: who and how many of us
+are publishing? what are we publishing on? where and in what form are we
+publishing? and what is the impact of our publications? The answers are usually
+in the form of numbers, graphs, and inter-connected visualizations. Special
+emphasis is laid on the demographics and inclusiveness of NLP publishing. 
+
+The work is presented in a number of ways, including:
+-- a series of Medium blog posts on the state of NLP literature
+-- research articles published at ACL-2020 and other venues (listed in the 
+   section below) 
+-- a number of interactive visualizations (to be available shortly; for now 
+   please see the figures in the papers and blog posts)
+
+
+DATA 
+
+Papers are taken from the ACL Anthology. Citation information is taken from
+Google Scholar author profiles. Date of data extraction: June 2020.  Currently
+this package includes one tab-separated master data file:
+nlp-scholar-papers-vJune2020.txt.  The dataset and its creation are described in
+detail in the LREC-2020 paper listed at the bottom of this page.  
+
+(Note that an earlier version of the package included data extracted in June 2019. 
+That data was the source of experiments and analyses in the papers listed at the 
+bottom of this page.)
+
+Each row in the data file corresponds to a paper. The columns correspond to
+various pieces of information about the paper that were obtained from:
+
+-- ACL Anthology (AA): these columns have names that start with AA
+-- Google Scholar (GS): these columns have names that start with GS
+-- additional information generated as part of the NLP Scholar (NS) project: 
+   these columns have names that start with NS
+
+Examples of AA columns include: AA title, AA first author first name, AA year
+of publication, etc. Examples of GS columns include: GS title, GS citations, GS
+year of publication, etc.  Examples of NS columns include: NS title-year id, 
+NS tutorial flag, NS paper type, etc.
+
+Note that the nature of automatic extraction, alignment, and processing entails 
+some amount of errors. Some of the columns, such as NS doctoral consortium flag,
+NS tutorial flag, etc., may miss data simply because the relevant information
+is not explicitly marked for some of the papers in the ACL Anthology.
+
+The column names are usually self-explanatory. However, I will continue to
+update this README to add more information.  Meanwhile, feel free to contact me
+(uvgotsaif@gmail.com) if you have any questions.
+
+Note that some columns have the same information about the paper from both AA
+and GS, for example, the paper title and year of publication. However, the
+information may not always match for columns such as year of publication, as
+Google sometimes records the arxiv year of publication.
+
+The information across AA and GS was aligned using the 'NS title-year id'
+column. It is essentially a concatenation of the lowercased title (after
+removing any white spaces and non-alphanumeric characters) and the year of
+publication. (In cases where the year in GS is different due to a preprint,
+first author name is used instead.)
+
+Starting in 2020, ACL Anthology changed the codes used to represent venues.
+For example, until 2019 ACL was represented by code 'P', but since 2020 it
+is represented by 'acl'. Thus 'AA venue code' has different codes for the same
+venue depending on whether the entry is pre Jan 1 2020 or post Jan 1 2020.
+'NS venue name' maps the different codes for the same venue to a common string.
+Thus entries for main conference papers from ACL have 'NS venue name' = 'ACL'
+regardless of year.
+
+PAPERS
+
+--  Examining Citations of Natural Language Processing Literature. Saif M.
+	Mohammad. In Proceedings of the 58th Annual Meeting of the Association of
+	Computational Linguistics (ACL-2020). July 2020. Seattle, USA. 
+
+	Summary: Examines nine questions pertaining to broad trends in citations of
+	NLP papers (across time, across venue types, across paper types, across areas,
+	etc.).
+
+	BibTeX:
+	@inproceedings{mohammad2020citations, 
+   	title={Examining Citations of Natural Language Processing Literature}, 
+   	author={Mohammad, Saif M.}, 
+   	booktitle={Proceedings of the 2020 annual conference of the association for computational linguistics},      
+	address={Seattle, USA}, 
+   	year={2020} }
+
+-- 	Gender Gap in Natural Language Processing Research: Disparities in
+	Authorship and Citations. Saif M. Mohammad. In Proceedings of the 58th Annual
+	Meeting of the Association of Computational Linguistics (ACL-2020). July 2020.
+	Seattle, USA.
+
+	Summary: Examines eight questions pertaining to disparities across gender
+	in authorship and citations of NLP papers.
+
+	BibTeX:
+	@inproceedings{mohammad2020gender, 
+   	title={Gender Gap in Natural Language Processing Research: Disparities in Authorship and Citations}, 
+   	author={Mohammad, Saif M.}, 
+   	booktitle={Proceedings of the 2020 annual conference of the association for computational linguistics}, 
+   	address={Seattle, USA}, 
+   	year={2020} }
+
+
+-- 	The State of NLP Literature: A Diachronic Analysis of the ACL Anthology.
+	Saif M. Mohammad. arXiv preprint arXiv:1911.03562. November 2019. 
+
+	Summary: A manuscript that brings together the analyses of NLP papers first
+	presented in the four State of NLP blog posts.
+
+	BibTeX:
+	@article{mohammad2019nlpscholar, 
+   	title={The State of NLP Literature: A Diachronic Analysis of the ACL Anthology}, 
+   	author={Mohammad, Saif M.}, 
+   	journal={arXiv preprint arXiv:1911.03562}, 
+   	year={2019}
+
+--	NLP Scholar: An Interactive Visual Explorer for Natural Language Processing
+	Literature. Saif M. Mohammad. In Proceedings of the 58th Annual Meeting of the
+	Association of Computational Linguistics (ACL-2020). July 2020. Seattle, USA.
+
+	Summary: Presents an interactive visualization tool to help users find
+	(related) work published in the ACL Anthology.
+
+	BibTeX:
+	@inproceedings{mohammad2020demo, 
+   	title={NLP Scholar: An Interactive Visual Explorer for Natural Language Processing Literature}, 
+   	author={Mohammad, Saif M.}, 
+   	booktitle={Proceedings of the 2020 annual conference of the association for computational linguistics}, 
+   	address={Seattle, USA}, 
+   	year={2020} }
+
+
+-- 	NLP Scholar: A Dataset for Examining the State of NLP Research. Saif M.
+	Mohammad. In Proceedings of the 12th Language Resources and Evaluation
+	Conference (LREC-2020). May 2020. Marseille, France. 
+
+	Summary: Presents the NLP Scholar Dataset -- a single unified source of
+	information from both the ACL Anthology (AA) and Google Scholar for tens of
+	thousands of NLP papers.Presents initial work on analyzing the volume of
+	research in NLP over the years, identifies some the most cited papers in AA, as
+	well as outlines a list of potential applications of the dataset.
+
+	BibTeX:
+	@inproceedings{mohammad2020data, 
+   	title={NLP Scholar: A Dataset for Examining the State of NLP Research}, 
+   	author={Mohammad, Saif M.}, 
+   	booktitle={Proceedings of the 12th Language Resources and Evaluation Conference (LREC-2020)},      
+   	address={Marseille, France},    
+   	year={2020} }
+
+ 
+
+Acknowledgments
+
+This work was possible due to the helpful discussion and encouragement from a
+number of awesome people, including: Dan Jurafsky, Tara Small, Michael Strube,
+Cyril Goutte, Eric Joanis, Matt Post, Patrick Littell, Torsten Zesch, Ellen
+Riloff, Norm Vinson, Iryna Gurevych, Rebecca Knowles, Isar Nejadgholi, and
+Peter Turney. Also, a big thanks to the ACL Anthology and Google Scholar Teams
+for creating and maintaining wonderful resources.
+
