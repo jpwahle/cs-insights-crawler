@@ -1,0 +1,3 @@
+L10-1-632	http://www.lrec-conf.org/proceedings/lrec2010/pdf/930_Paper.pdf
+L10-1-273	http://www.lrec-conf.org/proceedings/lrec2010/pdf/396_Paper.pdf
+L10-1-294	http://www.lrec-conf.org/proceedings/lrec2010/pdf/430_Paper.pdf
