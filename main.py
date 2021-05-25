@@ -5,58 +5,62 @@ import pandas as pd
 import urllib.request
 from dotenv import load_dotenv
 
-def analyze_cols(df: pd.DataFrame):
-    #df = df.drop(["AA in-volume id", "AA paper id", "AA doi", "AA collection id", "AA volume id", "AA venue code", "AA booktitle", "AA booktitle-url",
-                  # "AA front matter Url", "NS tutorial flag", "NS demo flag", "NS student paper flag", "NS shared task flag", "NS workshop flag",
-                  # "NS doctoral consortium flag", "NS main conference flag", "NS short paper flag", "NS long paper flag", "NS conference flag", "NS poster flag",
-                  # "NS oral paper flag", "NS squib flag", "NS paper type", "NS title-year id", "GS venue info 1 (GS calls this journal)",
-                  # "GS venue info 2 (GS calls this number)", "GS cid", "GS pubid", "GS masterpcid", "AA first author full name", "AA first author first name",
-                  # "AA publisher", "NS companion flag", "GS title", "GS authors", "GS year of publication"], axis=1)
-    # df = df.drop(["AA in-volume id", "AA paper id", "NS paper type", "NS title-year id"], axis=1)
-    pd.set_option('display.max_colwidth', None)
-    pd.set_option('display.width', 2000)
-    pd.set_option("display.max_rows", 50, "display.max_columns", 5)
-    # df = df[["GS cid", "GS pubid", "GS masterpcid", "GS venue info 2 (GS calls this number)", "GS venue info 1 (GS calls this journal)"]]
-    print(df)
+load_dotenv()
 
-    cols = df.columns.values
-    cols = pd.Series(cols)
-    print(list(cols))
 
-    # Directory naming:
-    print(df["AA year of publication"].isnull().sum())
-    print(df["GS year of publication"].isnull().sum())
-    # -> use AA year of publication, because there are not empty values compared to GS
+def print_null_values(df: pd.DataFrame, column: str):
+    print(f"# null values in '{column}': {df[column].isnull().sum()}")
 
-    print(np.sort(df["AA venue code"].unique()))
-    print(np.sort(df["NS venue name"].unique()))
-    print(df["AA venue code"].isnull().sum())
-    print(df["NS venue name"].isnull().sum())
-    # -> Use NS venue name, because it is more readable for humans and is not null for every entry
 
-    print(df["AA url"].isnull().sum())
-    # no missing
+def print_possible_values(df: pd.DataFrame, column: str):
+    print(f"Possible values in '{column}':")
+    print(np.sort(df[column].unique()))
 
-    years = np.sort(df["AA year of publication"].unique())
-    print(years)
 
-    print(df["AA url"].str.extractall(
-        r"(^(?!https:\/\/www\.aclweb\.org\/anthology\/|http:\/\/www\.lrec-conf\.org\/proceedings\/|http(s)?:\/\/doi\.org\/).*)"))
+def analyze_dataset(df: pd.DataFrame):
+    print("We first want to analyse the dataset and make sure everything is correct and as we expect it.")
+    print(f"These are all the columns in the dataset: {df.columns.values}")
+    print("")
 
-    print(df["AA first author full name"].isnull().sum())
-    print(df[~df["AA first author full name"].str.contains(",")]["AA first author full name"])
-    #print(df["AA first author full name"])
+    print("For directory naming, when downloading the papers, we need to make sure certain columns do not contain null values.")
+    print_null_values(df, 'AA year of publication')
+    print_null_values(df, 'GS year of publication')
+    print_possible_values(df, "AA year of publication")
+    print("-> We will use 'AA year of publication'.")
+    print("")
 
-    print(len(df["AA paper id"].unique()))
+    print_possible_values(df, 'NS venue name')
+    print_null_values(df, 'NS venue name')
+    print_possible_values(df, 'AA venue code')
+    print_null_values(df, 'AA venue code')
+    print("-> We will use 'NS venue name', because it is more readable.")
+    print("")
 
-    # == 52289
-    #print(df["AA paper id"].unique().sum())
+    print(f"The amount of not unique IDs in 'AA paper id': {len(df['AA paper id'].unique()) - len(df.index)}")
+    print("")
+
+    print(f"To download the papers we also need to check certain columns.")
+    print_null_values(df, 'AA url')
+    print("")
+
+    print(f"Over time more venues and their corresponding websites might get added.")
+    known_websites = ("https://www.aclweb.org/anthology/", "http://www.lrec-conf.org/proceedings/",
+                      "https://doi.org/", "http://doi.org/", "http://yanran.li/")
+    print(f"Websites this code can download from: {known_websites}")
+    problematic_urls = df[~df["AA url"].str.startswith(known_websites)]
+    print(f"The code might have issues with the following URLs:")
+    print(problematic_urls['AA url'])
+    print("")
+
+    print("For further analysis we also might want to look into some other columns.")
+    print_null_values(df, "AA first author full name")
+    print("What entries in 'AA first author full name' do not have a ',':")
+    print(df[~df['AA first author full name'].str.contains(',')]['AA first author full name'])
 
 
 def download_papers(df: pd.DataFrame, years: str):
     path_papers = os.getenv("PATH_PAPERS")
-
-    # df = df[["AA year of publication", "NS venue name", "AA url", "AA title", "AA first author full name"]]
+    df_missing = pd.read_csv("missing_papers.txt", delimiter="\t", low_memory=False, header=None)
 
     if "-" in years:
         years = years.split("-")
@@ -70,30 +74,22 @@ def download_papers(df: pd.DataFrame, years: str):
         years = [int(years)]
 
     for year in years:
-        df2 = df[df["AA year of publication"] == year]
-        for i, row in df2.iterrows():
+        df_year = df[df["AA year of publication"] == year]
+        for i, row in df_year.iterrows():
             venue = row["NS venue name"]
             venue = venue.replace("*", "").replace("/", "_").replace(" ", "_")
-            # author = row["AA first author full name"].split(",")[0]
-            # author = author.replace(" ", "_")
-            # title = row["AA title"].replace(" ", "_")
-            # filename = f"{author}_{title}.pdf"
             output_dir = f"{path_papers}/{year}/{venue}"
             os.makedirs(output_dir, exist_ok=True)
             filename = row["AA paper id"].replace(".", "_")
             full_path = f"{output_dir}/{filename}.pdf"
 
-            if not os.path.isfile(full_path):
-                # TODO also check missing papers
+            if not os.path.isfile(full_path) and row["AA paper id"] not in df_missing.iloc[:, [0]].values:
                 url = row["AA url"]
                 if str.startswith(url, "https://www.aclweb.org/anthology/"):
                     url = f"{url}.pdf"
-                elif str.startswith(url, "https://doi.org/") or str.startswith(url, "http://doi.org/") or str.startswith(url, "http://www.lrec-conf.org/proceedings/"):
-                    pass
                 elif str.startswith(url, "http://yanran.li/"):
+                    # TODO
                     pass
-                else:
-                    print(url)
 
                 print(url, full_path)
                 try:
@@ -104,8 +100,6 @@ def download_papers(df: pd.DataFrame, years: str):
 
 
 if __name__ == '__main__':
-    print("running!")
-    load_dotenv()
-    df = pd.read_csv("NLP-Scholar-Data-vJune2020/nlp-scholar-papers-vJune2020.txt", delimiter="\t", low_memory=False, header=0)
-   # analyze_cols(df)
-    download_papers(df, "1971-1975")
+    df = pd.read_csv(os.getenv("PATH_DATASET"), delimiter="\t", low_memory=False, header=0)
+    # analyze_dataset(df)
+    download_papers(df, "2010")
