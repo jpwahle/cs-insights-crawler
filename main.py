@@ -5,9 +5,12 @@ import pandas as pd
 import urllib.request
 from dotenv import load_dotenv
 from tqdm import tqdm
+from tika import parser
 
 load_dotenv()
 
+missing_papers = "missing_papers.txt"
+abstract_col = "NE abstract"
 
 def print_null_values(df: pd.DataFrame, column: str):
     print(f"# null values in '{column}': {df[column].isnull().sum()}")
@@ -69,7 +72,7 @@ def clean_venue_name(venue_name: str):
 
 def download_papers(df: pd.DataFrame, years: str):
     path_papers = os.getenv("PATH_PAPERS")
-    df_missing = pd.read_csv("missing_papers.txt", delimiter="\t", low_memory=False, header=None)
+    df_missing = pd.read_csv(missing_papers, delimiter="\t", low_memory=False, header=None)
 
     if "-" in years:
         years = years.split("-")
@@ -84,7 +87,7 @@ def download_papers(df: pd.DataFrame, years: str):
 
     for year in years:
         df_year = df[df["AA year of publication"] == year]
-        for i, row in df_year.iterrows():
+        for i, row in tqdm(df_year.iterrows()):
             venue = clean_venue_name(row["NS venue name"])
             output_dir = f"{path_papers}/{year}/{venue}"
             os.makedirs(output_dir, exist_ok=True)
@@ -103,115 +106,92 @@ def download_papers(df: pd.DataFrame, years: str):
                 try:
                     urllib.request.urlretrieve(url, full_path)
                 except urllib.error.HTTPError:
-                    with open("missing_papers.txt", "a+") as f:
+                    with open(missing_papers, "a+") as f:
                         f.write(f"{row['AA paper id']}\t{url}\n")
 
 
 def extract_abstracts(df: pd.DataFrame):
-    failures = 0
-    papers_checked = 0
-    tops = 0
+    iterated = 0
+    searched = 0
+    index = 0
     nones = 0
-    df = df[df["AA year of publication"] == 2010]
+    unicode = 0
+    path_papers = os.getenv("PATH_PAPERS")
+
+    df = df[df["AA year of publication"] >= 2010]
     top_tier = ["ACL", "EMNLP", "NAACL", "COLING", "EACL"]
+    df = df[df["NS venue name"].isin(top_tier)]
+
+    # if abstract_col not in df.columns:
+    #     df[abstract_col] = "NA"
+    # else:
+    #     df = df[df["NS venue name"].isin(top_tier)]
+
     for i, row in tqdm(df.iterrows(), total=df.shape[0]):
+        iterated += 1
         paper_id = clean_paper_id(row["AA paper id"])
         venue = clean_venue_name(row["NS venue name"])
         year = row["AA year of publication"]
-        path_papers = os.getenv("PATH_PAPERS")
         full_path = f"{path_papers}/{year}/{venue}/{paper_id}.pdf"
         if os.path.isfile(full_path):
-            papers_checked += 1
-            from tika import parser
+            searched += 1
 
             raw = parser.from_file(full_path)
-
-            # with open(full_path, 'rb', encoding='utf-8') as file:
-            #     content = file.read()
-            # raw = parser.from_buffer(content)
-
             text = raw["content"]
+
             if text is None:
                 nones += 1
-                # print("None", full_path)
+                print("None: ", full_path)
             else:
-                with open("tika.txt", "w+", encoding='utf-8') as f:
-                    start_string = "Abstract"
-                    pos_abstract = text.find(start_string)
-                    if pos_abstract == -1:
-                        start_string = "ABSTRACT"
-                        pos_abstract = text.find(start_string)
-                        if pos_abstract == -1:
-                            start_string = "A b s t r a c t"
-                            pos_abstract = text.find(start_string)
-                    # pos_1 = text.find("\n1", pos_abstract)
-                    # pos_intro = text.find("Introduction", pos_1)
-                    #pos_1 = 1
-                    pos_intro = text.find("\n1 Introduction", pos_abstract)
-                    if pos_intro == -1:
-                        pos_intro = text.find("\n1 Task Description", pos_abstract)
-                        if pos_intro == -1:
-                            pos_intro = text.find("\n1. Introduction", pos_abstract)
-                            if pos_intro == -1:
-                                pos_intro = text.find("\n\nIntroduction", pos_abstract)
-                                if pos_intro == -1:
-                                    pos_intro = text.find("\n\n1 ", pos_abstract)
-                    start_pos = pos_abstract
-                    end_pos = pos_intro
-                    if row["NS venue name"] == "CL":
-                        end_string = "\n\n1. Introduction"
-                        end_pos = text.find(end_string)
-                        start_string = "\n\n"
-                        start_pos = text.rfind("\n\n", 0, end_pos)
-                        #print(start_pos, end_pos)
-                    #print(pos_abstract, pos_1, pos_intro)
-                    if row["NS venue name"] in top_tier:
-                        tops += 1
-                        if (start_pos == -1 or end_pos == -1) and year >= 1980:
-                            print("failure:", start_pos, end_pos, full_path)
-                            # if full_path == "E:/nlp/NLP_Scholar_Papers/2001/SemEval/S01-1004.pdf":
-                            #print(text)
-                            failures += 1
-                            if failures >= 100:
-                                print(papers_checked, nones)
-                                quit()
-                        #print(text)
+                #with open("tika.txt", "w+", encoding='utf-8') as f:
+                start_strings = ["Abstract", "ABSTRACT", "A b s t r a c t"]
+                start_string = ""
+                start_pos = -1
+                for start_string in start_strings:
+                    start_pos = text.find(start_string)
+                    if start_pos != -1:
+                        break
+
+                end_strings = ["\n\n1 Introduction", "\n\n1. Introduction", "\n\n1 Task Description", "\n\n1. Task Description", "\n\n1 "]
+                end_pos = -1
+                for end_string in end_strings:
+                    end_pos = text.find(end_string, start_pos)
+                    if end_pos != -1:
+                        if end_string == "\n\n1. Task Description":
+                            print(f"end string: 1. Task Description, {full_path}")
+                            # TODO remove
+                        break
+
+                if row["NS venue name"] == "CL":
+                    end_string = "\n\n1. Introduction"
+                    end_pos = text.find(end_string)
+                    start_string = "\n\n"
+                    start_pos = text.rfind("\n\n", 0, end_pos)
+
+                if start_pos == -1 or end_pos == -1:
+                    print("index:", start_pos, end_pos, full_path)
+                    index += 1
+                    abstract = "NA"
+                else:
                     abstract = text[start_pos+len(start_string):end_pos]
-                    # if row["NS venue name"] == "CL":
-                    #     print(abstract)
-                    # print(abstract)
-                    #f.write(abstract)
-    print(papers_checked, nones, failures, tops)
 
-            #quit()
+                if "�" in abstract:
+                    unicode += 1
 
-            # import textract
-            # text = textract.process(full_path, encoding='utf-8', errors="ignore")
-            # with open("textract.txt", "w+", encoding='utf-8', errors="ignore") as f:
-            #     print(text)
-            #     f.write(text)
+                #f.write(abstract)
 
-            # import PyPDF2
-            # pdf_file = open(full_path, 'rb')
-            # read_pdf = PyPDF2.PdfFileReader(pdf_file)
-            # number_of_pages = read_pdf.getNumPages()
-            # with open("pypdf2.txt", "wb+") as f:
-            #     for i2 in range(number_of_pages):
-            #         page = read_pdf.getPage(i2)
-            #         page_content = page.extractText()
-            #         print(page_content.encode('utf-8'))
-            #         f.write(page_content.encode('utf-8'))
+    print(f"iterated: {iterated}, searched: {searched}, none: {nones}, index: {index}, �: {unicode}")
 
-            # import pdfplumber
-            # pdf = pdfplumber.open(full_path)
-            # page = pdf.pages[0]
-            # text = page.extract_text()
-            # print(text)
-            # pdf.close()
+
+def check_paper():
+    full_path = ""
+    raw = parser.from_file(full_path)
+    text = raw["content"]
+    print(text)
 
 
 if __name__ == '__main__':
     df = pd.read_csv(os.getenv("PATH_DATASET"), delimiter="\t", low_memory=False, header=0)
     # analyze_dataset(df)
-    # download_papers(df, "2020")
+    # download_papers(df, "2017-2019")
     extract_abstracts(df)
