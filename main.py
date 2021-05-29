@@ -12,6 +12,7 @@ load_dotenv()
 
 MISSING_PAPERS = "missing_papers.txt"
 ABSTRACT_COLUMN = "NE abstract"
+UNICODE_COLUMN = "NE encoding issue flag"
 NA = "NA"
 
 
@@ -92,8 +93,9 @@ def download_papers(df: pd.DataFrame, min_year: int, max_year: int) -> None:
         years.append(year)
 
     for year in years:
+        print(f"Downloading papers from {year}.")
         df_year = df[df["AA year of publication"] == year]
-        for i, row in tqdm(df_year.iterrows()):
+        for i, row in tqdm(df_year.iterrows(), total=df_year.shape[0]):
             venue = clean_venue_name(row["NS venue name"])
             output_dir = f"{path_papers}/{year}/{venue}"
             os.makedirs(output_dir, exist_ok=True)
@@ -108,7 +110,7 @@ def download_papers(df: pd.DataFrame, min_year: int, max_year: int) -> None:
                     # TODO
                     pass
 
-                print(url, full_path)
+                # print(url, full_path)
                 try:
                     urllib.request.urlretrieve(url, full_path)
                 except urllib.error.HTTPError:
@@ -118,13 +120,24 @@ def download_papers(df: pd.DataFrame, min_year: int, max_year: int) -> None:
 
 def save_dataset(df: pd.DataFrame):
     path_dataset_expanded = os.getenv("PATH_DATASET_EXPANDED")
-    df.to_csv(path_dataset_expanded, index=False, sep="\t")
+    df.to_csv(path_dataset_expanded, index=False, sep="\t", na_rep=NA)
+
+
+def determine_earliest_string(text: str, possible_strings: List[str]):
+    earliest_string = ""
+    earliest_pos = -1
+    for possible_string in possible_strings:
+        pos_current = text.find(possible_string)
+        if pos_current != -1 and (earliest_pos == -1 or pos_current < earliest_pos):
+            earliest_pos = pos_current
+            earliest_string = possible_string
+    return earliest_pos, earliest_string
 
 
 def extract_abstracts(df: pd.DataFrame, min_year: int = 1965, max_year: int = 2020, venues: List[str] = None, overwrite_abstracts: bool = False) -> None:
+    # TODO startup tika server
     start = time.time()
     iterated = 0
-    selected = 0
     searched = 0
     skipped = 0
     index = 0
@@ -134,70 +147,69 @@ def extract_abstracts(df: pd.DataFrame, min_year: int = 1965, max_year: int = 20
     path_papers = os.getenv("PATH_PAPERS")
 
     if ABSTRACT_COLUMN not in df.columns:
-        df[ABSTRACT_COLUMN] = NA
-    else:
-        df = df[df[ABSTRACT_COLUMN] != NA]
+        df[ABSTRACT_COLUMN] = None
+    if UNICODE_COLUMN not in df.columns:
+        df[UNICODE_COLUMN] = False
 
-    for i, row in tqdm(df.iterrows(), total=df.shape[0]):
+    df_select = df[(min_year <= df["AA year of publication"]) & (df["AA year of publication"] <= max_year)]
+    if venues is not None:
+        df_select = df_select[df_select["NS venue name"].isin(venues)]
+
+    for i, row in tqdm(df_select.iterrows(), total=df_select.shape[0]):
         iterated += 1
-        if min_year <= row["AA year of publication"] <= max_year and (venues is None or row["NS venue name"] in venues):
-            selected += 1
-            if overwrite_abstracts or pd.isnull(row[ABSTRACT_COLUMN]):
-                paper_id = clean_paper_id(row["AA paper id"])
-                venue = clean_venue_name(row["NS venue name"])
-                year = row["AA year of publication"]
-                full_path = f"{path_papers}/{year}/{venue}/{paper_id}.pdf"
-                if os.path.isfile(full_path):
-                    searched += 1
+        if overwrite_abstracts or pd.isnull(row[ABSTRACT_COLUMN]):
+            paper_id = clean_paper_id(row["AA paper id"])
+            venue = clean_venue_name(row["NS venue name"])
+            year = row["AA year of publication"]
+            full_path = f"{path_papers}/{year}/{venue}/{paper_id}.pdf"
+            if os.path.isfile(full_path):
+                searched += 1
 
-                    raw = parser.from_file(full_path)
-                    text = raw["content"]
+                raw = parser.from_file(full_path)
+                text = raw["content"]
 
-                    if text is None:
-                        nones += 1
-                        print("none: ", full_path)
-                    else:
-                        start_strings = ["Abstract", "ABSTRACT", "A b s t r a c t"]
-                        start_string = ""
-                        start_pos = -1
-                        for start_string in start_strings:
-                            start_pos = text.find(start_string)
-                            if start_pos != -1:
-                                break
+                if text is None:
+                    nones += 1
+                else:
+                    start_strings = ["Abstract", "ABSTRACT", "A b s t r a c t"]
+                    start_pos, start_string = determine_earliest_string(text, start_strings)
+                    start_pos += len(start_string)
 
-                        end_strings = ["\n\n1 Introduction", "\n\n1. Introduction", "\n\n1 Task Description", "\n\n1. Task Description", "\n\n1 "]
-                        end_pos = -1
-                        for end_string in end_strings:
+                    end_strings_1 = ["\n\nTITLE AND ABSTRACT IN ", "\n\nTitle and Abstract in ", "KEYWORDS:", "Keywords:"]
+                    end_pos, end_string = determine_earliest_string(text, end_strings_1)
+                    if end_pos == -1:
+                        end_strings_2 = ["\n\n1 Introduction", "\n\n1. Introduction",
+                                         "\n\n1 Task Description", "\n\n1. Task Description",
+                                         "\n\nIntroduction\n\n", "\n\n1 "]
+                        for end_string in end_strings_2:
                             end_pos = text.find(end_string, start_pos)
                             if end_pos != -1:
-                                if end_string == "\n\n1. Task Description":
-                                    print(f"end string: 1. Task Description, {full_path}")
-                                    # TODO remove
                                 break
 
-                        if row["NS venue name"] == "CL":
-                            end_string = "\n\n1. Introduction"
-                            end_pos = text.find(end_string)
-                            start_string = "\n\n"
-                            start_pos = text.rfind("\n\n", 0, end_pos)
+                    # if row["NS venue name"] == "CL":
+                    #     end_string = "\n\n1. Introduction"
+                    #     end_pos = text.find(end_string)
+                    #     start_string = "\n\n"
+                    #     start_pos = text.rfind("\n\n", 0, end_pos)
 
-                        if start_pos == -1 or end_pos == -1:
-                            print("index:", start_pos, end_pos, full_path)
-                            index += 1
+                    if end_pos == -1 or start_pos == -1:
+                        index += 1
+                    else:
+                        abstract = text[start_pos:end_pos]
+                        df.loc[i, ABSTRACT_COLUMN] = abstract
+                        if "�" in abstract:
+                            df.loc[i, UNICODE_COLUMN] = True
+                            unicode += 1
                         else:
-                            abstract = text[start_pos+len(start_string):end_pos]
-                            df.loc[i, ABSTRACT_COLUMN] = abstract
-                            if "�" in abstract:
-                                unicode += 1
-                else:
-                    no_file += 1
+                            df.loc[i, UNICODE_COLUMN] = False
             else:
-                skipped += 1
-        if i % 10000 == 0 and i > 0:
+                no_file += 1
+        else:
+            skipped += 1
+        if i % 1000 == 0 and i > 0:
             save_dataset(df)
     save_dataset(df)
-    print(f"Papers iterated: {iterated} in dataset")
-    print(f"Papers selected: {selected} matching year+venue")
+    print(f"Papers iterated: {iterated} matching year+venue")
     print(f"Abstracts searched: {searched} abstracts searched")
     print(f"Abstracts skipped: {skipped} already existed")
     print(f"none: {nones} texts of papers are None")
@@ -208,11 +220,32 @@ def extract_abstracts(df: pd.DataFrame, min_year: int = 1965, max_year: int = 20
     print(f"This took {time.strftime('%Mm %Ss', duration)}.")
 
 
+def paper_stats(df: pd.DataFrame):
+    path_papers = os.getenv("PATH_PAPERS")
+    # import os
+    cpt = sum([len(files) for r, d, files in os.walk(path_papers)])
+    print(f"Files downloaded: {cpt}")
+    dataset_size = len(df.index)
+    print(f"Papers in dataset: {dataset_size}")
+    df_missing = pd.read_csv(MISSING_PAPERS, delimiter="\t", low_memory=False, header=None)
+    missing_papers = len(df_missing.index)
+    print(f"Papers in missing_papers.txt: {missing_papers}")
+    print(f"Unaccounted: {dataset_size - cpt - missing_papers}")
+
+
+def print_unicode_to_file(df: pd.DataFrame):
+    df_uni = df[df[UNICODE_COLUMN] == True]
+    for i, row in df_uni.iterrows():
+        print(row["AA year of publication"], row["NS venue name"], row["AA paper id"])
+        print(row["NE abstract"])
+
+
 def check_paper_text() -> None:
-    full_path = ""
+    full_path = "E:/nlp/NLP_Scholar_Papers/2012/COLING/C12-2031.pdf"
     raw = parser.from_file(full_path)
     text = raw["content"]
     print(text)
+    print(text.find("ABSTRACT\n"))
 
 
 if __name__ == '__main__':
@@ -220,7 +253,11 @@ if __name__ == '__main__':
     df_expanded = pd.read_csv(os.getenv("PATH_DATASET_EXPANDED"), delimiter="\t", low_memory=False, header=0)
     # analyze_dataset(df_expanded)
     # check_paper_text()
-    download_papers(df_main, 2011, 2015)
+    # download_papers(df_main, 1965, 2020)
     # extract_abstracts(df_main, False)
-    # top_tier = ["ACL", "EMNLP", "NAACL", "COLING", "EACL"]
-    # extract_abstracts(df_expanded, min_year=2010, venues=top_tier, overwrite_abstracts=False)
+    top_tier = ["ACL", "EMNLP", "NAACL", "COLING", "EACL"]
+    # top_tier = ["COLING"]
+    # top_tier = None
+    # extract_abstracts(df_main, min_year=2010, venues=top_tier, overwrite_abstracts=False)
+    # paper_stats(df_main)
+    # print_unicode_to_file(df_expanded)
