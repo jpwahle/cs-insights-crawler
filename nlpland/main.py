@@ -69,7 +69,6 @@ def analyze_dataset(df: pd.DataFrame) -> None:
         print("0. The column does not exist yet.")
     print("")
 
-
     print("For further analysis we also might want to look into some other columns.")
     print_null_values(df, "AA first author full name")
     print("What entries in 'AA first author full name' do not have a ',':")
@@ -233,7 +232,7 @@ def paper_stats(df: pd.DataFrame):
     print(f"Unaccounted: {dataset_size - cpt - missing_papers}")
 
 
-def print_unicode_to_file(df: pd.DataFrame):
+def print_unicode_to_file(df: pd.DataFrame) -> None:
     df_uni = df[df[UNICODE_COLUMN] == True]
     for i, row in df_uni.iterrows():
         print(row["AA year of publication"], row["NS venue name"], row["AA paper id"])
@@ -251,13 +250,13 @@ def check_paper_text() -> None:
 if __name__ == '__main__':
     df_main = pd.read_csv(os.getenv("PATH_DATASET"), delimiter="\t", low_memory=False, header=0)
     df_expanded = pd.read_csv(os.getenv("PATH_DATASET_EXPANDED"), delimiter="\t", low_memory=False, header=0)
-    # analyze_dataset(df_expanded)
+    analyze_dataset(df_expanded)
     # check_paper_text()
     # download_papers(df_main, 1965, 2020)
     # extract_abstracts(df_main, False)
     top_tier = ["ACL", "EMNLP", "NAACL", "COLING", "EACL"]
     # top_tier = ["COLING"]
     # top_tier = None
-    # extract_abstracts(df_main, min_year=2010, venues=top_tier, overwrite_abstracts=False)
+    # extract_abstracts(df_expanded, min_year=2010, venues=top_tier, overwrite_abstracts=False)
     # paper_stats(df_main)
     # print_unicode_to_file(df_expanded)
