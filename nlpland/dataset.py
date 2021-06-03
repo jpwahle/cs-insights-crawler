@@ -13,6 +13,11 @@ def download_papers(df: pd.DataFrame, min_year: int, max_year: int) -> None:
     path_papers = os.getenv("PATH_PAPERS")
     df_missing = pd.read_csv(MISSING_PAPERS, delimiter="\t", low_memory=False, header=None)
 
+    if min_year is None:
+        min_year = df["AA year of publication"].min()
+    if max_year is None:
+        max_year = df["AA year of publication"].max()
+
     years = []
     for year in range(min_year, max_year+1):
         years.append(year)
@@ -20,14 +25,14 @@ def download_papers(df: pd.DataFrame, min_year: int, max_year: int) -> None:
     for year in years:
         print(f"Downloading papers from {year}.")
         df_year = df[df["AA year of publication"] == year]
-        for i, row in tqdm(df_year.iterrows(), total=df_year.shape[0]):
+        for index, row in tqdm(df_year.iterrows(), total=df_year.shape[0]):
             venue = clean_venue_name(row["NS venue name"])
             output_dir = f"{path_papers}/{year}/{venue}"
             os.makedirs(output_dir, exist_ok=True)
-            filename = clean_paper_id(row["AA paper id"])
+            filename = clean_paper_id(index)
             full_path = f"{output_dir}/{filename}.pdf"
 
-            if not os.path.isfile(full_path) and row["AA paper id"] not in df_missing.iloc[:, [0]].values:
+            if not os.path.isfile(full_path) and index not in df_missing.iloc[:, [0]].values:
                 url = row["AA url"]
                 if str.startswith(url, "https://www.aclweb.org/anthology/"):
                     url = f"{url}.pdf"
@@ -38,11 +43,11 @@ def download_papers(df: pd.DataFrame, min_year: int, max_year: int) -> None:
                     urllib.request.urlretrieve(url, full_path)
                 except urllib.error.HTTPError:
                     with open(MISSING_PAPERS, "a+") as f:
-                        f.write(f"{row['AA paper id']}\t{url}\n")
+                        f.write(f"{index}\t{url}\n")
 
-def load_dataset(env_name: str):
-    return pd.read_csv(os.getenv(env_name), delimiter="\t", low_memory=False, header=0, index_col=0)
-    # df_expanded = pd.read_csv(os.getenv("PATH_DATASET_EXPANDED"), delimiter="\t", low_memory=False, header=0, index_col=0)
+
+def load_dataset(env_var_name: str):
+    return pd.read_csv(os.getenv(env_var_name), delimiter="\t", low_memory=False, header=0, index_col=0)
 
 
 def save_dataset(df: pd.DataFrame):
@@ -61,13 +66,13 @@ def determine_earliest_string(text: str, possible_strings: List[str]):
     return earliest_pos, earliest_string
 
 
-def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int = 1965, max_year: int = 2020, venues: List[str] = None, overwrite_abstracts: bool = False) -> None:
+def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, venues: List[str] = None, overwrite_abstracts: bool = False) -> None:
     # TODO startup tika server
     start = time.time()
     iterated = 0
     searched = 0
     skipped = 0
-    index = 0
+    index_err = 0
     nones = 0
     # unicode = 0
     no_file = 0
@@ -75,14 +80,19 @@ def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int = 1965, max_year
 
     # df_create_cols(df)
 
+    if min_year is None:
+        min_year = df["AA year of publication"].min()
+    if max_year is None:
+        max_year = df["AA year of publication"].max()
+
     df_select = df[(min_year <= df["AA year of publication"]) & (df["AA year of publication"] <= max_year)]
     if venues is not None:
         df_select = df_select[df_select["NS venue name"].isin(venues)]
 
-    for i, row in tqdm(df_select.iterrows(), total=df_select.shape[0]):
+    for index, row in tqdm(df_select.iterrows(), total=df_select.shape[0]):
         iterated += 1
         if overwrite_abstracts or pd.isnull(row[COLUMN_ABSTRACT]):
-            paper_id = clean_paper_id(row["AA paper id"])
+            paper_id = clean_paper_id(index)
             venue = clean_venue_name(row["NS venue name"])
             year = row["AA year of publication"]
             full_path = f"{path_papers}/{year}/{venue}/{paper_id}.pdf"
@@ -117,11 +127,11 @@ def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int = 1965, max_year
                     #     start_pos = text.rfind("\n\n", 0, end_pos)
 
                     if end_pos == -1 or start_pos == -1:
-                        index += 1
+                        index_err += 1
                     else:
                         abstract = text[start_pos:end_pos]
-                        df.at[i, COLUMN_ABSTRACT] = abstract
-                        df.at[i, COLUMN_ABSTRACT_SOURCE] = ABSTRACT_SOURCE_RULE
+                        df.at[index, COLUMN_ABSTRACT] = abstract
+                        df.at[index, COLUMN_ABSTRACT_SOURCE] = ABSTRACT_SOURCE_RULE
                         # if "�" in abstract:
                         #     df.at[i, UNICODE_COLUMN] = True
                         #     unicode += 1
@@ -131,14 +141,14 @@ def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int = 1965, max_year
                 no_file += 1
         else:
             skipped += 1
-        if i % 1000 == 0 and i > 0:
+        if iterated % 1000 == 0:
             save_dataset(df)
     save_dataset(df)
     print(f"Papers iterated: {iterated} matching year+venue")
     print(f"Abstracts searched: {searched} abstracts searched")
     print(f"Abstracts skipped: {skipped} already existed")
     print(f"none: {nones} texts of papers are None")
-    print(f"index: {index} abstracts not found")
+    print(f"index: {index_err} abstracts not found")
     # print(f"�: {unicode} new abstracts with �")
     print(f"no_file: {no_file} papers not downloaded")
     duration = time.gmtime(time.time()-start)
@@ -146,7 +156,7 @@ def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int = 1965, max_year
 
 
 def extract_abstracts_anthology(df: pd.DataFrame):
-    # always overwrites
+    """This always overwrites."""
 
     # print(os.getenv("PYTHONPATH"))
     # os.environ["PYTHONPATH"]+=":E:/workspaces/python-git/acl-anthology/bin"
@@ -162,32 +172,46 @@ def extract_abstracts_anthology(df: pd.DataFrame):
     # for id_, paper in anthology.papers.items():
     #     print(paper.anthology_id, paper.get_title('text'))
 
-    # todo setup df
-    # df_create_cols()
-
     from lxml import etree
     start = time.time()
     abstracts = 0
+    unknown_id = 0
+    no_id_abstract = 0
     path_anthology = os.getenv("PATH_ANTHOLOGY")
     for file in tqdm(os.listdir(path_anthology), total=len(os.listdir(path_anthology))):
         if file.endswith(".xml"):
             tree = etree.parse(f"{path_anthology}/{file}")
-            for element in tree.iter("paper"):
-                children = element.getchildren()
-                id = None
-                abstract = None
-                for child in children:
-                    if child.tag == "url":
-                        id = child.text
-                    if child.tag == "abstract":
-                        if child.text is not None:
-                            abstract = child.xpath("string()")
-                if id is not None and abstract is not None:
-                    df.at[id, COLUMN_ABSTRACT] = abstract
-                    df.at[id, COLUMN_ABSTRACT_SOURCE] = ABSTRACT_SOURCE_ANTHOLOGY
-                    abstracts += 1
-                    # TODO only add when in id
-                    # TODO lrec id = url, not id
+            for collection in tree.iter("collection"):
+                collection_id = collection.attrib["id"]
+                for volume in collection.iter("volume"):
+                    if len(volume.attrib) > 0:
+                        volume_id = volume.attrib["id"]
+                    else:
+                        volume_id = ""
+                    for paper in volume.iter("paper"):
+                        children = paper.getchildren()
+                        id = None
+                        abstract = None
+                        for child in children:
+                            if child.tag == "url":
+                                if "http" not in child.text:
+                                    id = child.text
+                            if child.tag == "abstract":
+                                if child.text is not None:
+                                    abstract = child.xpath("string()")
+                        if id is None:
+                            paper_id = paper.attrib["id"]
+                            id = f"{collection_id}-{volume_id}-{paper_id}"
+
+                        if id is not None and abstract is not None:
+                            if id in df.index:
+                                df.at[id, COLUMN_ABSTRACT] = abstract
+                                df.at[id, COLUMN_ABSTRACT_SOURCE] = ABSTRACT_SOURCE_ANTHOLOGY
+                                abstracts += 1
+                            else:
+                                unknown_id += 1
+                        else:
+                            no_id_abstract += 1
     save_dataset(df)
     print(f"Abstracts added/overwritten: {abstracts}")
     duration = time.gmtime(time.time() - start)
