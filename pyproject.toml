@@ -5,15 +5,17 @@ description = ""
 authors = ["Lennart Kuell <lennart.kuell@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = ">=3.7.1,<4.0"
 click = "^8.0.1"
 matplotlib = "^3.4.2"
 numpy = "^1.20.3"
-pandas = "^1.1.4"
+pandas = "^1.2.4"
 python-dotenv = "^0.16"
 tika = "^1.24"
 tqdm = "^4.61.0"
 urllib3 = "^1.26.4"
+# acl-anthology = "^0.1"
+lxml = "^4.6.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
