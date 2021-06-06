@@ -74,7 +74,6 @@ def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, 
     skipped = 0
     index_err = 0
     nones = 0
-    # unicode = 0
     no_file = 0
     path_papers = os.getenv("PATH_PAPERS")
 
@@ -132,11 +131,6 @@ def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, 
                         abstract = text[start_pos:end_pos]
                         df.at[index, COLUMN_ABSTRACT] = abstract
                         df.at[index, COLUMN_ABSTRACT_SOURCE] = ABSTRACT_SOURCE_RULE
-                        # if "�" in abstract:
-                        #     df.at[i, UNICODE_COLUMN] = True
-                        #     unicode += 1
-                        # else:
-                        #     df.at[i, UNICODE_COLUMN] = False
             else:
                 no_file += 1
         else:
@@ -149,7 +143,6 @@ def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, 
     print(f"Abstracts skipped: {skipped} already existed")
     print(f"none: {nones} texts of papers are None")
     print(f"index: {index_err} abstracts not found")
-    # print(f"�: {unicode} new abstracts with �")
     print(f"no_file: {no_file} papers not downloaded")
     duration = time.gmtime(time.time()-start)
     print(f"This took {time.strftime('%Mm %Ss', duration)}.")
@@ -157,20 +150,6 @@ def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, 
 
 def extract_abstracts_anthology(df: pd.DataFrame):
     """This always overwrites."""
-
-    # print(os.getenv("PYTHONPATH"))
-    # os.environ["PYTHONPATH"]+=":E:/workspaces/python-git/acl-anthology/bin"
-    # print(os.getenv("PYTHONPATH"), os.getenv("ACLANTHOLOGY"))
-    #
-    # import sys
-    # sys.path.append(os.path.abspath("E:/workspaces/python-git/acl-anthology/bin"))
-    # # install requirements.txt in bin/
-    #
-    # from anthology import Anthology
-    #
-    # anthology = Anthology(importdir='E:/workspaces/python-git/acl-anthology/data')
-    # for id_, paper in anthology.papers.items():
-    #     print(paper.anthology_id, paper.get_title('text'))
 
     from lxml import etree
     start = time.time()
@@ -198,7 +177,7 @@ def extract_abstracts_anthology(df: pd.DataFrame):
                                     id = child.text
                             if child.tag == "abstract":
                                 if child.text is not None:
-                                    abstract = child.xpath("string()")
+                                    abstract = str(child.xpath("string()"))
                         if id is None:
                             paper_id = paper.attrib["id"]
                             id = f"{collection_id}-{volume_id}-{paper_id}"

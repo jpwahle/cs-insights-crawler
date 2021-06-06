@@ -17,6 +17,8 @@ Next, clone the repository and navigate to the root folder `NLPLand` in a shell.
 
 (You need python 3.7 for this)
 
+If you are not already in the project specific virtual environment, activate it to be able to use our CLI. You can execute `poetry shell` for this. (The command might not work on Windows) 
+
 ### .env
 First you have to rename the file `empty.env` to `.env`. In the file you also have to set your variables.
 
@@ -27,3 +29,5 @@ Hint: All path variables can be either an absolute or relative path.
 `PATH_DATASET` is the path to the `.txt` file of the NLP Scholar dataset. 
 
 `PATH_DATASET_EXPANDED` is the path to the `.txt` file of the expanded dataset or where it is supposed to be saved.
+
+`PATH_ANTHOLOGY` is the path to the `xml` directory in the ACL Anthology. 
