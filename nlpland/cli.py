@@ -70,8 +70,22 @@ def countabstractsanth():
     check.count_anthology_abstracts()
 
 
+@cli.command()
+def grobid():
+    from grobid_client.grobid_client import GrobidClient
+    import time
+    import os
+    start = time.time()
+    client = GrobidClient(config_path="C:/Users/Lennart/Desktop/grobid_client_python/config.json")
+    path = "C:/test_papers"
+    if os.path.isdir(path):
+        print(f"Processing {len(os.listdir(path))} files.")
+    client.process("processFulltextDocument", path, output="./resources/test_out_heavy/", n=20)
+    print(f"This took {time.time()-start}s.")
+
+
 if __name__ == '__main__':
     from click.testing import CliRunner
     runner = CliRunner()
     result = runner.invoke(extract, ["anth", "--original"])
-    #traceback.print_exception(*result.exc_info)
+    # traceback.print_exception(*result.exc_info)

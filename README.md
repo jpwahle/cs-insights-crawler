@@ -30,4 +30,17 @@ Hint: All path variables can be either an absolute or relative path.
 
 `PATH_DATASET_EXPANDED` is the path to the `.txt` file of the expanded dataset or where it is supposed to be saved.
 
-`PATH_ANTHOLOGY` is the path to the `xml` directory in the ACL Anthology. 
+`PATH_ANTHOLOGY` is the path to the `xml` directory in the ACL Anthology.
+
+### Grobid:
+Installation: https://grobid.readthedocs.io/en/latest/Install-Grobid/
+
+Linux (untested) https://grobid.readthedocs.io/en/latest/Grobid-service/
+
+Windows: https://grobid.readthedocs.io/en/latest/Grobid-docker/ (needs WSL 2)
+
+light: `docker run -t --rm --init -p 8070:8070 -p 8071:8071 lfoppiano/grobid:0.6.2`
+
+heavy: `docker run -t --rm --init -p 8070:8070 -p 8071:8071 grobid/grobid:0.6.2`
+
+(We use the python client)
