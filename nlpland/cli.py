@@ -3,6 +3,7 @@ import click
 import nlpland.dataset as data
 import nlpland.data_cleanup as clean
 import nlpland.data_check as check
+import nlpland.wordcount as count_
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -24,7 +25,7 @@ def cli() -> None:
 @click.option('--min-year')
 @click.option('--max-year')
 def download(min_year, max_year):
-    df = data.load_dataset("PATH_DATASET")
+    df = get_dataset(True)
     data.download_papers(df, min_year=min_year, max_year=max_year)
 
 
@@ -48,7 +49,7 @@ def extract(mode, original, overwrite, min_year, max_year):
 
 @cli.command()
 def checkencode():
-    df = data.load_dataset("PATH_DATASET_EXPANDED")
+    df = get_dataset(False)
     check.check_encoding_issues(df)
 
 
@@ -82,6 +83,38 @@ def grobid():
         print(f"Processing {len(os.listdir(path))} files.")
     client.process("processFulltextDocument", path, output="./resources/test_out_heavy/", n=20)
     print(f"This took {time.time()-start}s.")
+
+
+@cli.command()
+@click.argument('k', type=int)
+@click.option('--venue1')
+@click.option('--year1', type=int)
+@click.option('--venue2')
+@click.option('--year2', type=int)
+def count(k: int, venue1: str, year1: int, venue2: str, year2: int):
+    df1 = get_dataset(False)
+    if venue1 is not None:
+        df1 = df1[df1["NS venue name"] == venue1]
+    if year1 is not None:
+        df1 = df1[df1["AA year of publication"] == year1]
+
+    if venue2 is not None and year2 is not None:
+        df2 = get_dataset(False)
+        if venue2 is not None:
+            df2 = df2[df2["NS venue name"] == venue2]
+        if year2 is not None:
+            df2 = df2[df2["AA year of publication"] == year2]
+        count_.count_compare_words(k, df1, df2)
+    else:
+        count_.count_compare_words(k, df1)
+
+
+@cli.command()
+def test():
+    from nlpland.data_cleanup import clean_and_tokenize
+    test_ = "one two, three.\n four-five, se-\nven, open-\nsource, se-\nve.n, "
+
+    # clean_and_tokenize(test_, get_vocabulary())
 
 
 if __name__ == '__main__':
