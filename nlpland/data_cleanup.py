@@ -13,7 +13,7 @@ def clean_venue_name(venue_name: str) -> str:
 
 def clean_and_tokenize(input_: str, language_vocabulary):
     # does not remove stopwords, punctuation
-    # input_ = input_.lower()
+    input_ = input_.lower()
     for match in re.findall(r"[\s]+(\S*-\n\S*)[\s]+", input_, overlapped=True):
         # regex: start and end with whitespace
         # arbitrary amount of chars with -\n somewhere in it
@@ -28,3 +28,9 @@ def clean_and_tokenize(input_: str, language_vocabulary):
     # print(input)
     # print(tokens)
     return tokens
+
+
+def venues_to_list(venues: str):
+    venues_list = venues.split(',')
+    venues_list = [venue.strip(" ") for venue in venues_list]
+    return venues_list

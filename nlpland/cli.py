@@ -9,13 +9,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def get_dataset(original: bool):
-    if original:
-        return data.load_dataset("PATH_DATASET")
-    else:
-        return data.load_dataset("PATH_DATASET_EXPANDED")
-
-
 @click.group()
 def cli() -> None:
     pass
@@ -25,7 +18,7 @@ def cli() -> None:
 @click.option('--min-year')
 @click.option('--max-year')
 def download(min_year, max_year):
-    df = get_dataset(True)
+    df = data.get_dataset(True)
     data.download_papers(df, min_year=min_year, max_year=max_year)
 
 
@@ -36,7 +29,7 @@ def download(min_year, max_year):
 @click.option('--min-year')
 @click.option('--max-year')
 def extract(mode, original, overwrite, min_year, max_year):
-    df = get_dataset(original)
+    df = data.get_dataset(original)
 
     modes = ["rule", "anth"]
     if mode not in modes:
@@ -49,14 +42,14 @@ def extract(mode, original, overwrite, min_year, max_year):
 
 @cli.command()
 def checkencode():
-    df = get_dataset(False)
+    df = data.get_dataset(False)
     check.check_encoding_issues(df)
 
 
 @cli.command()
 @click.option('--original', is_flag=True)
 def checkdataset(original):
-    df = get_dataset(original)
+    df = data.get_dataset(original)
     check.check_dataset(df)
 
 
@@ -85,28 +78,59 @@ def grobid():
     print(f"This took {time.time()-start}s.")
 
 
+def df_filter_options(function):
+    function = click.option('--venues')(function)
+    function = click.option('--year', type=int)(function)
+    function = click.option('--min-year', type=int)(function)
+    function = click.option('--max-year', type=int)(function)
+    return function
+
+
+def df_filter_options2(function):
+    function = click.option('--venues2')(function)
+    function = click.option('--year2', type=int)(function)
+    function = click.option('--min-year2', type=int)(function)
+    function = click.option('--max-year2', type=int)(function)
+    return function
+
+
+def get_filtered_df(venues: str, year: int, min_year: int, max_year: int, original_dataset: bool = False):
+    # if year is set, it overrides min/max year
+    df = data.get_dataset(original_dataset)
+    if venues is not None:
+        venues_list = clean.venues_to_list(venues)
+        df = df[df["NS venue name"].isin(venues_list)]
+    if year is not None:
+        df = df[df["AA year of publication"] == year]
+    if min_year is not None:
+        df = df[df["AA year of publication"] >= year]
+    if max_year is not None:
+        df = df[df["AA year of publication"] <= year]
+    return df
+
+
 @cli.command()
 @click.argument('k', type=int)
-@click.option('--venue1')
-@click.option('--year1', type=int)
-@click.option('--venue2')
-@click.option('--year2', type=int)
-def count(k: int, venue1: str, year1: int, venue2: str, year2: int):
-    df1 = get_dataset(False)
-    if venue1 is not None:
-        df1 = df1[df1["NS venue name"] == venue1]
-    if year1 is not None:
-        df1 = df1[df1["AA year of publication"] == year1]
+@click.option('--bigrams', is_flag=True)
+@df_filter_options
+@df_filter_options2
+def count(k: int, venues: str, year: int, min_year: int, max_year: int, venues2: str, year2: int, min_year2: int, max_year2: int, bigrams: bool= False):
+    # works like filters:
+    # leaving both blank: whole dataset (once)
+    # leaving the second blank: only count first one
+    df1 = get_filtered_df(venues, year, min_year, max_year)
 
-    if venue2 is not None and year2 is not None:
-        df2 = get_dataset(False)
-        if venue2 is not None:
-            df2 = df2[df2["NS venue name"] == venue2]
-        if year2 is not None:
-            df2 = df2[df2["AA year of publication"] == year2]
-        count_.count_compare_words(k, df1, df2)
+    if venues2 is not None or year2 is not None or min_year2 is not None or max_year2 is not None:
+        df2 = get_filtered_df(venues2, year2, min_year2, max_year2)
+        if bigrams:
+            count_.count_and_compare_bigrams(k, df1, df2)
+        else:
+            count_.count_and_compare_words(k, df1, df2)
     else:
-        count_.count_compare_words(k, df1)
+        if bigrams:
+            count_.count_and_compare_bigrams(k, df1)
+        else:
+            count_.count_and_compare_words(k, df1)
 
 
 @cli.command()

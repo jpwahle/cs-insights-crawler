@@ -46,6 +46,13 @@ def download_papers(df: pd.DataFrame, min_year: int, max_year: int) -> None:
                         f.write(f"{index}\t{url}\n")
 
 
+def get_dataset(original_dataset: bool):
+    if original_dataset:
+        return load_dataset("PATH_DATASET")
+    else:
+        return load_dataset("PATH_DATASET_EXPANDED")
+
+
 def load_dataset(env_var_name: str):
     return pd.read_csv(os.getenv(env_var_name), delimiter="\t", low_memory=False, header=0, index_col=0)
 
