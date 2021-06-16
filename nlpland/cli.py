@@ -1,9 +1,11 @@
 import click
+import pandas as pd
 
 import nlpland.dataset as data
 import nlpland.data_cleanup as clean
 import nlpland.data_check as check
 import nlpland.wordcount as count_
+from nlpland.constants import COLUMN_ABSTRACT
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -76,8 +78,10 @@ def grobid():
         print(f"Processing {len(os.listdir(path))} files.")
     client.process("processFulltextDocument", path, output="./resources/test_out_heavy/", n=20)
     print(f"This took {time.time()-start}s.")
+    # TODO cleanup
 
 
+# TODO move to helper
 def df_filter_options(function):
     function = click.option('--venues')(function)
     function = click.option('--year', type=int)(function)
@@ -119,6 +123,12 @@ def count(k: int, venues: str, year: int, min_year: int, max_year: int, venues2:
     # leaving both blank: whole dataset (once)
     # leaving the second blank: only count first one
     df1 = get_filtered_df(venues, year, min_year, max_year)
+    docs = list(df1[COLUMN_ABSTRACT])+list(df1["AA title"])
+    # TODO change to use n as input from the user
+    if not bigrams:
+        count_.count_and_compare(10, docs)
+    else:
+        count_.count_and_compare(10, docs, n=2)
 
     if venues2 is not None or year2 is not None or min_year2 is not None or max_year2 is not None:
         df2 = get_filtered_df(venues2, year2, min_year2, max_year2)
@@ -135,13 +145,28 @@ def count(k: int, venues: str, year: int, min_year: int, max_year: int, venues2:
 
 @cli.command()
 def test():
-    from nlpland.data_cleanup import clean_and_tokenize
-    test_ = "one two, three.\n four-five, se-\nven, open-\nsource, se-\nve.n, "
+    # from nlpland.data_cleanup import clean_and_tokenize
+    # test_ = "one two, three.\n four-five, se-\nven, open-\nsource, se-\nve.n, "
 
+    corpus = [
+        'This is the first document.',
+        'This document is the second document.',
+        'And this is the third one.',
+        'Is this the first document?',
+        "one two, three.\n four-five, se-\nven, open-\nsource, se-\nve.n, ",
+    ]
     # clean_and_tokenize(test_, get_vocabulary())
+    count_.count_and_compare(10, corpus)
+
+    # print(X.toarray())
+    #
+    # vectorizer2 = CountVectorizer(analyzer='word', ngram_range=(2, 2))
+    # X2 = vectorizer2.fit_transform(corpus)
+    # print(vectorizer2.get_feature_names())
 
 
 if __name__ == '__main__':
+    # debugging
     from click.testing import CliRunner
     runner = CliRunner()
     result = runner.invoke(extract, ["anth", "--original"])

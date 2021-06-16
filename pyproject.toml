@@ -16,6 +16,7 @@ tqdm = "^4.61.0"
 urllib3 = "^1.26.4"
 lxml = "^4.6.1"
 nltk = "^3.6.2"
+scikit-learn = "^0.24.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
