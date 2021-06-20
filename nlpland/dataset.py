@@ -4,9 +4,10 @@ import pandas as pd
 import urllib.request
 from tqdm import tqdm
 from tika import parser
+import tika
 from typing import List
 from nlpland.constants import COLUMN_ABSTRACT, MISSING_PAPERS, ABSTRACT_SOURCE_ANTHOLOGY, ABSTRACT_SOURCE_RULE, COLUMN_ABSTRACT_SOURCE
-from nlpland.data_cleanup import clean_paper_id, clean_venue_name
+from nlpland.clean import clean_paper_id, clean_venue_name
 
 
 def download_papers(df: pd.DataFrame, min_year: int, max_year: int) -> None:
@@ -74,7 +75,6 @@ def determine_earliest_string(text: str, possible_strings: List[str]):
 
 
 def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, venues: List[str] = None, overwrite_abstracts: bool = False) -> None:
-    # TODO startup tika server
     start = time.time()
     iterated = 0
     searched = 0
@@ -83,8 +83,8 @@ def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, 
     nones = 0
     no_file = 0
     path_papers = os.getenv("PATH_PAPERS")
-
-    # df_create_cols(df)
+    tika.initVM()
+    #TODO vectorize
 
     if min_year is None:
         min_year = df["AA year of publication"].min()

@@ -18,6 +18,8 @@ lxml = "^4.6.1"
 nltk = "^3.6.2"
 scikit-learn = "^0.24.2"
 scattertext = "^0.1.2"
+gensim = "^3.8.1"
+pyLDAvis = "^3.3.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

@@ -1,6 +1,8 @@
 import nltk
 import regex as re
 from string import punctuation
+from nltk.corpus import words, stopwords
+from typing import List
 
 
 def clean_paper_id(paper_id: str) -> str:
@@ -33,7 +35,15 @@ def clean_newline_hyphens(input_: str, language_vocabulary):
     return input_
 
 
-def venues_to_list(venues: str):
-    venues_list = venues.split(',')
-    venues_list = [venue.strip(" ") for venue in venues_list]
-    return venues_list
+def get_english_words():
+    return set(words.words())
+
+
+def get_stopwords_and_punct():
+    stops = stopwords.words('english')
+    stops += [char for char in punctuation]
+    return stops
+
+
+def remove_stopwords(tokens: List[str], stops):
+    return [token for token in tokens if token not in stops]

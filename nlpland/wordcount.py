@@ -1,44 +1,41 @@
 import pandas as pd
 from collections import Counter
-from nlpland.data_cleanup import clean_newline_hyphens_and_tokenize,  clean_newline_hyphens
-from string import punctuation
+from nlpland.clean import clean_newline_hyphens_and_tokenize,  clean_newline_hyphens, get_english_words, get_stopwords_and_punct
 from typing import List
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 import nltk
 from nltk import word_tokenize
-from nltk.corpus import stopwords, words
 import numpy as np
 from nlpland.constants import COLUMN_ABSTRACT
 
+
 def count_words_in_df(df: pd.DataFrame):
     counts = Counter()
-    english_dict = set(words.words())
+    english_words = get_english_words()
     for index, row in df.iterrows():
-        tokens = clean_newline_hyphens_and_tokenize(row["AA title"], english_dict)
+        tokens = clean_newline_hyphens_and_tokenize(row["AA title"], english_words)
         if not pd.isna(row["NE abstract"]):
-            tokens += clean_newline_hyphens_and_tokenize(row["NE abstract"], english_dict)
+            tokens += clean_newline_hyphens_and_tokenize(row["NE abstract"], english_words)
         counts += Counter(tokens)
-    stopwords_ = set(stopwords.words('english'))
-    for stopword in stopwords_:
+    stopwords = get_stopwords_and_punct()
+    for stopword in stopwords:
         counts.pop(stopword, None)
-    for char in punctuation:
-        counts.pop(char, None)
     return counts
 
 
 def count_bigrams_in_df(df: pd.DataFrame):
     counts = Counter()
-    english_dict = set(words.words())
+    english_words = get_english_words()
     for index, row in df.iterrows():
-        tokens = clean_newline_hyphens_and_tokenize(row["AA title"], english_dict)
+        tokens = clean_newline_hyphens_and_tokenize(row["AA title"], english_words)
         bigrams = list(nltk.bigrams(tokens))
         if not pd.isna(row["NE abstract"]):
-            tokens = clean_newline_hyphens_and_tokenize(row["NE abstract"], english_dict)
+            tokens = clean_newline_hyphens_and_tokenize(row["NE abstract"], english_words)
             bigrams += list(nltk.bigrams(tokens))
         counts += Counter(bigrams)
-    stopwords_ = set(stopwords.words('english'))
+    stopwords = get_stopwords_and_punct()
     for bigram in list(counts.keys()):
-        if any(stopword in bigram for stopword in stopwords_) or any(punc in bigram for punc in punctuation):
+        if any(stopword in bigram for stopword in stopwords):
             counts.pop(bigram)
     return counts
 
@@ -55,11 +52,10 @@ def count_and_compare_words(k: int, df1: pd.DataFrame, df2: pd.DataFrame = None,
 
 
 def count_grams(documents: List[List[str]], n: int = 1, tfidf: bool = False):
-    english_dict = set(words.words())
-    stops = stopwords.words('english')
-    stops += [char for char in punctuation]
+    english_words = get_english_words()
+    stopwords = get_stopwords_and_punct()
     cv = CountVectorizer(analyzer='word', tokenizer=word_tokenize,
-                         preprocessor=lambda doc: clean_newline_hyphens(doc, english_dict),
+                         preprocessor=lambda doc: clean_newline_hyphens(doc, english_words),
                          lowercase=True, ngram_range=(n, n)
                          )
     # the sklearn tokenizer splits "open-source", nltk does not
@@ -73,7 +69,7 @@ def count_grams(documents: List[List[str]], n: int = 1, tfidf: bool = False):
     feature_names = cv.get_feature_names()
     for token in cv.get_feature_names():
         tokens = token.split(" ")
-        if any(stopword in tokens for stopword in stops):
+        if any(stopword in tokens for stopword in stopwords):
             index = feature_names.index(token)
             feature_names.pop(index)
             word_counts.pop(index)
@@ -100,21 +96,19 @@ def count_and_compare(k: int, documents: List[List[str]], documents2: List[List[
 def plot_word_counts(df: pd.DataFrame, venues: str, venues2: str, years: str = None, years2: str = None):
     import scattertext as st
 
-    english_dict = set(words.words())
-    df[COLUMN_ABSTRACT] = df[COLUMN_ABSTRACT].apply(lambda x: clean_newline_hyphens(x, english_dict))
+    english_words = get_english_words()
+    df[COLUMN_ABSTRACT] = df[COLUMN_ABSTRACT].apply(lambda x: clean_newline_hyphens(x, english_words))
 
     df["parse"] = df[COLUMN_ABSTRACT].apply(st.whitespace_nlp_with_sentences)
 
     if years is None and years2 is None:
         category = venues
         category_col = "NS venue name"
-        category_name = venues
-        category_name2 = venues2
     else:
         category = years
         category_col = "year"
-        category_name = years
-        category_name2 = years2
+    category_name = f"{venues} {years}"
+    category_name2 = f"{venues2} {years2}"
 
     corpus = st.CorpusFromParsedDocuments(
         df, category_col=category_col, parsed_col="parse"
@@ -127,7 +121,7 @@ def plot_word_counts(df: pd.DataFrame, venues: str, venues2: str, years: str = N
         width_in_pixels=1000,
         transform=st.Scalers.dense_rank
     )
-    html_file = f"./data/wordcount.html"
+    html_file = f"output/st_wordcount.html"
     open(html_file, 'w+', encoding="UTF-8").write(html)
     print(f"File created at {html_file}")
 

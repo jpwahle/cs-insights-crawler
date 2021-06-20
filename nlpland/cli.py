@@ -2,7 +2,6 @@ import click
 import pandas as pd
 
 import nlpland.dataset as data
-import nlpland.data_cleanup as clean
 import nlpland.data_check as check
 import nlpland.wordcount as count_
 from nlpland.constants import COLUMN_ABSTRACT
@@ -18,8 +17,8 @@ def cli() -> None:
 
 
 @cli.command()
-@click.option('--min-year')
-@click.option('--max-year')
+@click.option('--min-year', type=int)
+@click.option('--max-year', type=int)
 def download(min_year, max_year):
     df = data.get_dataset(True)
     data.download_papers(df, min_year=min_year, max_year=max_year)
@@ -29,8 +28,8 @@ def download(min_year, max_year):
 @click.argument('mode', type=str)
 @click.option('--original', is_flag=True)
 @click.option('--overwrite', is_flag=True)
-@click.option('--min-year')
-@click.option('--max-year')
+@click.option('--min-year', type=int)
+@click.option('--max-year', type=int)
 def extract(mode, original, overwrite, min_year, max_year):
     df = data.get_dataset(original)
 
@@ -115,8 +114,8 @@ def scatter(venues: str, year: int, min_year: int, max_year: int, venues2: str, 
     df2 = filter.get_filtered_df(venues2, year2, min_year2, max_year2)
     df = pd.concat([df1, df2])
 
-    venues_list = clean.venues_to_list(venues)
-    venues_list2 = clean.venues_to_list(venues2)
+    venues_list = filter.venues_to_list(venues)
+    venues_list2 = filter.venues_to_list(venues2)
     df["NS venue name"] = df.apply(lambda x: filter.edit_venues(x, venues, venues_list, venues2), axis=1)
 
     if venues_list == venues_list2:
@@ -132,6 +131,17 @@ def scatter(venues: str, year: int, min_year: int, max_year: int, venues2: str, 
         count_.plot_word_counts(df, venues, venues2, years, years2)
     else:
         count_.plot_word_counts(df, venues, venues2)
+
+
+@cli.command()
+@click.argument('topics', type=int)
+@click.option('--load', is_flag=True)
+@filter.df_filter_options
+# @filter.df_filter_options2
+def topic(topics: int, venues: str, year: int, min_year: int, max_year: int, load=False):
+    from nlpland.topic_modelling import topic
+    df = filter.get_filtered_df(venues, year, min_year, max_year)
+    topic(df, topics, load)
 
 
 @cli.command()

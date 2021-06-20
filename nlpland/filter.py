@@ -1,7 +1,8 @@
 import click
 import nlpland.dataset as data
-import nlpland.data_cleanup as clean
+import nlpland.clean as clean
 from nlpland.constants import COLUMN_ABSTRACT
+
 
 def df_filter_options(function):
     function = click.option('--venues')(function)
@@ -24,7 +25,7 @@ def get_filtered_df(venues: str, year: int, min_year: int, max_year: int, origin
     df = data.get_dataset(original_dataset)
     df = df[~df[COLUMN_ABSTRACT].isna()]
     if venues is not None:
-        venues_list = clean.venues_to_list(venues)
+        venues_list = venues_to_list(venues)
         df = df[df["NS venue name"].isin(venues_list)]
     if year is not None:
         df = df[df["AA year of publication"] == year]
@@ -33,6 +34,12 @@ def get_filtered_df(venues: str, year: int, min_year: int, max_year: int, origin
     if max_year is not None:
         df = df[df["AA year of publication"] <= max_year]
     return df
+
+
+def venues_to_list(venues: str):
+    venues_list = venues.split(',')
+    venues_list = [venue.strip(" ") for venue in venues_list]
+    return venues_list
 
 
 def format_years(row, year, min_year, max_year, year2, min_year2, max_year2):
