@@ -73,6 +73,9 @@ def check_dataset(df: pd.DataFrame) -> None:
         print(f"{abstracts} abstracts of {rows} papers: {abstracts/rows*100:.2f}%")
         print(f"{anth} abstracts were extracted from the anthology.")
         print(f"{rule} abstracts were extracted with the rule-based system.")
+        print("The amount of abstracts per year we get from the anthology:")
+        df2 = df[df[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_ANTHOLOGY]
+        print(df2.groupby(["AA year of publication"])[COLUMN_ABSTRACT].count())
     else:
         print("0. The column does not exist yet.")
     print()

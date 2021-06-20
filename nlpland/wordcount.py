@@ -1,24 +1,22 @@
 import pandas as pd
 from collections import Counter
-# import nltk
-from nltk.corpus import stopwords
-import nltk
-from nlpland.data_cleanup import clean_and_tokenize
+from nlpland.data_cleanup import clean_newline_hyphens_and_tokenize,  clean_newline_hyphens
 from string import punctuation
 from typing import List
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+import nltk
 from nltk import word_tokenize
 from nltk.corpus import stopwords, words
-from nlpland.data_cleanup import clean_newline_hyphens
 import numpy as np
+from nlpland.constants import COLUMN_ABSTRACT
 
 def count_words_in_df(df: pd.DataFrame):
     counts = Counter()
     english_dict = set(words.words())
     for index, row in df.iterrows():
-        tokens = clean_and_tokenize(row["AA title"], english_dict)
+        tokens = clean_newline_hyphens_and_tokenize(row["AA title"], english_dict)
         if not pd.isna(row["NE abstract"]):
-            tokens += clean_and_tokenize(row["NE abstract"], english_dict)
+            tokens += clean_newline_hyphens_and_tokenize(row["NE abstract"], english_dict)
         counts += Counter(tokens)
     stopwords_ = set(stopwords.words('english'))
     for stopword in stopwords_:
@@ -32,10 +30,10 @@ def count_bigrams_in_df(df: pd.DataFrame):
     counts = Counter()
     english_dict = set(words.words())
     for index, row in df.iterrows():
-        tokens = clean_and_tokenize(row["AA title"], english_dict)
+        tokens = clean_newline_hyphens_and_tokenize(row["AA title"], english_dict)
         bigrams = list(nltk.bigrams(tokens))
         if not pd.isna(row["NE abstract"]):
-            tokens = clean_and_tokenize(row["NE abstract"], english_dict)
+            tokens = clean_newline_hyphens_and_tokenize(row["NE abstract"], english_dict)
             bigrams += list(nltk.bigrams(tokens))
         counts += Counter(bigrams)
     stopwords_ = set(stopwords.words('english'))
@@ -45,16 +43,15 @@ def count_bigrams_in_df(df: pd.DataFrame):
     return counts
 
 
-def count_and_compare_words(k: int, df1: pd.DataFrame, df2: pd.DataFrame = None):
-    print(count_words_in_df(df1).most_common(k))
-    if df2 is not None:
-        print(count_words_in_df(df2).most_common(k))
-
-
-def count_and_compare_bigrams(k: int, df1: pd.DataFrame, df2: pd.DataFrame = None):
-    print(count_bigrams_in_df(df1).most_common(k))
-    if df2 is not None:
-        print(count_bigrams_in_df(df2).most_common(k))
+def count_and_compare_words(k: int, df1: pd.DataFrame, df2: pd.DataFrame = None, n: int = 1):
+    if n == 1:
+        print(count_words_in_df(df1).most_common(k))
+        if df2 is not None:
+            print(count_words_in_df(df2).most_common(k))
+    if n == 2:
+        print(count_bigrams_in_df(df1).most_common(k))
+        if df2 is not None:
+            print(count_bigrams_in_df(df2).most_common(k))
 
 
 def count_grams(documents: List[List[str]], n: int = 1, tfidf: bool = False):
@@ -98,3 +95,41 @@ def count_and_compare(k: int, documents: List[List[str]], documents2: List[List[
     print(get_most_common_grams(k, documents, n))
     if documents2 is not None:
         print(get_most_common_grams(k, documents2, n))
+
+
+def plot_word_counts(df: pd.DataFrame, venues: str, venues2: str, years: str = None, years2: str = None):
+    import scattertext as st
+
+    english_dict = set(words.words())
+    df[COLUMN_ABSTRACT] = df[COLUMN_ABSTRACT].apply(lambda x: clean_newline_hyphens(x, english_dict))
+
+    df["parse"] = df[COLUMN_ABSTRACT].apply(st.whitespace_nlp_with_sentences)
+
+    if years is None and years2 is None:
+        category = venues
+        category_col = "NS venue name"
+        category_name = venues
+        category_name2 = venues2
+    else:
+        category = years
+        category_col = "year"
+        category_name = years
+        category_name2 = years2
+
+    corpus = st.CorpusFromParsedDocuments(
+        df, category_col=category_col, parsed_col="parse"
+    ).build().get_unigram_corpus().compact(st.AssociationCompactor(2000))
+
+    html = st.produce_scattertext_explorer(
+        corpus,
+        category=category, category_name=category_name, not_category_name=category_name2,
+        minimum_term_frequency=5, pmi_threshold_coefficient=0,
+        width_in_pixels=1000,
+        transform=st.Scalers.dense_rank
+    )
+    html_file = f"./data/wordcount.html"
+    open(html_file, 'w+', encoding="UTF-8").write(html)
+    print(f"File created at {html_file}")
+
+    # import webbrowser
+    # webbrowser.get("chrome").open_new_tab(html_file)

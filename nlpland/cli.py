@@ -7,6 +7,7 @@ import nlpland.data_check as check
 import nlpland.wordcount as count_
 from nlpland.constants import COLUMN_ABSTRACT
 from dotenv import load_dotenv
+from nlpland import filter
 
 load_dotenv()
 
@@ -81,66 +82,56 @@ def grobid():
     # TODO cleanup
 
 
-# TODO move to helper
-def df_filter_options(function):
-    function = click.option('--venues')(function)
-    function = click.option('--year', type=int)(function)
-    function = click.option('--min-year', type=int)(function)
-    function = click.option('--max-year', type=int)(function)
-    return function
-
-
-def df_filter_options2(function):
-    function = click.option('--venues2')(function)
-    function = click.option('--year2', type=int)(function)
-    function = click.option('--min-year2', type=int)(function)
-    function = click.option('--max-year2', type=int)(function)
-    return function
-
-
-def get_filtered_df(venues: str, year: int, min_year: int, max_year: int, original_dataset: bool = False):
-    # if year is set, it overrides min/max year
-    df = data.get_dataset(original_dataset)
-    if venues is not None:
-        venues_list = clean.venues_to_list(venues)
-        df = df[df["NS venue name"].isin(venues_list)]
-    if year is not None:
-        df = df[df["AA year of publication"] == year]
-    if min_year is not None:
-        df = df[df["AA year of publication"] >= year]
-    if max_year is not None:
-        df = df[df["AA year of publication"] <= year]
-    return df
-
-
 @cli.command()
 @click.argument('k', type=int)
-@click.option('--bigrams', is_flag=True)
-@df_filter_options
-@df_filter_options2
-def count(k: int, venues: str, year: int, min_year: int, max_year: int, venues2: str, year2: int, min_year2: int, max_year2: int, bigrams: bool= False):
+@click.option('--ngrams', type=int)
+@filter.df_filter_options
+@filter.df_filter_options2
+def count(k: int, venues: str, year: int, min_year: int, max_year: int, venues2: str, year2: int, min_year2: int, max_year2: int, ngrams: int = 1):
     # works like filters:
     # leaving both blank: whole dataset (once)
     # leaving the second blank: only count first one
-    df1 = get_filtered_df(venues, year, min_year, max_year)
-    docs = list(df1[COLUMN_ABSTRACT])+list(df1["AA title"])
-    # TODO change to use n as input from the user
-    if not bigrams:
-        count_.count_and_compare(10, docs)
-    else:
-        count_.count_and_compare(10, docs, n=2)
+    df1 = filter.get_filtered_df(venues, year, min_year, max_year)
+    docs = list(df1[COLUMN_ABSTRACT]) + list(df1["AA title"])
 
     if venues2 is not None or year2 is not None or min_year2 is not None or max_year2 is not None:
-        df2 = get_filtered_df(venues2, year2, min_year2, max_year2)
-        if bigrams:
-            count_.count_and_compare_bigrams(k, df1, df2)
-        else:
-            count_.count_and_compare_words(k, df1, df2)
+        df2 = filter.get_filtered_df(venues2, year2, min_year2, max_year2)
+        docs2 = list(df2[COLUMN_ABSTRACT]) + list(df2["AA title"])
+        count_.count_and_compare(10, docs, docs2, n=ngrams)
+        count_.count_and_compare_words(k, df1, df2, n=ngrams)
     else:
-        if bigrams:
-            count_.count_and_compare_bigrams(k, df1)
+        count_.count_and_compare(10, docs, n=ngrams)
+        count_.count_and_compare_words(k, df1, n=ngrams)
+
+
+@cli.command()
+@filter.df_filter_options
+@filter.df_filter_options2
+def scatter(venues: str, year: int, min_year: int, max_year: int, venues2: str, year2: int, min_year2: int, max_year2: int):
+    import numpy as np
+    np.seterr(divide='ignore', invalid='ignore')
+
+    df1 = filter.get_filtered_df(venues, year, min_year, max_year)
+    df2 = filter.get_filtered_df(venues2, year2, min_year2, max_year2)
+    df = pd.concat([df1, df2])
+
+    venues_list = clean.venues_to_list(venues)
+    venues_list2 = clean.venues_to_list(venues2)
+    df["NS venue name"] = df.apply(lambda x: filter.edit_venues(x, venues, venues_list, venues2), axis=1)
+
+    if venues_list == venues_list2:
+        if year is not None:
+            years = f"{year}"
         else:
-            count_.count_and_compare_words(k, df1)
+            years = f"{min_year}-{max_year}"
+        if year2 is not None:
+            years2 = f"{year2}"
+        else:
+            years2 = f"{min_year2}-{max_year2}"
+        df["year"] = df.apply(lambda x: filter.format_years(x, year, min_year, max_year, year2, min_year2, max_year2), axis=1)
+        count_.plot_word_counts(df, venues, venues2, years, years2)
+    else:
+        count_.plot_word_counts(df, venues, venues2)
 
 
 @cli.command()
@@ -155,14 +146,6 @@ def test():
         'Is this the first document?',
         "one two, three.\n four-five, se-\nven, open-\nsource, se-\nve.n, ",
     ]
-    # clean_and_tokenize(test_, get_vocabulary())
-    count_.count_and_compare(10, corpus)
-
-    # print(X.toarray())
-    #
-    # vectorizer2 = CountVectorizer(analyzer='word', ngram_range=(2, 2))
-    # X2 = vectorizer2.fit_transform(corpus)
-    # print(vectorizer2.get_feature_names())
 
 
 if __name__ == '__main__':
