@@ -6,7 +6,7 @@ authors = ["Lennart Kuell <lennart.kuell@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = ">=3.7.1,<4.0"
-click = "^8.0.1"
+click = "^7.0.1"
 matplotlib = "^3.4.2"
 numpy = "^1.20.3"
 pandas = "^1.2.4"
@@ -20,6 +20,7 @@ scikit-learn = "^0.24.2"
 scattertext = "^0.1.2"
 gensim = "^3.8.1"
 pyLDAvis = "^3.3.1"
+spacy = "^3.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

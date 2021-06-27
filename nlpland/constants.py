@@ -4,4 +4,5 @@ COLUMN_ABSTRACT_SOURCE = "NE abstract source"
 # UNICODE_COLUMN = "NE encoding issue flag"
 ABSTRACT_SOURCE_ANTHOLOGY = "anthology"
 ABSTRACT_SOURCE_RULE = "rule"
-
+from datetime import datetime
+CURRENT_TIME = str.replace(datetime.now().isoformat(timespec='seconds'), ":", "-")

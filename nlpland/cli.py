@@ -83,24 +83,19 @@ def grobid():
 
 @cli.command()
 @click.argument('k', type=int)
-@click.option('--ngrams', type=int)
+@click.option('--ngrams', type=int, default=1)
 @filter.df_filter_options
-@filter.df_filter_options2
-def count(k: int, venues: str, year: int, min_year: int, max_year: int, venues2: str, year2: int, min_year2: int, max_year2: int, ngrams: int = 1):
+def count(k: int, venues: str, year: int, min_year: int, max_year: int, ngrams: int):
+    # TODO allow different sizes of ngrams
     # works like filters:
     # leaving both blank: whole dataset (once)
     # leaving the second blank: only count first one
     df1 = filter.get_filtered_df(venues, year, min_year, max_year)
     docs = list(df1[COLUMN_ABSTRACT]) + list(df1["AA title"])
 
-    if venues2 is not None or year2 is not None or min_year2 is not None or max_year2 is not None:
-        df2 = filter.get_filtered_df(venues2, year2, min_year2, max_year2)
-        docs2 = list(df2[COLUMN_ABSTRACT]) + list(df2["AA title"])
-        count_.count_and_compare(10, docs, docs2, n=ngrams)
-        count_.count_and_compare_words(k, df1, df2, n=ngrams)
-    else:
-        count_.count_and_compare(10, docs, n=ngrams)
-        count_.count_and_compare_words(k, df1, n=ngrams)
+    highest_count, highest_tfidf = count_.count_tokens(k, docs, ngrams)
+    print(f"Most occuring words in selection: {highest_count}")
+    print(f"Highest tf-idf scores in selection: {highest_tfidf}")
 
 
 @cli.command()
@@ -118,26 +113,24 @@ def scatter(venues: str, year: int, min_year: int, max_year: int, venues2: str, 
     venues_list2 = filter.venues_to_list(venues2)
     df["NS venue name"] = df.apply(lambda x: filter.edit_venues(x, venues, venues_list, venues2), axis=1)
 
-    if venues_list == venues_list2:
-        if year is not None:
-            years = f"{year}"
-        else:
-            years = f"{min_year}-{max_year}"
-        if year2 is not None:
-            years2 = f"{year2}"
-        else:
-            years2 = f"{min_year2}-{max_year2}"
-        df["year"] = df.apply(lambda x: filter.format_years(x, year, min_year, max_year, year2, min_year2, max_year2), axis=1)
-        count_.plot_word_counts(df, venues, venues2, years, years2)
+    if year is not None:
+        years = f"{year}"
     else:
-        count_.plot_word_counts(df, venues, venues2)
+        years = f"{min_year}-{max_year}"
+    if year2 is not None:
+        years2 = f"{year2}"
+    else:
+        years2 = f"{min_year2}-{max_year2}"
+
+    if venues_list == venues_list2:
+        df["year"] = df.apply(lambda x: filter.format_years(x, year, min_year, max_year, year2, min_year2, max_year2), axis=1)
+    count_.plot_word_counts(df, venues, venues2, years, years2)
 
 
 @cli.command()
 @click.argument('topics', type=int)
 @click.option('--load', is_flag=True)
 @filter.df_filter_options
-# @filter.df_filter_options2
 def topic(topics: int, venues: str, year: int, min_year: int, max_year: int, load=False):
     from nlpland.topic_modelling import topic
     df = filter.get_filtered_df(venues, year, min_year, max_year)

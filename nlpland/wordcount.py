@@ -1,118 +1,72 @@
+import os
 import pandas as pd
-from collections import Counter
-from nlpland.clean import clean_newline_hyphens_and_tokenize,  clean_newline_hyphens, get_english_words, get_stopwords_and_punct
+from nlpland.clean import clean_newline_hyphens, get_english_words, get_stopwords_and_more, tokenize_and_lemmatize, get_lemmatizer
 from typing import List
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-import nltk
-from nltk import word_tokenize
-import numpy as np
-from nlpland.constants import COLUMN_ABSTRACT
+from nlpland.constants import COLUMN_ABSTRACT, CURRENT_TIME
 
 
-def count_words_in_df(df: pd.DataFrame):
-    counts = Counter()
+def generate_token_matrices(documents: List[List[str]], n: int = 1):
     english_words = get_english_words()
-    for index, row in df.iterrows():
-        tokens = clean_newline_hyphens_and_tokenize(row["AA title"], english_words)
-        if not pd.isna(row["NE abstract"]):
-            tokens += clean_newline_hyphens_and_tokenize(row["NE abstract"], english_words)
-        counts += Counter(tokens)
-    stopwords = get_stopwords_and_punct()
-    for stopword in stopwords:
-        counts.pop(stopword, None)
-    return counts
-
-
-def count_bigrams_in_df(df: pd.DataFrame):
-    counts = Counter()
-    english_words = get_english_words()
-    for index, row in df.iterrows():
-        tokens = clean_newline_hyphens_and_tokenize(row["AA title"], english_words)
-        bigrams = list(nltk.bigrams(tokens))
-        if not pd.isna(row["NE abstract"]):
-            tokens = clean_newline_hyphens_and_tokenize(row["NE abstract"], english_words)
-            bigrams += list(nltk.bigrams(tokens))
-        counts += Counter(bigrams)
-    stopwords = get_stopwords_and_punct()
-    for bigram in list(counts.keys()):
-        if any(stopword in bigram for stopword in stopwords):
-            counts.pop(bigram)
-    return counts
-
-
-def count_and_compare_words(k: int, df1: pd.DataFrame, df2: pd.DataFrame = None, n: int = 1):
-    if n == 1:
-        print(count_words_in_df(df1).most_common(k))
-        if df2 is not None:
-            print(count_words_in_df(df2).most_common(k))
-    if n == 2:
-        print(count_bigrams_in_df(df1).most_common(k))
-        if df2 is not None:
-            print(count_bigrams_in_df(df2).most_common(k))
-
-
-def count_grams(documents: List[List[str]], n: int = 1, tfidf: bool = False):
-    english_words = get_english_words()
-    stopwords = get_stopwords_and_punct()
-    cv = CountVectorizer(analyzer='word', tokenizer=word_tokenize,
-                         preprocessor=lambda doc: clean_newline_hyphens(doc, english_words),
-                         lowercase=True, ngram_range=(n, n)
-                         )
+    stopwords = get_stopwords_and_more()
+    lemmatizer = get_lemmatizer()
+    vectorizer = CountVectorizer(analyzer='word',
+                                 tokenizer=lambda doc: tokenize_and_lemmatize(doc, lemmatizer),
+                                 preprocessor=lambda doc: clean_newline_hyphens(doc, english_words),
+                                 stop_words=stopwords,
+                                 lowercase=True,
+                                 ngram_range=(n, n)
+                                 )
     # the sklearn tokenizer splits "open-source", nltk does not
-    word_counts_matrix = cv.fit_transform(documents)  # is a sparse matrix
+    for list_ in documents:
+        for token in list_:
+            if type(token) is not str:
+                print(token)
+                print(list_)
 
-    word_counts = word_counts_matrix.sum(axis=0).tolist()[0]
-    if tfidf:
-        tfidf_transformer = TfidfTransformer(smooth_idf=True, use_idf=True)
-        tfidf_scores = tfidf_transformer.fit(word_counts_matrix).idf_
+    counts_matrix = vectorizer.fit_transform(documents)  # is a sparse matrix
+    tfidf_matrix = TfidfTransformer(smooth_idf=True, use_idf=True).fit(counts_matrix)
 
-    feature_names = cv.get_feature_names()
-    for token in cv.get_feature_names():
-        tokens = token.split(" ")
-        if any(stopword in tokens for stopword in stopwords):
-            index = feature_names.index(token)
-            feature_names.pop(index)
-            word_counts.pop(index)
-            if tfidf:
-                np.delete(tfidf_scores, index)
-    if tfidf:
-        return feature_names, word_counts, tfidf_scores
-    else:
-        return feature_names, word_counts
+    return vectorizer.get_feature_names(), counts_matrix, tfidf_matrix
 
 
-def get_most_common_grams(k: int, documents: List[List[str]], n: int = 1):
-    feature_names, word_counts, tfidf_scores = count_grams(documents, n, tfidf=True)
-    freqs = zip(feature_names, word_counts, tfidf_scores)
-    return sorted(freqs, key=lambda x: x[1], reverse=True)[:k]
-
-
-def count_and_compare(k: int, documents: List[List[str]], documents2: List[List[str]] = None, n: int = 1):
-    print(get_most_common_grams(k, documents, n))
-    if documents2 is not None:
-        print(get_most_common_grams(k, documents2, n))
+def count_tokens(k: int, documents: List[List[str]], n: int = 1):
+    feature_names, counts_matrix, tfidf_matrix = generate_token_matrices(documents, n)
+    word_counts = counts_matrix.sum(axis=0).tolist()[0]
+    tfidf_scores = tfidf_matrix.idf_
+    freqs = list(zip(feature_names, word_counts, tfidf_scores))
+    highest_count = sorted(freqs, key=lambda x: x[1], reverse=True)[:k]
+    highest_tfidf = sorted(freqs, key=lambda x: x[2], reverse=True)[:k]
+    return highest_count, highest_tfidf
 
 
 def plot_word_counts(df: pd.DataFrame, venues: str, venues2: str, years: str = None, years2: str = None):
     import scattertext as st
 
     english_words = get_english_words()
+    stopwords = get_stopwords_and_more()
     df[COLUMN_ABSTRACT] = df[COLUMN_ABSTRACT].apply(lambda x: clean_newline_hyphens(x, english_words))
 
-    df["parse"] = df[COLUMN_ABSTRACT].apply(st.whitespace_nlp_with_sentences)
+    # df["parse"] = df[COLUMN_ABSTRACT].apply(st.whitespace_nlp)
+    # the above one is faster, but breaks if lemmatization is active
+    import spacy
+    nlp = spacy.load("en_core_web_sm", disable=["ner", "textcat", "custom"])
+    df["parse"] = df[COLUMN_ABSTRACT].apply(nlp)
+    # TODO add download for spacy model
 
-    if years is None and years2 is None:
-        category = venues
-        category_col = "NS venue name"
-    else:
+    if venues == venues2:
         category = years
         category_col = "year"
+    else:
+        category = venues
+        category_col = "NS venue name"
     category_name = f"{venues} {years}"
     category_name2 = f"{venues2} {years2}"
 
     corpus = st.CorpusFromParsedDocuments(
-        df, category_col=category_col, parsed_col="parse"
-    ).build().get_unigram_corpus().compact(st.AssociationCompactor(2000))
+        df, category_col=category_col, parsed_col="parse",
+        feats_from_spacy_doc=st.FeatsFromSpacyDoc(use_lemmas=True)
+    ).build().remove_terms(stopwords, ignore_absences=True).get_unigram_corpus().compact(st.AssociationCompactor(2000))
 
     html = st.produce_scattertext_explorer(
         corpus,
@@ -121,9 +75,8 @@ def plot_word_counts(df: pd.DataFrame, venues: str, venues2: str, years: str = N
         width_in_pixels=1000,
         transform=st.Scalers.dense_rank
     )
-    html_file = f"output/st_wordcount.html"
-    open(html_file, 'w+', encoding="UTF-8").write(html)
-    print(f"File created at {html_file}")
-
-    # import webbrowser
-    # webbrowser.get("chrome").open_new_tab(html_file)
+    import time
+    from datetime import datetime
+    path = f"output/scattertext_{CURRENT_TIME}.html"
+    open(path, 'w+', encoding="UTF-8").write(html)
+    print(f"File created at {os.path.abspath(path)}")
