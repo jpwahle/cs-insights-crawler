@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 from nlpland.constants import COLUMN_ABSTRACT
-from nlpland.clean import preprocess_text, get_stopwords_and_more, get_english_words, get_lemmatizer
+import nlpland.clean as clean
 from nlpland.constants import CURRENT_TIME
 
 import gensim
@@ -10,10 +10,10 @@ import pyLDAvis.gensim_models
 
 
 def topic(df: pd.DataFrame, topics: int):
-    english_words = get_english_words()
-    stopwords = get_stopwords_and_more()
-    lemmatizer = get_lemmatizer()
-    processed_docs = df[COLUMN_ABSTRACT].apply(lambda abstract: preprocess_text(abstract, english_words, lemmatizer, stopwords))
+    english_words = clean.english_words()
+    stopwords = clean.stopwords_and_more()
+    lemmatizer = clean.lemmatizer()
+    processed_docs = df[COLUMN_ABSTRACT].apply(lambda abstract: clean.preprocess_text(abstract, english_words, lemmatizer, stopwords))
 
     dictionary = gensim.corpora.Dictionary(processed_docs)
     bow_corpus = [dictionary.doc2bow(doc) for doc in processed_docs]

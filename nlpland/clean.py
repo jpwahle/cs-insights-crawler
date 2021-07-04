@@ -1,8 +1,6 @@
 import nltk
 import regex as re
-from string import punctuation
-from nltk.corpus import words, stopwords
-from nltk.stem import WordNetLemmatizer
+import string
 from typing import List
 
 
@@ -15,20 +13,20 @@ def clean_venue_name(venue_name: str) -> str:
 
 
 def preprocess_text(text: str, language_vocabulary, lemmatizer, stopwords):
-    text = clean_newline_hyphens(text, language_vocabulary)
+    text = newline_hyphens(text, language_vocabulary)
     tokens = tokenize_and_lemmatize(text, lemmatizer)
     tokens = remove_stopwords(tokens, stopwords)
     return tokens
 
 
-def clean_newline_hyphens(input_: str, language_vocabulary):
+def newline_hyphens(input_: str, language_vocabulary):
     # does not remove stopwords, punctuation
     input_ = input_.lower()
     for match in re.findall(r"[\s]+(\S*-\n\S*)[\s]+", input_, overlapped=True):
         # regex: start and end with whitespace
         # arbitrary amount of chars with -\n somewhere in it
         new_match = match.replace("-\n", "")
-        new_match = new_match.strip(punctuation)
+        new_match = new_match.strip(string.punctuation)
         if new_match in language_vocabulary:
             input_ = input_.replace(match, new_match)
         else:
@@ -41,18 +39,18 @@ def tokenize_and_lemmatize(text, lemmatizer):
     return [lemmatizer.lemmatize(token) for token in tokens]
 
 
-def get_english_words():
-    return set(words.words())
+def english_words():
+    return set(nltk.corpus.words.words())
 
 
-def get_stopwords_and_more():
-    stops = stopwords.words('english')
-    stops += [char for char in punctuation]
+def stopwords_and_more():
+    stops = nltk.corpus.stopwords.words('english')
+    stops += [char for char in string.punctuation]
     return set(stops)
 
 
-def get_lemmatizer():
-    return WordNetLemmatizer()
+def lemmatizer():
+    return nltk.stem.WordNetLemmatizer()
 
 
 # TODO add download nltk corpus

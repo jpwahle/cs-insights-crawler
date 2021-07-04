@@ -97,7 +97,7 @@ def count(k: int, ngrams: int, **kwargs):
     docs = list(df1[COLUMN_ABSTRACT]) + list(df1["AA title"])
 
     highest_count, highest_tfidf = count_.count_tokens(k, docs, ngrams)
-    print(f"Most occuring words in selection: {highest_count}")
+    print(f"Most occurring words in selection: {highest_count}")
     print(f"Highest tf-idf scores in selection: {highest_tfidf}")
 
 
@@ -105,7 +105,7 @@ def count(k: int, ngrams: int, **kwargs):
 @filter.df_filter_options
 @filter.df_filter_options2
 def scatter(**kwargs):
-    np.seterr(divide='ignore', invalid='ignore')
+    # np.seterr(divide='ignore', invalid='ignore')
     df1 = filter.get_filtered_df(kwargs)
     df2 = filter.get_filtered_df(kwargs, second_df=True)
     df = pd.concat([df1, df2])
@@ -118,14 +118,18 @@ def scatter(**kwargs):
     year2 = kwargs["year2"]
     min_year2 = kwargs["min_year2"]
     max_year2 = kwargs["max_year2"]
+    author = kwargs["author"]
+    author2 = kwargs["author2"]
 
     venues_list = filter.venues_to_list(venues)
     venues_list2 = filter.venues_to_list(venues2)
 
     if venues_list != venues_list2:
-        df["category"] = df.apply(lambda x: filter.format_venues(x, venues_list), axis=1)
+        df["category"] = df.apply(lambda row: filter.category_venues(row, venues_list), axis=1)
     elif year != year2 or min_year != min_year2 or max_year != max_year2:
-        df["category"] = df.apply(lambda x: filter.format_years(x, year, min_year, max_year), axis=1)
+        df["category"] = df.apply(lambda row: filter.category_years(row, year, min_year, max_year), axis=1)
+    elif author != author2:
+        df["category"] = df.apply(lambda row: filter.category_authors(row, author), axis=1)
 
     count_.plot_word_counts(df, kwargs)
 
@@ -156,7 +160,5 @@ if __name__ == '__main__':
     # debugging
     from click.testing import CliRunner
     runner = CliRunner()
-    result = runner.invoke(extract, ["anth", "--original"])
+    result = runner.invoke(count, args=["5"], catch_exceptions=False)
     # traceback.print_exception(*result.exc_info)
-
-# TODO consistent import statements
