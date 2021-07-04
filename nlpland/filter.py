@@ -2,6 +2,7 @@ import click
 import nlpland.dataset as data
 import nlpland.clean as clean
 from nlpland.constants import COLUMN_ABSTRACT
+from typing import Dict, Any
 
 
 def df_filter_options(function):
@@ -20,17 +21,29 @@ def df_filter_options2(function):
     return function
 
 
-def get_filtered_df(venues: str, year: int, min_year: int, max_year: int, original_dataset: bool = False):
+# def is_valid_key(key, kwargs):
+#     return key in kwargs.keys() and kwargs[key] is not None
+
+
+def get_filtered_df(filters: Dict[str, Any], original_dataset: bool = False, second_df: bool = False):
     # if year is set, it overrides min/max year
+    if second_df:
+        sec = "2"
+    else:
+        sec = ""
     df = data.get_dataset(original_dataset)
     df = df[~df[COLUMN_ABSTRACT].isna()]
+    venues = filters["venues" + sec]
     if venues is not None:
         venues_list = venues_to_list(venues)
         df = df[df["NS venue name"].isin(venues_list)]
+    year = filters["year" + sec]
     if year is not None:
         df = df[df["AA year of publication"] == year]
+    min_year = filters["min_year" + sec]
     if min_year is not None:
         df = df[df["AA year of publication"] >= min_year]
+    max_year = filters["max_year" + sec]
     if max_year is not None:
         df = df[df["AA year of publication"] <= max_year]
     return df
@@ -42,22 +55,24 @@ def venues_to_list(venues: str):
     return venues_list
 
 
-def format_years(row, year, min_year, max_year, year2, min_year2, max_year2):
-    if year is not None and row["AA year of publication"] == year:
-        return f"{year}"
-    if year2 is not None and row["AA year of publication"] == year2:
-        return f"{year2}"
-    if min_year is not None and max_year is not None and min_year <= row["AA year of publication"] <= max_year:
-        return f"{min_year}-{max_year}"
-    if min_year2 is not None and max_year2 is not None and min_year2 <= row["AA year of publication"] <= max_year2:
-        return f"{min_year2}-{max_year2}"
+def format_years(row, year, min_year, max_year):
+    if (year is not None and row["AA year of publication"] == year) or\
+            (min_year is not None and max_year is not None and min_year <= row["AA year of publication"] <= max_year):
+        return "c1"
     else:
-        return ""
+        return "c2"
 
 
-def edit_venues(row, venues, venues_list, venues2):
+def format_venues(row, venues_list):
     if row["NS venue name"] in venues_list:
-        val = venues
+        return "c1"
     else:
-        val = venues2
-    return val
+        return "c2"
+
+
+def category_names(filters, second_df: bool = False):
+    category_name = []
+    for key, value in filters.items():
+        if value is not None and (("2" in key and second_df) or ("2" not in key and not second_df)):
+            category_name.append(value)
+    return category_name

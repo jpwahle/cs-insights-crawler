@@ -4,7 +4,7 @@ from nlpland.clean import clean_newline_hyphens, get_english_words, get_stopword
 from typing import List
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from nlpland.constants import COLUMN_ABSTRACT, CURRENT_TIME
-
+from nlpland.filter import category_names
 
 def generate_token_matrices(documents: List[List[str]], n: int = 1):
     english_words = get_english_words()
@@ -40,7 +40,7 @@ def count_tokens(k: int, documents: List[List[str]], n: int = 1):
     return highest_count, highest_tfidf
 
 
-def plot_word_counts(df: pd.DataFrame, venues: str, venues2: str, years: str = None, years2: str = None):
+def plot_word_counts(df: pd.DataFrame, filters):
     import scattertext as st
 
     english_words = get_english_words()
@@ -54,23 +54,14 @@ def plot_word_counts(df: pd.DataFrame, venues: str, venues2: str, years: str = N
     df["parse"] = df[COLUMN_ABSTRACT].apply(nlp)
     # TODO add download for spacy model
 
-    if venues == venues2:
-        category = years
-        category_col = "year"
-    else:
-        category = venues
-        category_col = "NS venue name"
-    category_name = f"{venues} {years}"
-    category_name2 = f"{venues2} {years2}"
-
     corpus = st.CorpusFromParsedDocuments(
-        df, category_col=category_col, parsed_col="parse",
+        df, category_col="category", parsed_col="parse",
         feats_from_spacy_doc=st.FeatsFromSpacyDoc(use_lemmas=True)
     ).build().remove_terms(stopwords, ignore_absences=True).get_unigram_corpus().compact(st.AssociationCompactor(2000))
 
     html = st.produce_scattertext_explorer(
         corpus,
-        category=category, category_name=category_name, not_category_name=category_name2,
+        category="c1", category_name=category_names(filters), not_category_name=category_names(filters, second_df = True),
         minimum_term_frequency=5, pmi_threshold_coefficient=0,
         width_in_pixels=1000,
         transform=st.Scalers.dense_rank

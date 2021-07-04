@@ -1,12 +1,16 @@
 import click
 import pandas as pd
+import numpy as np
+import time
+import os
 
 import nlpland.dataset as data
 import nlpland.data_check as check
 import nlpland.wordcount as count_
 from nlpland.constants import COLUMN_ABSTRACT
 from dotenv import load_dotenv
-from nlpland import filter
+import nlpland.filter as filter
+import nlpland.topic_modelling as topic
 
 load_dotenv()
 
@@ -69,8 +73,7 @@ def countabstractsanth():
 @cli.command()
 def grobid():
     from grobid_client.grobid_client import GrobidClient
-    import time
-    import os
+
     start = time.time()
     client = GrobidClient(config_path="C:/Users/Lennart/Desktop/grobid_client_python/config.json")
     path = "C:/test_papers"
@@ -85,12 +88,12 @@ def grobid():
 @click.argument('k', type=int)
 @click.option('--ngrams', type=int, default=1)
 @filter.df_filter_options
-def count(k: int, venues: str, year: int, min_year: int, max_year: int, ngrams: int):
+def count(k: int, ngrams: int, **kwargs):
     # TODO allow different sizes of ngrams
     # works like filters:
     # leaving both blank: whole dataset (once)
     # leaving the second blank: only count first one
-    df1 = filter.get_filtered_df(venues, year, min_year, max_year)
+    df1 = filter.get_filtered_df(kwargs)
     docs = list(df1[COLUMN_ABSTRACT]) + list(df1["AA title"])
 
     highest_count, highest_tfidf = count_.count_tokens(k, docs, ngrams)
@@ -101,40 +104,38 @@ def count(k: int, venues: str, year: int, min_year: int, max_year: int, ngrams: 
 @cli.command()
 @filter.df_filter_options
 @filter.df_filter_options2
-def scatter(venues: str, year: int, min_year: int, max_year: int, venues2: str, year2: int, min_year2: int, max_year2: int):
-    import numpy as np
+def scatter(**kwargs):
     np.seterr(divide='ignore', invalid='ignore')
-
-    df1 = filter.get_filtered_df(venues, year, min_year, max_year)
-    df2 = filter.get_filtered_df(venues2, year2, min_year2, max_year2)
+    df1 = filter.get_filtered_df(kwargs)
+    df2 = filter.get_filtered_df(kwargs, second_df=True)
     df = pd.concat([df1, df2])
+
+    venues = kwargs["venues"]
+    year = kwargs["year"]
+    min_year = kwargs["min_year"]
+    max_year = kwargs["max_year"]
+    venues2 = kwargs["venues2"]
+    year2 = kwargs["year2"]
+    min_year2 = kwargs["min_year2"]
+    max_year2 = kwargs["max_year2"]
 
     venues_list = filter.venues_to_list(venues)
     venues_list2 = filter.venues_to_list(venues2)
-    df["NS venue name"] = df.apply(lambda x: filter.edit_venues(x, venues, venues_list, venues2), axis=1)
 
-    if year is not None:
-        years = f"{year}"
-    else:
-        years = f"{min_year}-{max_year}"
-    if year2 is not None:
-        years2 = f"{year2}"
-    else:
-        years2 = f"{min_year2}-{max_year2}"
+    if venues_list != venues_list2:
+        df["category"] = df.apply(lambda x: filter.format_venues(x, venues_list), axis=1)
+    elif year != year2 or min_year != min_year2 or max_year != max_year2:
+        df["category"] = df.apply(lambda x: filter.format_years(x, year, min_year, max_year), axis=1)
 
-    if venues_list == venues_list2:
-        df["year"] = df.apply(lambda x: filter.format_years(x, year, min_year, max_year, year2, min_year2, max_year2), axis=1)
-    count_.plot_word_counts(df, venues, venues2, years, years2)
+    count_.plot_word_counts(df, kwargs)
 
 
 @cli.command()
 @click.argument('topics', type=int)
-@click.option('--load', is_flag=True)
 @filter.df_filter_options
-def topic(topics: int, venues: str, year: int, min_year: int, max_year: int, load=False):
-    from nlpland.topic_modelling import topic
-    df = filter.get_filtered_df(venues, year, min_year, max_year)
-    topic(df, topics, load)
+def topic(topics: int, **kwargs):
+    df = filter.get_filtered_df(kwargs)
+    topic.topic(df, topics)
 
 
 @cli.command()
@@ -157,3 +158,5 @@ if __name__ == '__main__':
     runner = CliRunner()
     result = runner.invoke(extract, ["anth", "--original"])
     # traceback.print_exception(*result.exc_info)
+
+# TODO consistent import statements
