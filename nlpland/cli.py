@@ -7,10 +7,11 @@ import os
 import nlpland.dataset as data
 import nlpland.data_check as check
 import nlpland.wordcount as count_
-from nlpland.constants import COLUMN_ABSTRACT
+from nlpland.constants import COLUMN_ABSTRACT, ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY
 from dotenv import load_dotenv
 import nlpland.filter as filter
-import nlpland.topic_modelling as topic
+import nlpland.topic_modelling as topic_
+import nlpland.semantic as semantic
 
 load_dotenv()
 
@@ -31,18 +32,18 @@ def download(min_year, max_year):
 @cli.command()
 @click.argument('mode', type=str)
 @click.option('--original', is_flag=True)
-@click.option('--overwrite', is_flag=True)
+@click.option('--overwrite', is_flag=True)  # always only overwrites rule based abstracts
 @click.option('--min-year', type=int)
 @click.option('--max-year', type=int)
 def extract(mode, original, overwrite, min_year, max_year):
     df = data.get_dataset(original)
 
-    modes = ["rule", "anth"]
+    modes = [ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY]
     if mode not in modes:
         print(f"Unsupported mode '{mode}'. Choose from {modes}.")
-    if mode == "rule":
-        data.extract_abstracts_rulebased(df, overwrite_abstracts=overwrite, min_year=min_year, max_year=max_year)
-    elif mode == "anth":
+    if mode == ABSTRACT_SOURCE_RULE:
+        data.extract_abstracts_rulebased(df, overwrite=overwrite, min_year=min_year, max_year=max_year)
+    elif mode == ABSTRACT_SOURCE_ANTHOLOGY:
         data.extract_abstracts_anthology(df)
 
 
@@ -139,7 +140,23 @@ def scatter(**kwargs):
 @filter.df_filter_options
 def topic(topics: int, **kwargs):
     df = filter.get_filtered_df(kwargs)
-    topic.topic(df, topics)
+    topic_.topic(df, topics)
+
+
+@cli.command()
+@click.option('--train', is_flag=True)
+@filter.df_filter_options
+def fasttext(train: bool, **kwargs):
+    df = filter.get_filtered_df(kwargs)
+    semantic.semantic(df, train)
+
+
+@cli.command()
+@click.option('--train', is_flag=True)
+@filter.df_filter_options
+def umap(**kwargs):
+    df = filter.get_filtered_df(kwargs)
+    semantic.plot(df)
 
 
 @cli.command()

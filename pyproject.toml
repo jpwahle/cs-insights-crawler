@@ -21,9 +21,13 @@ scattertext = "^0.1.2"
 gensim = "^3.8.1"
 pyLDAvis = "^3.3.1"
 spacy = "^3.0.0"
+umap-learn = {extras = ["plot"], version = "^0.5.1"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
+
+#[tool.poetry.extras]
+#umap-learn = ["plot"]
 
 [tool.poetry.scripts]
 cli = "nlpland.cli:cli"

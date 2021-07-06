@@ -74,7 +74,7 @@ def determine_earliest_string(text: str, possible_strings: List[str]):
     return earliest_pos, earliest_string
 
 
-def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, venues: List[str] = None, overwrite_abstracts: bool = False) -> None:
+def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, venues: List[str] = None, overwrite: bool = False) -> None:
     start = time.time()
     iterated = 0
     searched = 0
@@ -82,6 +82,7 @@ def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, 
     index_err = 0
     nones = 0
     no_file = 0
+    long_abstract = 0
     path_papers = os.getenv("PATH_PAPERS")
     tika.initVM()
     #TODO vectorize
@@ -97,7 +98,7 @@ def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, 
 
     for index, row in tqdm(df_select.iterrows(), total=df_select.shape[0]):
         iterated += 1
-        if overwrite_abstracts or pd.isnull(row[COLUMN_ABSTRACT]):
+        if (overwrite and row[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_RULE) or pd.isnull(row[COLUMN_ABSTRACT]):
             paper_id = clean_paper_id(index)
             venue = clean_venue_name(row["NS venue name"])
             year = row["AA year of publication"]
@@ -111,16 +112,16 @@ def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, 
                 if text is None:
                     nones += 1
                 else:
-                    start_strings = ["Abstract", "ABSTRACT", "A b s t r a c t"]
+                    start_strings = ["Abstract ", "Abstract\n", "ABSTRACT ", "ABSTRACT\n", "A b s t r a c t ", "A b s t r a c t\n"]
                     start_pos, start_string = determine_earliest_string(text, start_strings)
                     start_pos += len(start_string)
 
-                    end_strings_1 = ["\n\nTITLE AND ABSTRACT IN ", "\n\nTitle and Abstract in ", "KEYWORDS:", "Keywords:"]
+                    end_strings_1 = ["\n\nTITLE AND ABSTRACT IN ", "\n\nTitle and Abstract in ", "KEYWORDS:", "Keywords:", "Keywords :", "KEYWORDS :"]
                     end_pos, end_string = determine_earliest_string(text, end_strings_1)
                     if end_pos == -1:
                         end_strings_2 = ["\n\n1 Introduction", "\n\n1. Introduction",
                                          "\n\n1 Task Description", "\n\n1. Task Description",
-                                         "\n\nIntroduction\n\n", "\n\n1 "]
+                                         "\n\nIntroduction\n\n", "\n\n1 ", "\n\n1. "]
                         for end_string in end_strings_2:
                             end_pos = text.find(end_string, start_pos)
                             if end_pos != -1:
@@ -138,11 +139,14 @@ def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, 
                         abstract = text[start_pos:end_pos]
                         df.at[index, COLUMN_ABSTRACT] = abstract
                         df.at[index, COLUMN_ABSTRACT_SOURCE] = ABSTRACT_SOURCE_RULE
+                        if len(abstract) > 5000:
+                            long_abstract += 1
             else:
                 no_file += 1
         else:
             skipped += 1
         if iterated % 1000 == 0:
+            pass
             save_dataset(df)
     save_dataset(df)
     print(f"Papers iterated: {iterated} matching year+venue")
@@ -151,6 +155,7 @@ def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, 
     print(f"none: {nones} texts of papers are None")
     print(f"index: {index_err} abstracts not found")
     print(f"no_file: {no_file} papers not downloaded")
+    print(f"long_abstract: {no_file} papers with (too) long abstracts")
     duration = time.gmtime(time.time()-start)
     print(f"This took {time.strftime('%Mm %Ss', duration)}.")
 

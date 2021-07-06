@@ -47,6 +47,7 @@ def plot_word_counts(df: pd.DataFrame, filters):
     nlp = spacy.load("en_core_web_sm", disable=["ner", "textcat", "custom"])
     df["parse"] = df[COLUMN_ABSTRACT].apply(nlp)
     # TODO add download for spacy model
+    # TODO add title column as words
 
     corpus = st.CorpusFromParsedDocuments(
         df, category_col="category", parsed_col="parse",

@@ -10,10 +10,13 @@ import pyLDAvis.gensim_models
 
 
 def topic(df: pd.DataFrame, topics: int):
+    # TODO add title column for words
     english_words = clean.english_words()
     stopwords = clean.stopwords_and_more()
     lemmatizer = clean.lemmatizer()
-    processed_docs = df[COLUMN_ABSTRACT].apply(lambda abstract: clean.preprocess_text(abstract, english_words, lemmatizer, stopwords))
+    processed_docs = list(df[COLUMN_ABSTRACT].apply(lambda abstract: clean.preprocess_text(abstract, english_words, lemmatizer, stopwords)))
+    # print(processed_docs)
+    # quit()
 
     dictionary = gensim.corpora.Dictionary(processed_docs)
     bow_corpus = [dictionary.doc2bow(doc) for doc in processed_docs]
