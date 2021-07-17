@@ -7,6 +7,7 @@ import os
 import nlpland.dataset as data
 import nlpland.data_check as check
 import nlpland.wordcount as count_
+import nlpland.scatter as scatter_
 from nlpland.constants import COLUMN_ABSTRACT, ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY
 from dotenv import load_dotenv
 import nlpland.filter as filter
@@ -94,10 +95,9 @@ def count(k: int, ngrams: int, **kwargs):
     # works like filters:
     # leaving both blank: whole dataset (once)
     # leaving the second blank: only count first one
-    df1 = filter.get_filtered_df(kwargs)
-    docs = list(df1[COLUMN_ABSTRACT]) + list(df1["AA title"])
+    df = filter.get_filtered_df(kwargs)
 
-    highest_count, highest_tfidf = count_.count_tokens(k, docs, ngrams)
+    highest_count, highest_tfidf = count_.count_tokens(k, df, ngrams)
     print(f"Most occurring words in selection: {highest_count}")
     print(f"Highest tf-idf scores in selection: {highest_tfidf}")
 
@@ -111,28 +111,7 @@ def scatter(**kwargs):
     df2 = filter.get_filtered_df(kwargs, second_df=True)
     df = pd.concat([df1, df2])
 
-    venues = kwargs["venues"]
-    year = kwargs["year"]
-    min_year = kwargs["min_year"]
-    max_year = kwargs["max_year"]
-    venues2 = kwargs["venues2"]
-    year2 = kwargs["year2"]
-    min_year2 = kwargs["min_year2"]
-    max_year2 = kwargs["max_year2"]
-    author = kwargs["author"]
-    author2 = kwargs["author2"]
-
-    venues_list = filter.venues_to_list(venues)
-    venues_list2 = filter.venues_to_list(venues2)
-
-    if venues_list != venues_list2:
-        df["category"] = df.apply(lambda row: filter.category_venues(row, venues_list), axis=1)
-    elif year != year2 or min_year != min_year2 or max_year != max_year2:
-        df["category"] = df.apply(lambda row: filter.category_years(row, year, min_year, max_year), axis=1)
-    elif author != author2:
-        df["category"] = df.apply(lambda row: filter.category_authors(row, author), axis=1)
-
-    count_.plot_word_counts(df, kwargs)
+    scatter_.plot_word_counts(df, kwargs)
 
 
 @cli.command()
@@ -171,6 +150,12 @@ def test():
         'Is this the first document?',
         "one two, three.\n four-five, se-\nven, open-\nsource, se-\nve.n, ",
     ]
+
+    df = data.get_dataset(original_dataset=False)
+    df = df[~df[COLUMN_ABSTRACT].isna()]
+    df["1"] = df["AA authors list"].str.lower()
+    print(df["1"].str.contains("jurafsky, dan").sum())
+    print(df["1"].str.contains("manning, christopher").sum())
 
 
 if __name__ == '__main__':

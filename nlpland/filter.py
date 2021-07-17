@@ -36,7 +36,7 @@ def get_filtered_df(filters: Dict[str, Any], original_dataset: bool = False, sec
     else:
         sec = ""
     df = data.get_dataset(original_dataset)
-    df = df[~df[COLUMN_ABSTRACT].isna()]
+    # df = df[~df[COLUMN_ABSTRACT].isna()]
 
     venues = filters["venues" + sec]
     if venues is not None:

@@ -26,7 +26,7 @@ def topic(df: pd.DataFrame, topics: int):
                                            id2word=dictionary,
                                            passes=10,
                                            workers=2)
-    lda_model.save("output/ldamodel")
+    lda_model.save(f"output/ldamodel_{CURRENT_TIME}.model")
     print(lda_model.show_topics(formatted=True))
 
     vis = pyLDAvis.gensim_models.prepare(lda_model, bow_corpus, dictionary)

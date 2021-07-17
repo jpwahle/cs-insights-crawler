@@ -68,14 +68,20 @@ def check_dataset(df: pd.DataFrame) -> None:
     if COLUMN_ABSTRACT in df.columns:
         abstracts = df[COLUMN_ABSTRACT].count()
         rows = len(df.index)
-        anth = df[df[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_ANTHOLOGY].count()[COLUMN_ABSTRACT_SOURCE]
-        rule = df[df[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_RULE].count()[COLUMN_ABSTRACT_SOURCE]
+        anth = df[df[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_ANTHOLOGY][COLUMN_ABSTRACT_SOURCE].count()
+        rule = df[df[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_RULE][COLUMN_ABSTRACT_SOURCE].count()
         print(f"{abstracts} abstracts of {rows} papers: {abstracts/rows*100:.2f}%")
         print(f"{anth} abstracts were extracted from the anthology.")
         print(f"{rule} abstracts were extracted with the rule-based system.")
         print("The amount of abstracts per year we get from the anthology:")
         df2 = df[df[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_ANTHOLOGY]
-        print(df2.groupby(["AA year of publication"])[COLUMN_ABSTRACT].count())
+        df3 = df[df[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_RULE]
+        df4 = pd.DataFrame()
+        df4["total"] = df.groupby(["AA year of publication"]).count()["AA url"]
+        df4["anth"] = df2.groupby(["AA year of publication"])[COLUMN_ABSTRACT].count()
+        df4["rule"] = df3.groupby(["AA year of publication"])[COLUMN_ABSTRACT].count()
+        print(df4)
+        # print(pd.concat([years_total, years_anth, years_rule], axis=1))
     else:
         print("0. The column does not exist yet.")
     print()
