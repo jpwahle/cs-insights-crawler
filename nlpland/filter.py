@@ -1,6 +1,6 @@
 import click
 import nlpland.dataset as data
-from nlpland.constants import COLUMN_ABSTRACT
+from nlpland.constants import COLUMN_ABSTRACT, COLUMN_ABSTRACT_SOURCE, ABSTRACT_SOURCE_RULE
 from typing import Dict, Any
 
 #
@@ -19,8 +19,9 @@ def df_filter_options(function, second_df: bool = False):
     function = click.option('--min-year' + sec, type=int)(function)
     function = click.option('--max-year' + sec, type=int)(function)
     function = click.option('--author' + sec)(function)
-    function = click.option('--institution' + sec)(function)
-    function = click.option('--location' + sec)(function)
+    function = click.option('--no-rule' + sec, is_flag=True)(function)
+    # function = click.option('--institution' + sec)(function)
+    # function = click.option('--location' + sec)(function)
     return function
 
 
@@ -36,7 +37,6 @@ def get_filtered_df(filters: Dict[str, Any], original_dataset: bool = False, sec
     else:
         sec = ""
     df = data.get_dataset(original_dataset)
-    # df = df[~df[COLUMN_ABSTRACT].isna()]
 
     venues = filters["venues" + sec]
     if venues is not None:
@@ -56,6 +56,11 @@ def get_filtered_df(filters: Dict[str, Any], original_dataset: bool = False, sec
     author = filters["author" + sec]
     if author is not None:
         df = df[df["AA authors list"].str.contains(author, case=False)]
+
+    no_rule = filters["no_rule" + sec]
+    if no_rule:
+        df[COLUMN_ABSTRACT] = df[COLUMN_ABSTRACT].mask(df[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_RULE)
+
     # TODO maybe add location/institution (not in dataset)
     return df
 
@@ -91,10 +96,14 @@ def category_authors(row, author):
         return "c2"
 
 
-
 def category_names(filters, second_df: bool = False):
     category_name = []
     for key, value in filters.items():
+        # print(key)
+        # print(type(value))
         if value is not None and (("2" in key and second_df) or ("2" not in key and not second_df)):
-            category_name.append(value)
+            if type(value) != bool:
+                category_name.append(value)
+            elif value:
+                category_name.append(key)
     return category_name

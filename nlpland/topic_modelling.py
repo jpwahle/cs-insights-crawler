@@ -10,22 +10,25 @@ import pyLDAvis.gensim_models
 
 
 def topic(df: pd.DataFrame, topics: int):
-    # TODO add title column for words
+    print("Preprocess docs")
     english_words = clean.english_words()
     stopwords = clean.stopwords_and_more()
     lemmatizer = clean.lemmatizer()
-    processed_docs = list(df[COLUMN_ABSTRACT].apply(lambda abstract: clean.preprocess_text(abstract, english_words, lemmatizer, stopwords)))
-    # print(processed_docs)
-    # quit()
+    abstracts = df[COLUMN_ABSTRACT].dropna()
+    cleaned_abstracts = list(abstracts.apply(lambda text: clean.preprocess_text(text, english_words, lemmatizer, stopwords)))
+    cleaned_titles = list(df["AA title"].apply(lambda text: clean.preprocess_text(text, english_words, lemmatizer, stopwords)))
+    cleaned_docs = cleaned_titles + cleaned_abstracts
 
-    dictionary = gensim.corpora.Dictionary(processed_docs)
-    bow_corpus = [dictionary.doc2bow(doc) for doc in processed_docs]
+    print("Create model")
+    dictionary = gensim.corpora.Dictionary(cleaned_docs)
+    bow_corpus = [dictionary.doc2bow(doc) for doc in cleaned_docs]
 
     lda_model = gensim.models.LdaMulticore(bow_corpus,
                                            num_topics=topics,
                                            id2word=dictionary,
                                            passes=10,
                                            workers=2)
+    print("Save model and results")
     lda_model.save(f"output/ldamodel_{CURRENT_TIME}.model")
     print(lda_model.show_topics(formatted=True))
 

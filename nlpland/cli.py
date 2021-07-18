@@ -109,9 +109,8 @@ def scatter(**kwargs):
     # np.seterr(divide='ignore', invalid='ignore')
     df1 = filter.get_filtered_df(kwargs)
     df2 = filter.get_filtered_df(kwargs, second_df=True)
-    df = pd.concat([df1, df2])
 
-    scatter_.plot_word_counts(df, kwargs)
+    scatter_.plot_word_counts(df1, df2, kwargs)
 
 
 @cli.command()
@@ -152,10 +151,13 @@ def test():
     ]
 
     df = data.get_dataset(original_dataset=False)
-    df = df[~df[COLUMN_ABSTRACT].isna()]
+    # df = df[~df[COLUMN_ABSTRACT].isna()]
     df["1"] = df["AA authors list"].str.lower()
     print(df["1"].str.contains("jurafsky, dan").sum())
     print(df["1"].str.contains("manning, christopher").sum())
+    print(df["1"].str.contains("manning, christopher|jurafsky, dan").sum())
+    print(len(df[(df["1"].str.contains("manning, christopher")) & (df["1"].str.contains("jurafsky, dan"))]))
+    # print(df["1"].str.contains("Card, Dallas && Gabriel, Saadia").sum())
 
 
 if __name__ == '__main__':
