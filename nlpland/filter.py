@@ -1,12 +1,10 @@
 import click
-import nlpland.dataset as data
-from nlpland.constants import COLUMN_ABSTRACT, COLUMN_ABSTRACT_SOURCE, ABSTRACT_SOURCE_RULE
-from typing import Dict, Any
+import numpy as np
+import pandas as pd
 
-#
-# def filter_options(function):
-
-#     return function
+import nlpland.dataset as dataset
+from nlpland.constants import COLUMN_ABSTRACT, COLUMN_ABSTRACT_SOURCE, ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY
+from typing import Dict, Any, List
 
 
 def df_filter_options(function, second_df: bool = False):
@@ -19,9 +17,7 @@ def df_filter_options(function, second_df: bool = False):
     function = click.option('--min-year' + sec, type=int)(function)
     function = click.option('--max-year' + sec, type=int)(function)
     function = click.option('--author' + sec)(function)
-    function = click.option('--no-rule' + sec, is_flag=True)(function)
-    # function = click.option('--institution' + sec)(function)
-    # function = click.option('--location' + sec)(function)
+    function = click.option('--data' + sec)(function)
     return function
 
 
@@ -36,11 +32,11 @@ def get_filtered_df(filters: Dict[str, Any], original_dataset: bool = False, sec
         sec = "2"
     else:
         sec = ""
-    df = data.get_dataset(original_dataset)
+    df = dataset.get_dataset(original_dataset)
 
     venues = filters["venues" + sec]
     if venues is not None:
-        venues_list = venues_to_list(venues)
+        venues_list = set(attributes_to_list(venues))
         df = df[df["NS venue name"].isin(venues_list)]
 
     year = filters["year" + sec]
@@ -57,50 +53,30 @@ def get_filtered_df(filters: Dict[str, Any], original_dataset: bool = False, sec
     if author is not None:
         df = df[df["AA authors list"].str.contains(author, case=False)]
 
-    no_rule = filters["no_rule" + sec]
-    if no_rule:
-        df[COLUMN_ABSTRACT] = df[COLUMN_ABSTRACT].mask(df[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_RULE)
+    data = filters["data" + sec]
+    if data:
+        selection = set(attributes_to_list(data))
+        if "all" not in selection:
+            if "titles" not in selection:
+                df["AA title"] = np.nan
+            if "abstracts" not in selection:
+                if "abstracts-rule" not in selection:
+                    df[COLUMN_ABSTRACT] = df[COLUMN_ABSTRACT].mask(df[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_RULE)
+                if "abstracts-anth" not in selection:
+                    df[COLUMN_ABSTRACT] = df[COLUMN_ABSTRACT].mask(df[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_ANTHOLOGY)
 
-    # TODO maybe add location/institution (not in dataset)
     return df
 
 
-def venues_to_list(venues: str):
-    if venues is not None:
-        venues_list = venues.split(',')
-        venues_list = [venue.strip(" ") for venue in venues_list]
-        return venues_list
-    else:
-        return None
-
-
-def category_years(row, year, min_year, max_year):
-    if (year is not None and row["AA year of publication"] == year) or\
-            (min_year is not None and max_year is not None and min_year <= row["AA year of publication"] <= max_year):
-        return "c1"
-    else:
-        return "c2"
-
-
-def category_venues(row, venues_list):
-    if row["NS venue name"] in venues_list:
-        return "c1"
-    else:
-        return "c2"
-
-
-def category_authors(row, author):
-    if author in row["AA authors list"].lower():
-        return "c1"
-    else:
-        return "c2"
+def attributes_to_list(attributes: str) -> List[str]:
+    attributes_list = attributes.split(',')
+    attributes_list = [venue.strip(" ") for venue in attributes_list]
+    return attributes_list
 
 
 def category_names(filters, second_df: bool = False):
     category_name = []
     for key, value in filters.items():
-        # print(key)
-        # print(type(value))
         if value is not None and (("2" in key and second_df) or ("2" not in key and not second_df)):
             if type(value) != bool:
                 category_name.append(value)

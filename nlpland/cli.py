@@ -88,9 +88,9 @@ def grobid():
 
 @cli.command()
 @click.argument('k', type=int)
-@click.option('--ngrams', type=int, default=1)
+@click.option('--ngrams', type=str, default="1")
 @filter.df_filter_options
-def count(k: int, ngrams: int, **kwargs):
+def count(k: int, ngrams: str, **kwargs):
     # TODO allow different sizes of ngrams
     # works like filters:
     # leaving both blank: whole dataset (once)
@@ -103,14 +103,14 @@ def count(k: int, ngrams: int, **kwargs):
 
 
 @cli.command()
+@click.option("--fast", is_flag=True)
 @filter.df_filter_options
 @filter.df_filter_options2
-def scatter(**kwargs):
-    # np.seterr(divide='ignore', invalid='ignore')
+def scatter(fast, **kwargs):
     df1 = filter.get_filtered_df(kwargs)
     df2 = filter.get_filtered_df(kwargs, second_df=True)
 
-    scatter_.plot_word_counts(df1, df2, kwargs)
+    scatter_.plot_word_counts(df1, df2, fast, kwargs)
 
 
 @cli.command()
@@ -138,6 +138,11 @@ def umap(**kwargs):
 
 
 @cli.command()
+def load():
+    pass
+
+
+@cli.command()
 def test():
     # from nlpland.data_cleanup import clean_and_tokenize
     # test_ = "one two, three.\n four-five, se-\nven, open-\nsource, se-\nve.n, "
@@ -149,6 +154,10 @@ def test():
         'Is this the first document?',
         "one two, three.\n four-five, se-\nven, open-\nsource, se-\nve.n, ",
     ]
+    import nltk
+    print(nltk.stem.WordNetLemmatizer().lemmatize("models"))
+
+    quit()
 
     df = data.get_dataset(original_dataset=False)
     # df = df[~df[COLUMN_ABSTRACT].isna()]
