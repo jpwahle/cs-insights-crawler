@@ -79,16 +79,19 @@ def count(k: int, ngrams: str, **kwargs):
     df = filter_.get_filtered_df(kwargs)
 
     count_top, tfidf_top = count_.top_k_tokens(k, df, ngrams)
-    print(f"Most occurring words in selection: {count_top}")
-    print(f"Highest tf-idf scores in selection: {tfidf_top}")
+    print(f"Most occurring words in selection:\n{count_top}")
+    print(f"Highest tf-idf scores in selection:\n{tfidf_top}")
 
 
 @cli.command()
 @click.argument('k', type=int)
+@click.option("-n", "--name", type=str)
 @click.option('--ngrams', type=str, default="1")
+@click.option('--tfidf', is_flag=True)
 @filter_.df_filter_options
-def counts_time(k: int, ngrams: str, **kwargs):
+def counts_time(k: int, ngrams: str, name: str, tfidf: bool, **kwargs):
     df = filter_.get_filtered_df(kwargs)
+    count_.counts_over_time(df, k, ngrams, name, tfidf, kwargs)
 
 
 @cli.command()
