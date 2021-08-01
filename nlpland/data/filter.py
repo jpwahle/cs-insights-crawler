@@ -27,6 +27,7 @@ def df_filter_options2(function):
 def get_filtered_df(filters: Dict[str, Any], original_dataset: bool = False, second_df: bool = False):
     # if year is set, it overrides min/max year
     # authors as last names, first names
+    print("Filter documents")
     if second_df:
         sec = "2"
     else:
