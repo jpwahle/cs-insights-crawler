@@ -84,30 +84,41 @@ def count(k: int, ngrams: str, **kwargs):
 
 
 @cli.command()
+@click.argument('k', type=int)
+@click.option('--ngrams', type=str, default="1")
+@filter_.df_filter_options
+def counts_time(k: int, ngrams: str, **kwargs):
+    df = filter_.get_filtered_df(kwargs)
+
+
+@cli.command()
 @click.option("--fast", is_flag=True)
+@click.option("-n", "--name", type=str)
 @filter_.df_filter_options
 @filter_.df_filter_options2
-def scatter(fast, **kwargs):
+def scatter(fast, name: str, **kwargs):
     df1 = filter_.get_filtered_df(kwargs)
     df2 = filter_.get_filtered_df(kwargs, second_df=True)
 
-    scatter_.plot_word_counts(df1, df2, fast, kwargs)
+    scatter_.plot_word_counts(df1, df2, fast, name, kwargs)
 
 
 @cli.command()
 @click.argument('topics', type=int)
+@click.option("-n", "--name", type=str)
 @filter_.df_filter_options
-def topic(topics: int, **kwargs):
+def topic_train(topics: int, name: str, **kwargs):
     df = filter_.get_filtered_df(kwargs)
-    topic_.topic(df, topics)
+    topic_.topic(df, topics, name)
 
 
 @cli.command()
 @click.option('--train', is_flag=True)
+@click.option("-n", "--name", type=str)
 @filter_.df_filter_options
-def fasttext(train: bool, **kwargs):
+def fasttext(train: bool, name: str, **kwargs):
     df = filter_.get_filtered_df(kwargs)
-    semantic_.semantic(df, train)
+    semantic_.semantic(df, train, name)
 
 
 @cli.command()

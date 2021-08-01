@@ -9,7 +9,7 @@ import gensim
 import pyLDAvis.gensim_models
 
 
-def topic(df: pd.DataFrame, topics: int):
+def topic(df: pd.DataFrame, topics: int, name: str):
     print("Preprocess docs")
     english_words = clean_.english_words()
     stopwords = clean_.stopwords_and_more()
@@ -30,10 +30,16 @@ def topic(df: pd.DataFrame, topics: int):
                                            passes=10,
                                            workers=2)
     print("Save model and results")
-    lda_model.save(f"output/lda_models/lda_{topics}_{CURRENT_TIME}.model")
-    print(lda_model.show_topics(formatted=True))
+    if name is None:
+        name_model = f"lda_{topics}_{CURRENT_TIME}"
+        name_vis = f"lv_{topics}_{CURRENT_TIME}"
+    else:
+        name_model = name
+        name_vis = name
+    lda_model.save(f"output/lda_models/{name_model}.model")
+    # print(lda_model.show_topics(formatted=True))
 
     vis = pyLDAvis.gensim_models.prepare(lda_model, bow_corpus, dictionary)
-    path = f"output/ldavis/lv_{topics}_{CURRENT_TIME}.html"
+    path = f"output/ldavis/{name_vis}.html"
     pyLDAvis.save_html(vis, path)
     print(f"File created at {os.path.abspath(path)}")

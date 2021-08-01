@@ -44,3 +44,7 @@ def top_k_tokens(k: int, df: pd.DataFrame, ngrams: str):
     count_top = sorted(frequencies, key=lambda x: x[1], reverse=True)[:k]
     tfidf_top = sorted(frequencies, key=lambda x: x[2], reverse=True)[:k]
     return count_top, tfidf_top
+
+
+def counts_over_time():
+    pass

@@ -9,7 +9,9 @@ SIZE = 100
 ITER = 10
 
 
-def semantic(df_abstracts: pd.DataFrame, train: bool = False):
+def semantic(df_abstracts: pd.DataFrame, train: bool, name: str):
+    if name is None:
+        name = f"ft_{SIZE}_{ITER}_{CURRENT_TIME}"
     if train:
         df_abstracts = df_abstracts[df_abstracts[COLUMN_ABSTRACT_SOURCE] == "anthology"][COLUMN_ABSTRACT]
         # print(common_texts[0])
@@ -29,10 +31,10 @@ def semantic(df_abstracts: pd.DataFrame, train: bool = False):
         print("finish train")
         # TODO sentences not documents
 
-        path = f"output/fasttext_models/ft_{SIZE}_{ITER}_{CURRENT_TIME}.model"
+        path = f"output/fasttext_models/{name}.model"
         model.save(path)
         print(f"File created at {os.path.abspath(path)}")
-    model = FastText.load(f"output/fasttext_models/ft_{SIZE}_{ITER}_{CURRENT_TIME}.model")
+    model = FastText.load(f"output/fasttext_models/{name}.model")
 
     print(model.wv.most_similar_cosmul(positive=['computer', 'human'], negative=['interface']))
     # print(model.wv.doesnt_match("human computer interface tree".split()))

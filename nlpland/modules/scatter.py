@@ -1,6 +1,7 @@
 import os
 import pandas as pd
-
+import scattertext as st
+import spacy
 
 import nlpland.data.clean as clean_
 from nlpland.constants import COLUMN_ABSTRACT, CURRENT_TIME
@@ -28,7 +29,6 @@ def preprocess_dfs(df1: pd.DataFrame, df2: pd.DataFrame, fast: bool):
 
     # df[PARSE] = df[COLUMN_ABSTRACT].apply(st.whitespace_nlp)
     # the above one is even faster, but breaks if lemmatization is active
-    import spacy
     if fast:
         model = "en_core_web_sm"
     else:
@@ -39,8 +39,7 @@ def preprocess_dfs(df1: pd.DataFrame, df2: pd.DataFrame, fast: bool):
     return df
 
 
-def plot_word_counts(df1: pd.DataFrame, df2: pd.DataFrame, fast, filters):
-    import scattertext as st
+def plot_word_counts(df1: pd.DataFrame, df2: pd.DataFrame, fast, name, filters):
     df = preprocess_dfs(df1, df2, fast)
     stopwords = clean_.stopwords_and_more()
 
@@ -57,6 +56,8 @@ def plot_word_counts(df1: pd.DataFrame, df2: pd.DataFrame, fast, filters):
         width_in_pixels=1000,
         transform=st.Scalers.dense_rank
     )
-    path = f"output/scattertext/st_{CURRENT_TIME}.html"
+    if name is None:
+        name = f"st_{CURRENT_TIME}"
+    path = f"output/scattertext/{name}.html"
     open(path, 'w+', encoding="UTF-8").write(html)
     print(f"File created at {os.path.abspath(path)}")
