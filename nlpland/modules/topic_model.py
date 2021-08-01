@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 from nlpland.constants import COLUMN_ABSTRACT
-import nlpland.clean as clean
+import nlpland.data.clean as clean_
 from nlpland.constants import CURRENT_TIME
 
 import gensim
@@ -11,13 +11,13 @@ import pyLDAvis.gensim_models
 
 def topic(df: pd.DataFrame, topics: int):
     print("Preprocess docs")
-    english_words = clean.english_words()
-    stopwords = clean.stopwords_and_more()
-    lemmatizer = clean.lemmatizer()
+    english_words = clean_.english_words()
+    stopwords = clean_.stopwords_and_more()
+    lemmatizer = clean_.lemmatizer()
     abstracts = df[COLUMN_ABSTRACT].dropna()
     titles = df["AA title"].dropna()
-    cleaned_abstracts = list(abstracts.apply(lambda text: clean.preprocess_text(text, english_words, lemmatizer, stopwords)))
-    cleaned_titles = list(titles.apply(lambda text: clean.preprocess_text(text, english_words, lemmatizer, stopwords)))
+    cleaned_abstracts = list(abstracts.apply(lambda text: clean_.preprocess_text(text, english_words, lemmatizer, stopwords)))
+    cleaned_titles = list(titles.apply(lambda text: clean_.preprocess_text(text, english_words, lemmatizer, stopwords)))
     cleaned_docs = cleaned_titles + cleaned_abstracts
 
     print("Create model")
@@ -30,10 +30,10 @@ def topic(df: pd.DataFrame, topics: int):
                                            passes=10,
                                            workers=2)
     print("Save model and results")
-    lda_model.save(f"output/ldamodel_{topics}_{CURRENT_TIME}.model")
+    lda_model.save(f"output/lda_models/lda_{topics}_{CURRENT_TIME}.model")
     print(lda_model.show_topics(formatted=True))
 
     vis = pyLDAvis.gensim_models.prepare(lda_model, bow_corpus, dictionary)
-    path = f"output/ldavis_{topics}_{CURRENT_TIME}.html"
+    path = f"output/ldavis/lv_{topics}_{CURRENT_TIME}.html"
     pyLDAvis.save_html(vis, path)
     print(f"File created at {os.path.abspath(path)}")

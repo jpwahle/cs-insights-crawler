@@ -1,8 +1,12 @@
+import os
 import pandas as pd
 from gensim.models import FastText
 # from gensim.test.utils import common_texts  # some example sentences
-from nlpland.constants import COLUMN_ABSTRACT, COLUMN_ABSTRACT_SOURCE
-import nlpland.clean as clean
+from nlpland.constants import COLUMN_ABSTRACT, COLUMN_ABSTRACT_SOURCE, CURRENT_TIME
+import nlpland.data.clean as clean_
+
+SIZE = 100
+ITER = 10
 
 
 def semantic(df_abstracts: pd.DataFrame, train: bool = False):
@@ -16,17 +20,19 @@ def semantic(df_abstracts: pd.DataFrame, train: bool = False):
         # model.build_vocab(sentences=common_texts)
         # model.train(sentences=common_texts, total_examples=len(common_texts), epochs=10)  # train
         print("start preprocess")
-        vocabulary = clean.english_words()
-        lemmatizer = clean.lemmatizer()
-        stopwords = clean.stopwords_and_more()
-        df_abstracts = df_abstracts.apply(lambda row: clean.preprocess_text(row, vocabulary, lemmatizer, stopwords))  # todo
+        vocabulary = clean_.english_words()
+        lemmatizer = clean_.lemmatizer()
+        stopwords = clean_.stopwords_and_more()
+        df_abstracts = df_abstracts.apply(lambda row: clean_.preprocess_text(row, vocabulary, lemmatizer, stopwords))  # todo
         print("start train")
-        model = FastText(size=100, window=3, min_count=1, sentences=list(df_abstracts), iter=10)
+        model = FastText(size=SIZE, window=3, min_count=1, sentences=list(df_abstracts), iter=ITER)
         print("finish train")
         # TODO sentences not documents
 
-        model.save("fasttext.model")
-    model = FastText.load("fasttext.model")
+        path = f"output/fasttext_models/ft_{SIZE}_{ITER}_{CURRENT_TIME}.model"
+        model.save(path)
+        print(f"File created at {os.path.abspath(path)}")
+    model = FastText.load(f"output/fasttext_models/ft_{SIZE}_{ITER}_{CURRENT_TIME}.model")
 
     print(model.wv.most_similar_cosmul(positive=['computer', 'human'], negative=['interface']))
     # print(model.wv.doesnt_match("human computer interface tree".split()))
@@ -52,11 +58,6 @@ def semantic(df_abstracts: pd.DataFrame, train: bool = False):
 
 
 def plot(df: pd.DataFrame):
-    import umap
-    from sklearn.datasets import load_digits
-    import umap.plot
-    import matplotlib.pyplot as plt
-
     # digits = load_digits()
     # mapper = umap.UMAP().fit(digits.data)
     # print(digits.target)

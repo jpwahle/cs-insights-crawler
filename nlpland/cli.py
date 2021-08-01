@@ -1,18 +1,14 @@
 import click
-import pandas as pd
-import numpy as np
-import time
-import os
 
-import nlpland.dataset as data
-import nlpland.data_check as check
-import nlpland.wordcount as count_
-import nlpland.scatter as scatter_
-from nlpland.constants import COLUMN_ABSTRACT, ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY
+import nlpland.data.dataset as dataset_
+import nlpland.data.check as check_
+import nlpland.modules.count as count_
+import nlpland.modules.scatter as scatter_
+from nlpland.constants import ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY
 from dotenv import load_dotenv
-import nlpland.filter as filter
-import nlpland.topic_modelling as topic_
-import nlpland.semantic as semantic
+import nlpland.data.filter as filter_
+import nlpland.modules.topic_model as topic_
+import nlpland.modules.semantic as semantic_
 
 load_dotenv()
 
@@ -26,8 +22,8 @@ def cli() -> None:
 @click.option('--min-year', type=int)
 @click.option('--max-year', type=int)
 def download(min_year, max_year):
-    df = data.get_dataset(True)
-    data.download_papers(df, min_year=min_year, max_year=max_year)
+    df = dataset_.get_dataset(True)
+    dataset_.download_papers(df, min_year=min_year, max_year=max_year)
 
 
 @cli.command()
@@ -37,50 +33,50 @@ def download(min_year, max_year):
 @click.option('--min-year', type=int)
 @click.option('--max-year', type=int)
 def extract(mode, original, overwrite, min_year, max_year):
-    df = data.get_dataset(original)
+    df = dataset_.get_dataset(original)
 
     modes = [ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY]
     if mode not in modes:
         print(f"Unsupported mode '{mode}'. Choose from {modes}.")
     if mode == ABSTRACT_SOURCE_RULE:
-        data.extract_abstracts_rulebased(df, overwrite=overwrite, min_year=min_year, max_year=max_year)
+        dataset_.extract_abstracts_rulebased(df, overwrite=overwrite, min_year=min_year, max_year=max_year)
     elif mode == ABSTRACT_SOURCE_ANTHOLOGY:
-        data.extract_abstracts_anthology(df)
+        dataset_.extract_abstracts_anthology(df)
 
 
 @cli.command()
 def checkencode():
-    df = data.get_dataset(False)
-    check.check_encoding_issues(df)
+    df = dataset_.get_dataset(False)
+    check_.check_encoding_issues(df)
 
 
 @cli.command()
 @click.option('--original', is_flag=True)
 def checkdataset(original):
-    df = data.get_dataset(original)
-    check.check_dataset(df)
+    df = dataset_.get_dataset(original)
+    check_.check_dataset(df)
 
 
 @cli.command()
 @click.argument('paper-path', type=str)
 def checkpaper(paper_path):
-    check.check_paper_parsing(paper_path)
+    check_.check_paper_parsing(paper_path)
 
 
 @cli.command()
 def countabstractsanth():
-    check.count_anthology_abstracts()
+    check_.count_anthology_abstracts()
 
 
 @cli.command()
 @click.argument('k', type=int)
 @click.option('--ngrams', type=str, default="1")
-@filter.df_filter_options
+@filter_.df_filter_options
 def count(k: int, ngrams: str, **kwargs):
     # works like filters:
     # leaving both blank: whole dataset (once)
     # leaving the second blank: only count first one
-    df = filter.get_filtered_df(kwargs)
+    df = filter_.get_filtered_df(kwargs)
 
     count_top, tfidf_top = count_.top_k_tokens(k, df, ngrams)
     print(f"Most occurring words in selection: {count_top}")
@@ -89,37 +85,37 @@ def count(k: int, ngrams: str, **kwargs):
 
 @cli.command()
 @click.option("--fast", is_flag=True)
-@filter.df_filter_options
-@filter.df_filter_options2
+@filter_.df_filter_options
+@filter_.df_filter_options2
 def scatter(fast, **kwargs):
-    df1 = filter.get_filtered_df(kwargs)
-    df2 = filter.get_filtered_df(kwargs, second_df=True)
+    df1 = filter_.get_filtered_df(kwargs)
+    df2 = filter_.get_filtered_df(kwargs, second_df=True)
 
     scatter_.plot_word_counts(df1, df2, fast, kwargs)
 
 
 @cli.command()
 @click.argument('topics', type=int)
-@filter.df_filter_options
+@filter_.df_filter_options
 def topic(topics: int, **kwargs):
-    df = filter.get_filtered_df(kwargs)
+    df = filter_.get_filtered_df(kwargs)
     topic_.topic(df, topics)
 
 
 @cli.command()
 @click.option('--train', is_flag=True)
-@filter.df_filter_options
+@filter_.df_filter_options
 def fasttext(train: bool, **kwargs):
-    df = filter.get_filtered_df(kwargs)
-    semantic.semantic(df, train)
+    df = filter_.get_filtered_df(kwargs)
+    semantic_.semantic(df, train)
 
 
 @cli.command()
 @click.option('--train', is_flag=True)
-@filter.df_filter_options
+@filter_.df_filter_options
 def umap(**kwargs):
-    df = filter.get_filtered_df(kwargs)
-    semantic.plot(df)
+    df = filter_.get_filtered_df(kwargs)
+    semantic_.plot(df)
 
 
 @cli.command()
@@ -144,7 +140,7 @@ def test():
 
     quit()
 
-    df = data.get_dataset(original_dataset=False)
+    df = dataset_.get_dataset(original_dataset=False)
     # df = df[~df[COLUMN_ABSTRACT].isna()]
     df["1"] = df["AA authors list"].str.lower()
     print(df["1"].str.contains("jurafsky, dan").sum())

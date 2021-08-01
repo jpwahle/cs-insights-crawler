@@ -7,7 +7,7 @@ from tika import parser
 import tika
 from typing import List
 from nlpland.constants import COLUMN_ABSTRACT, MISSING_PAPERS, ABSTRACT_SOURCE_ANTHOLOGY, ABSTRACT_SOURCE_RULE, COLUMN_ABSTRACT_SOURCE
-from nlpland.clean import clean_paper_id, clean_venue_name
+from nlpland.data.clean import clean_paper_id, clean_venue_name
 
 
 def download_papers(df: pd.DataFrame, min_year: int, max_year: int) -> None:
@@ -172,14 +172,14 @@ def extract_abstracts_anthology(df: pd.DataFrame):
     for file in tqdm(os.listdir(path_anthology), total=len(os.listdir(path_anthology))):
         if file.endswith(".xml"):
             tree = etree.parse(f"{path_anthology}/{file}")
-            for collection in tree.iter("collection"):
+            for collection in tree.ITER("collection"):
                 collection_id = collection.attrib["id"]
-                for volume in collection.iter("volume"):
+                for volume in collection.ITER("volume"):
                     if len(volume.attrib) > 0:
                         volume_id = volume.attrib["id"]
                     else:
                         volume_id = ""
-                    for paper in volume.iter("paper"):
+                    for paper in volume.ITER("paper"):
                         children = paper.getchildren()
                         id = None
                         abstract = None

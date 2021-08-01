@@ -1,8 +1,7 @@
 import click
 import numpy as np
-import pandas as pd
 
-import nlpland.dataset as dataset
+import nlpland.data.dataset as dataset_
 from nlpland.constants import COLUMN_ABSTRACT, COLUMN_ABSTRACT_SOURCE, ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY
 from typing import Dict, Any, List
 
@@ -32,7 +31,7 @@ def get_filtered_df(filters: Dict[str, Any], original_dataset: bool = False, sec
         sec = "2"
     else:
         sec = ""
-    df = dataset.get_dataset(original_dataset)
+    df = dataset_.get_dataset(original_dataset)
 
     venues = filters["venues" + sec]
     if venues is not None:
