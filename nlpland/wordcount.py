@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import nlpland.clean as clean
 import nlpland.filter as filter
 from typing import List
@@ -23,7 +24,7 @@ def generate_token_matrices(documents: List[List[str]], n_lower: int, n_upper: i
     return vectorizer.get_feature_names(), counts_matrix, tfidf_matrix
 
 
-def count_tokens(k: int, df: pd.DataFrame, ngrams: str):
+def token_frequencies(df: pd.DataFrame, ngrams: str):
     ngrams_list = filter.attributes_to_list(ngrams)
     if len(ngrams_list) > 1:
         n_upper = ngrams_list[1]
@@ -32,9 +33,14 @@ def count_tokens(k: int, df: pd.DataFrame, ngrams: str):
 
     documents = list(df[COLUMN_ABSTRACT].dropna()) + list(df["AA title"].dropna())
     feature_names, counts_matrix, tfidf_matrix = generate_token_matrices(documents, int(ngrams_list[0]), int(n_upper))
-    word_counts = counts_matrix.sum(axis=0).tolist()[0]
-    tfidf_scores = tfidf_matrix.idf_
-    frequencies = list(zip(feature_names, word_counts, tfidf_scores))
-    highest_count = sorted(frequencies, key=lambda x: x[1], reverse=True)[:k]
-    highest_tfidf = sorted(frequencies, key=lambda x: x[2], reverse=True)[:k]
-    return highest_count, highest_tfidf
+    tf = np.asarray(counts_matrix.sum(axis=0))[0]
+    idf = tfidf_matrix.idf_
+    frequencies = list(zip(feature_names, tf, tf * idf))
+    return frequencies
+
+
+def top_k_tokens(k: int, df: pd.DataFrame, ngrams: str):
+    frequencies = token_frequencies(df, ngrams)
+    count_top = sorted(frequencies, key=lambda x: x[1], reverse=True)[:k]
+    tfidf_top = sorted(frequencies, key=lambda x: x[2], reverse=True)[:k]
+    return count_top, tfidf_top

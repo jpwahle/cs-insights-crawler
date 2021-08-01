@@ -73,33 +73,18 @@ def countabstractsanth():
 
 
 @cli.command()
-def grobid():
-    from grobid_client.grobid_client import GrobidClient
-
-    start = time.time()
-    client = GrobidClient(config_path="C:/Users/Lennart/Desktop/grobid_client_python/config.json")
-    path = "C:/test_papers"
-    if os.path.isdir(path):
-        print(f"Processing {len(os.listdir(path))} files.")
-    client.process("processFulltextDocument", path, output="./resources/test_out_heavy/", n=20)
-    print(f"This took {time.time()-start}s.")
-    # TODO cleanup
-
-
-@cli.command()
 @click.argument('k', type=int)
 @click.option('--ngrams', type=str, default="1")
 @filter.df_filter_options
 def count(k: int, ngrams: str, **kwargs):
-    # TODO allow different sizes of ngrams
     # works like filters:
     # leaving both blank: whole dataset (once)
     # leaving the second blank: only count first one
     df = filter.get_filtered_df(kwargs)
 
-    highest_count, highest_tfidf = count_.count_tokens(k, df, ngrams)
-    print(f"Most occurring words in selection: {highest_count}")
-    print(f"Highest tf-idf scores in selection: {highest_tfidf}")
+    count_top, tfidf_top = count_.top_k_tokens(k, df, ngrams)
+    print(f"Most occurring words in selection: {count_top}")
+    print(f"Highest tf-idf scores in selection: {tfidf_top}")
 
 
 @cli.command()
