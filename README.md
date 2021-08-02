@@ -27,9 +27,6 @@ You have to rename the file `empty.env` to `.env`. In this file you have to set 
 
 `PATH_PAPERS` is the path to the directory with the downloaded papers.
 (Only used in abstract extraction)
-The papers are structured as follows: `<year>/<venue-name>/<paper-id>.pdf`.
-Some special characters in the venue name and paper id had to be removed or replaced.
-
 
 `PATH_ANTHOLOGY` is the path to the `xml` [directory in the ACL Anthology](https://github.com/acl-org/acl-anthology/tree/master/data/xml).
 (Only used in abstract extraction)
@@ -38,14 +35,39 @@ Some special characters in the venue name and paper id had to be removed or repl
 
 `PATH_DATASET_EXPANDED` is the path to the `.txt` file of the expanded dataset or where it is supposed to be created.
 
+
 ## Commands
 All commands are preceded with `cli`.
 
-### Dataset related
-WIP
+### Paper download
+The command `download` downloads and saves the papers to your computer.
+The papers will be structured as follows: `<year>/<venue-name>/<paper-id>.pdf`.
+Some special characters in the venue name and paper id will be removed or replaced, because of folder name restrictions.
+
+Example: `cli download --min-year 2015` will download all papers from 2015 onwards.
+
+### Abstract extraction
+The command `extract <mode>` adds the abstracts to the dataset.
+There are two modes and multiple options:
+
+The mode `anth` to extract from the XML files.
+This will always overwrite abstracts extracted with the rule-based system.
+(Preferred option, but not all papers have an abstract in the anthology)
+
+The mode `rule` to use the rule-based system.
+(There might be errors/noise)
+
+The option `--overwrite-rule` to overwrite previously with the rule-based system extracted abstracts.
+This has no effect for `mode = anth`.
+
+The option `--original` will use the original dataset as basis and not an already expanded one.
+Warning: This will overwrite everything once it saves.
+
+Example: `cli extract rule --overwrite-rule` will add new abstracts and overwrite all abstracts previously extracted with the rule-based system.
+
 
 ### Counting
-The command `count` prints the term frequency of the top k grams/tokens.
+The command `count <k>` prints the term frequency of the top k grams/tokens.
 It also prints the top k tf-idf scores. Both are calculated using [sklearn](https://github.com/scikit-learn/scikit-learn).
 
 The option `--ngrams <n>` specifies the n of the n-grams. The default is `1`.
@@ -54,7 +76,7 @@ To set the lower and upper bounds of n one can use e.g. `--ngrams 1,2`.
 Example: `cli count 10 --ngrams 2` prints the 10 bigrams with the highest term frequency and also separately tf-idf score.
 
 ### Counts over time
-The command `counts-time` plots the top k grams over a specified time.
+The command `counts-time <k>` plots the top k grams over a specified time.
 It counts the term frequency per year and plots all tokens that were in a top k in one year or more.
 The time can be specified using the filters mentioned further down.
 
@@ -80,8 +102,7 @@ The option `--name <name>` or `-n` allows to name the file the plot will be save
 Example: `cli scatter --venues ACL --year 2019 --venues2 --year 2020` will plot the ACL papers from 2019 against those from 2020.
 
 ### Topic model training
-The command `topic-train` will train a topic model using an LDA implementation in [gensim](https://github.com/RaRe-Technologies/gensim). 
-The amount of topics can be freely chosen.
+The command `topic-train <k>` will train a topic model with `k` topics using an LDA implementation in [gensim](https://github.com/RaRe-Technologies/gensim).
 It will also create an interactive plot using [pyLDAvis](https://github.com/bmabey/pyLDAvis).
 
 The option `--name <name>` or `-n` allows to name the model and the file the plot will be saved to.
@@ -95,7 +116,18 @@ WIP
 WIP
 
 ### Misc
-WIP
+These commands are mostly for development purposes and improving the rule-based system.
+
+The command `checkdataset` prints a lot of information about the dataset and performs various checks.
+The option `--original` uses the original dataset without abstracts.
+By default, the expanded version is used.
+
+The command `checkencode` checks if there are encoding issues in the abstracts by checking if `�` is in any abstracts.
+It will print the abstracts with one or more `�` and other information.
+
+The command `checkpaper <paper-path>` prints the raw text of the paper specified.
+
+The command `countabstractsanth` counts the amount abstracts and papers in the ACL Anthology based on the XML files.
 
 ## Filters
 The following filters are applicable to all non-misc (and for now non-dataset related) commands.

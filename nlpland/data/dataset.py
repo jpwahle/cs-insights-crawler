@@ -74,7 +74,7 @@ def determine_earliest_string(text: str, possible_strings: List[str]):
     return earliest_pos, earliest_string
 
 
-def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, venues: List[str] = None, overwrite: bool = False) -> None:
+def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, venues: List[str] = None, overwrite_rule: bool = False) -> None:
     start = time.time()
     iterated = 0
     searched = 0
@@ -98,7 +98,7 @@ def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, 
 
     for index, row in tqdm(df_select.iterrows(), total=df_select.shape[0]):
         iterated += 1
-        if (overwrite and row[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_RULE) or pd.isnull(row[COLUMN_ABSTRACT]):
+        if (overwrite_rule and row[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_RULE) or pd.isnull(row[COLUMN_ABSTRACT]):
             paper_id = clean_paper_id(index)
             venue = clean_venue_name(row["NS venue name"])
             year = row["AA year of publication"]

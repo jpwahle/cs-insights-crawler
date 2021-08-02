@@ -18,6 +18,7 @@ def cli() -> None:
     pass
 
 
+#TODO switch to different filter
 @cli.command()
 @click.option('--min-year', type=int)
 @click.option('--max-year', type=int)
@@ -26,20 +27,21 @@ def download(min_year, max_year):
     dataset_.download_papers(df, min_year=min_year, max_year=max_year)
 
 
+#TODO switch to different filter
 @cli.command()
 @click.argument('mode', type=str)
 @click.option('--original', is_flag=True)
-@click.option('--overwrite', is_flag=True)  # always only overwrites rule based abstracts
+@click.option('--overwrite-rule', is_flag=True)  # always only overwrites rule based abstracts
 @click.option('--min-year', type=int)
 @click.option('--max-year', type=int)
-def extract(mode, original, overwrite, min_year, max_year):
+def extract(mode, original, overwrite_rule, min_year, max_year):
     df = dataset_.get_dataset(original)
 
     modes = [ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY]
     if mode not in modes:
         print(f"Unsupported mode '{mode}'. Choose from {modes}.")
     if mode == ABSTRACT_SOURCE_RULE:
-        dataset_.extract_abstracts_rulebased(df, overwrite=overwrite, min_year=min_year, max_year=max_year)
+        dataset_.extract_abstracts_rulebased(df, overwrite_rule=overwrite_rule, min_year=min_year, max_year=max_year)
     elif mode == ABSTRACT_SOURCE_ANTHOLOGY:
         dataset_.extract_abstracts_anthology(df)
 
