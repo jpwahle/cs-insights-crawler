@@ -17,10 +17,10 @@ Next, clone the repository and navigate to the root folder `NLPLand` in a shell.
 Execute `poetry install` there.
 This will install all the dependencies this project needs.
 If you are in a virtual environment it will install all dependencies there, otherwise it will create a new one.
-(Should poetry not be able to find a python 3.7 installation, specify the path using `poetry env use <path>` to create a venv based on the given python version.)
+(Should poetry not be able to find a python 3.7 installation, specify the python path using `poetry env use <path>` to create a venv based on the given python version.)
 
 If you were not already in a venv, execute `poetry shell` to activate the newly created one.
-(If the command does not work, try to activate the venv manually.) 
+(If the command does not work, try to activate the venv manually or try another shell.) 
 
 ### .env
 You have to rename the file `empty.env` to `.env`. In this file you have to set your variables.  (Hint: All path variables can be either an absolute or relative path.)
