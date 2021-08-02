@@ -141,8 +141,12 @@ This filter will overwrite the other two, should they be applied at the same tim
 Example: `cli count 10 --min-year 2018 --max-year 2020` will count all words from papers published in 2018, 2019 and 2020.
 
 ### Authors
-The filter `--author <name>` selects only the papers where the author is in the list of authors.
-The filter ignores casing but otherwise has to be an exact match.
+To filter the authors there are two options.
+The filters ignore casing, but otherwise it has to be an exact match.
 In the NLP Scholar dataset nearly all authors are saved like `<lastname>, <firstname>`.
 
-Example: `cli count 10 --author "manning, christopher"`
+`--author <name>` selects only the papers where the author is in the list of authors.
+
+`--fauthor <name>` selects only the papers where the author is the first author.
+
+Example: `cli count 10 --author "manning, christopher"` will count all words from papers Christopher Manning worked on.

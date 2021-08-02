@@ -16,6 +16,7 @@ def df_filter_options(function, second_df: bool = False):
     function = click.option('--min-year' + sec, type=int)(function)
     function = click.option('--max-year' + sec, type=int)(function)
     function = click.option('--author' + sec)(function)
+    function = click.option('--fauthor' + sec)(function)
     function = click.option('--data' + sec)(function)
     return function
 
@@ -52,6 +53,10 @@ def get_filtered_df(filters: Dict[str, Any], original_dataset: bool = False, sec
     author = filters["author" + sec]
     if author is not None:
         df = df[df["AA authors list"].str.contains(author, case=False)]
+
+    fauthor = filters["fauthor" + sec]
+    if fauthor is not None:
+        df = df[df["AA first author full name"].str.lower() == fauthor.lower()]
 
     data = filters["data" + sec]
     if data:
