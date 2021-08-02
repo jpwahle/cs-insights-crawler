@@ -3,3 +3,5 @@
 venv/
 .env
 data/
+output/
+resources/
