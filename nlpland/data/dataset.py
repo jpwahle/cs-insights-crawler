@@ -10,19 +10,11 @@ from nlpland.constants import COLUMN_ABSTRACT, MISSING_PAPERS, ABSTRACT_SOURCE_A
 from nlpland.data.clean import clean_paper_id, clean_venue_name
 
 
-def download_papers(df: pd.DataFrame, min_year: int, max_year: int) -> None:
+def download_papers(df: pd.DataFrame) -> None:
     path_papers = os.getenv("PATH_PAPERS")
     df_missing = pd.read_csv(MISSING_PAPERS, delimiter="\t", low_memory=False, header=None)
 
-    if min_year is None:
-        min_year = df["AA year of publication"].min()
-    if max_year is None:
-        max_year = df["AA year of publication"].max()
-
-    years = []
-    for year in range(min_year, max_year+1):
-        years.append(year)
-
+    years = sorted(df["AA year of publication"].unique())
     for year in years:
         print(f"Downloading papers from {year}.")
         df_year = df[df["AA year of publication"] == year]
@@ -74,7 +66,7 @@ def determine_earliest_string(text: str, possible_strings: List[str]):
     return earliest_pos, earliest_string
 
 
-def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, venues: List[str] = None, overwrite_rule: bool = False) -> None:
+def extract_abstracts_rulebased(df_select: pd.DataFrame, df_full: pd.DataFrame, overwrite_rule: bool = False) -> None:
     start = time.time()
     iterated = 0
     searched = 0
@@ -84,17 +76,9 @@ def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, 
     no_file = 0
     long_abstract = 0
     path_papers = os.getenv("PATH_PAPERS")
+
     tika.initVM()
     #TODO vectorize
-
-    if min_year is None:
-        min_year = df["AA year of publication"].min()
-    if max_year is None:
-        max_year = df["AA year of publication"].max()
-
-    df_select = df[(min_year <= df["AA year of publication"]) & (df["AA year of publication"] <= max_year)]
-    if venues is not None:
-        df_select = df_select[df_select["NS venue name"].isin(venues)]
 
     for index, row in tqdm(df_select.iterrows(), total=df_select.shape[0]):
         iterated += 1
@@ -137,19 +121,18 @@ def extract_abstracts_rulebased(df: pd.DataFrame, min_year: int, max_year: int, 
                         index_err += 1
                     else:
                         abstract = text[start_pos:end_pos]
-                        df.at[index, COLUMN_ABSTRACT] = abstract
-                        df.at[index, COLUMN_ABSTRACT_SOURCE] = ABSTRACT_SOURCE_RULE
+                        df_full.at[index, COLUMN_ABSTRACT] = abstract
+                        df_full.at[index, COLUMN_ABSTRACT_SOURCE] = ABSTRACT_SOURCE_RULE
                         if len(abstract) > 5000:
                             long_abstract += 1
             else:
                 no_file += 1
         else:
             skipped += 1
-        if iterated % 1000 == 0:
-            pass
-            save_dataset(df)
-    save_dataset(df)
-    print(f"Papers iterated: {iterated} matching year+venue")
+        if iterated % 1000 == 0 and iterated > 0:
+            save_dataset(df_full)
+    save_dataset(df_full)
+    print(f"Papers iterated: {iterated} matching filters")
     print(f"Abstracts searched: {searched} abstracts searched")
     print(f"Abstracts skipped: {skipped} already existed")
     print(f"none: {nones} texts of papers are None")

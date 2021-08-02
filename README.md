@@ -17,7 +17,7 @@ Next, clone the repository and navigate to the root folder `NLPLand` in a shell.
 Execute `poetry install` there.
 This will install all the dependencies this project needs.
 If you are in a virtual environment it will install all dependencies there, otherwise it will create a new one.
-(Should poetry not be able to find a python 3.7 installation, specify the path using `poetry env use <path>` to create a venv.)
+(Should poetry not be able to find a python 3.7 installation, specify the path using `poetry env use <path>` to create a venv based on the given python version.)
 
 If you were not already in a venv, execute `poetry shell` to activate the newly created one.
 (If the command does not work, try to activate the venv manually.) 
@@ -52,6 +52,7 @@ There are two modes and multiple options:
 
 The mode `anth` to extract from the XML files.
 This will always overwrite abstracts extracted with the rule-based system.
+Any filters applied will be ignored by this mode.
 (Preferred option, but not all papers have an abstract in the anthology)
 
 The mode `rule` to use the rule-based system.
@@ -64,7 +65,6 @@ The option `--original` will use the original dataset as basis and not an alread
 Warning: This will overwrite everything once it saves.
 
 Example: `cli extract rule --overwrite-rule` will add new abstracts and overwrite all abstracts previously extracted with the rule-based system.
-
 
 ### Counting
 The command `count <k>` prints the term frequency of the top k grams/tokens.
@@ -130,9 +130,10 @@ The command `checkpaper <paper-path>` prints the raw text of the paper specified
 The command `countabstractsanth` counts the amount abstracts and papers in the ACL Anthology based on the XML files.
 
 ## Filters
-The following filters are applicable to all non-misc (and for now non-dataset related) commands.
+The following filters are applicable to all commands except the few ones under [Misc](#misc).
 They will filter out rows that do not match the specified filters or mask certain attributes.
-Different filter can be applied simultaneously. The filters will then work additively, i.e. the more different filters are specified, the more restrictive the selection is.
+Different filters can be applied simultaneously.
+The filters will then work additively, i.e. the more different filters are specified, the more restrictive the selection is.
 
 ### Data
 The filter `--data <type>` allows selecting only specific parts of the data.
@@ -147,7 +148,7 @@ The following types exist:
 
 `abstracts` selects the abstracts of the papers.
 
-`abstracts-anth` selects the abstracts that were extracted from the ACl Anthology XML files.
+`abstracts-anth` selects the abstracts that were extracted from the ACL Anthology XML files.
 
 `abstracts-rule` selects the abstracts that were extracted from the papers using the rule-based system.
 
@@ -163,12 +164,12 @@ Example: `cli count 10 --venues ACL,EMNLP` will only count words from paper publ
 ### Years
 To filter the year of publication there are 3 filters one can use.
 
-`--year <year>` will only select papers that were published in that year according to the ACl Anthology.
+`--year <year>` selects papers that were published in that year according to the ACL Anthology.
 This filter will overwrite the other two, should they be applied at the same time.
 
-`--min-year <year>` will only select papers that were published in that year or later.
+`--min-year <year>` selects papers that were published in that year or later.
 
-`--max-year <year>` will only select papers that were published in that year or before.
+`--max-year <year>` selects papers that were published in that year or before.
 
 Example: `cli count 10 --min-year 2018 --max-year 2020` will count all words from papers published in 2018, 2019 and 2020.
 
@@ -177,8 +178,8 @@ To filter the authors there are two options.
 The filters ignore casing, but otherwise it has to be an exact match.
 In the NLP Scholar dataset nearly all authors are saved like `<lastname>, <firstname>`.
 
-`--author <name>` selects only the papers where the author is in the list of authors.
+`--author <name>` selects the papers where the author is in the list of authors.
 
-`--fauthor <name>` selects only the papers where the author is the first author.
+`--fauthor <name>` selects the papers where the author is the first author.
 
 Example: `cli count 10 --author "manning, christopher"` will count all words from papers Christopher Manning worked on.

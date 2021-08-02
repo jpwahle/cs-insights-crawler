@@ -18,32 +18,29 @@ def cli() -> None:
     pass
 
 
-#TODO switch to different filter
 @cli.command()
-@click.option('--min-year', type=int)
-@click.option('--max-year', type=int)
-def download(min_year, max_year):
-    df = dataset_.get_dataset(True)
-    dataset_.download_papers(df, min_year=min_year, max_year=max_year)
+@filter_.df_filter_options
+def download(**kwargs):
+    df = filter_.get_filtered_df(kwargs)
+    dataset_.download_papers(df)
 
 
-#TODO switch to different filter
 @cli.command()
 @click.argument('mode', type=str)
 @click.option('--original', is_flag=True)
-@click.option('--overwrite-rule', is_flag=True)  # always only overwrites rule based abstracts
-@click.option('--min-year', type=int)
-@click.option('--max-year', type=int)
-def extract(mode, original, overwrite_rule, min_year, max_year):
-    df = dataset_.get_dataset(original)
+@click.option('--overwrite-rule', is_flag=True)  # only overwrites rule based abstracts
+@filter_.df_filter_options
+def extract(mode, original, overwrite_rule, **kwargs):
+    df_full = dataset_.get_dataset(original)
 
     modes = [ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY]
     if mode not in modes:
         print(f"Unsupported mode '{mode}'. Choose from {modes}.")
     if mode == ABSTRACT_SOURCE_RULE:
-        dataset_.extract_abstracts_rulebased(df, overwrite_rule=overwrite_rule, min_year=min_year, max_year=max_year)
+        df_select = filter_.get_filtered_df(kwargs, original_dataset=original)
+        dataset_.extract_abstracts_rulebased(df_select, df_full, overwrite_rule=overwrite_rule)
     elif mode == ABSTRACT_SOURCE_ANTHOLOGY:
-        dataset_.extract_abstracts_anthology(df)
+        dataset_.extract_abstracts_anthology(df_full)
 
 
 @cli.command()
@@ -135,11 +132,6 @@ def umap(**kwargs):
 
 
 @cli.command()
-def load():
-    pass
-
-
-@cli.command()
 def test():
     # from nlpland.data_cleanup import clean_and_tokenize
     # test_ = "one two, three.\n four-five, se-\nven, open-\nsource, se-\nve.n, "
@@ -156,18 +148,9 @@ def test():
 
     quit()
 
-    df = dataset_.get_dataset(original_dataset=False)
-    # df = df[~df[COLUMN_ABSTRACT].isna()]
-    df["1"] = df["AA authors list"].str.lower()
-    print(df["1"].str.contains("jurafsky, dan").sum())
-    print(df["1"].str.contains("manning, christopher").sum())
-    print(df["1"].str.contains("manning, christopher|jurafsky, dan").sum())
-    print(len(df[(df["1"].str.contains("manning, christopher")) & (df["1"].str.contains("jurafsky, dan"))]))
-    # print(df["1"].str.contains("Card, Dallas && Gabriel, Saadia").sum())
-
 
 if __name__ == '__main__':
-    # debugging
+    # this is for debugging via IDE
     from click.testing import CliRunner
     runner = CliRunner()
     result = runner.invoke(count, args=["5"], catch_exceptions=False)
