@@ -8,7 +8,7 @@ The following project description should give a broad overview over the project,
 The ACL Anthology (AA) is the largest single repository of thousands of articles on Natural Language Processing (NLP) and Computational Linguistics (CL). It contains valuable metadata (e.g. venues, authors’ name, title) that can be used to better understand the field. NLP Scholar, uses this data to examine the literature to identify broad trends in productivity, focus, and impact. We want to extend this analysis to specific components in NLP publications.
 
 ## Installation & Setup
-## poetry
+### poetry
 First download poetry as explained here: https://python-poetry.org/docs/#installation
 
 Also make sure you have python 3.7 installed.
@@ -25,9 +25,14 @@ If you were not already in a venv, execute `poetry shell` to activate the newly 
 ### .env
 You have to rename the file `empty.env` to `.env`. In this file you have to set your variables.  (Hint: All path variables can be either an absolute or relative path.)
 
-`PATH_PAPERS` is the path to the directory with the downloaded papers. (Only used in abstract extraction)
+`PATH_PAPERS` is the path to the directory with the downloaded papers.
+(Only used in abstract extraction)
+The papers are structured as follows: `<year>/<venue-name>/<paper-id>.pdf`.
+Some special characters in the venue name and paper id had to be removed or replaced.
 
-`PATH_ANTHOLOGY` is the path to the `xml` directory in the ACL Anthology. (Only used in abstract extraction)
+
+`PATH_ANTHOLOGY` is the path to the `xml` [directory in the ACL Anthology](https://github.com/acl-org/acl-anthology/tree/master/data/xml).
+(Only used in abstract extraction)
 
 `PATH_DATASET` is the path to the `.txt` file of the NLP Scholar dataset. 
 
@@ -74,7 +79,7 @@ The option `--name <name>` or `-n` allows to name the file the plot will be save
 
 Example: `cli scatter --venues ACL --year 2019 --venues2 --year 2020` will plot the ACL papers from 2019 against those from 2020.
 
-### Topic modelling training
+### Topic model training
 The command `topic-train` will train a topic model using an LDA implementation in [gensim](https://github.com/RaRe-Technologies/gensim). 
 The amount of topics can be freely chosen.
 It will also create an interactive plot using [pyLDAvis](https://github.com/bmabey/pyLDAvis).
@@ -89,13 +94,55 @@ WIP
 ### Semantic analysis
 WIP
 
+### Misc
+WIP
+
 ## Filters
+The following filters are applicable to all non-misc (and for now non-dataset related) commands.
+They will filter out rows that do not match the specified filters or mask certain attributes.
+Different filter can be applied simultaneously. The filters will then work additively, i.e. the more different filters are specified, the more restrictive the selection is.
 
 ### Data
+The filter `--data <type>` allows selecting only specific parts of the data.
+To do so it will mask all non-selected entries.
+Combinations are possible, by listing multiple types (see the example).
+In those cases the multiple types will be additive, so the more is listed, the less is masked.
+The following types exist:
+
+`all` selects everything and is the equivalent to applying no `data` filter at all. 
+
+`titles` selects the titles of the papers.
+
+`abstracts` selects the abstracts of the papers.
+
+`abstracts-anth` selects the abstracts that were extracted from the ACl Anthology XML files.
+
+`abstracts-rule` selects the abstracts that were extracted from the papers using the rule-based system.
+
+Example: `cli count 10 --data titles,abstracts-anth` will count all words in the titles and additionally all abstracts that were extracted from the XML files.
 
 ### Venues
+The filter `--venues <name(s)>` allows to select a subset of data containing only papers from specific venues.
+It is possible to select one or multiple venues (see the example).
+The venue name must match the name in the dataset, not the name of the folder the papers are saved in, as some special characters had to be removed or replaced for the folder naming.
 
-### Time
+Example: `cli count 10 --venues ACL,EMNLP` will only count words from paper published in ACL and EMNLP.
+
+### Years
+To filter the year of publication there are 3 filters one can use.
+
+`--year <year>` will only select papers that were published in that year according to the ACl Anthology.
+This filter will overwrite the other two, should they be applied at the same time.
+
+`--min-year <year>` will only select papers that were published in that year or later.
+
+`--max-year <year>` will only select papers that were published in that year or before.
+
+Example: `cli count 10 --min-year 2018 --max-year 2020` will count all words from papers published in 2018, 2019 and 2020.
 
 ### Authors
+The filter `--author <name>` selects only the papers where the author is in the list of authors.
+The filter ignores casing but otherwise has to be an exact match.
+In the NLP Scholar dataset nearly all authors are saved like `<lastname>, <firstname>`.
 
+Example: `cli count 10 --author "manning, christopher"`

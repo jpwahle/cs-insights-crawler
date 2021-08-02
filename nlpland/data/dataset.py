@@ -172,14 +172,14 @@ def extract_abstracts_anthology(df: pd.DataFrame):
     for file in tqdm(os.listdir(path_anthology), total=len(os.listdir(path_anthology))):
         if file.endswith(".xml"):
             tree = etree.parse(f"{path_anthology}/{file}")
-            for collection in tree.ITER("collection"):
+            for collection in tree.iter("collection"):
                 collection_id = collection.attrib["id"]
-                for volume in collection.ITER("volume"):
+                for volume in collection.iter("volume"):
                     if len(volume.attrib) > 0:
                         volume_id = volume.attrib["id"]
                     else:
                         volume_id = ""
-                    for paper in volume.ITER("paper"):
+                    for paper in volume.iter("paper"):
                         children = paper.getchildren()
                         id = None
                         abstract = None
