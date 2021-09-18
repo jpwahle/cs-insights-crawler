@@ -150,7 +150,7 @@ def test():
     quit()
 
 
-
+# cli command to store the papers in a database
 @cli.command()
 def store():
     df = dataset_.get_dataset(False)

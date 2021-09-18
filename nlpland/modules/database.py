@@ -11,8 +11,8 @@ from mongoengine.fields import (
     BooleanField,
 )
 
-
-DB_URI = "mongodb+srv://shaz:Attitudeisme@nlpland.ktc05.mongodb.net/NLPLand?retryWrites=true&w=majority"
+# connect to the mongoDB in the way you wish
+DB_URI = ""
 db.connect(host = DB_URI)
 
 import pandas as pd
