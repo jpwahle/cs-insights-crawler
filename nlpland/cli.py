@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import nlpland.data.filter as filter_
 import nlpland.modules.topic_model as topic_
 import nlpland.modules.semantic as semantic_
+import nlpland.modules.database as database_
 
 load_dotenv()
 
@@ -147,6 +148,14 @@ def test():
     print(nltk.stem.WordNetLemmatizer().lemmatize("models"))
 
     quit()
+
+
+
+@cli.command()
+def store():
+    df = dataset_.get_dataset(False)
+    database_.store(df)
+
 
 
 if __name__ == '__main__':
