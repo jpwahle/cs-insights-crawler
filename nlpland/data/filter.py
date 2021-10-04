@@ -1,12 +1,16 @@
 import click
 import numpy as np
+import pandas as pd
 
 import nlpland.data.dataset as dataset_
 from nlpland.constants import COLUMN_ABSTRACT, COLUMN_ABSTRACT_SOURCE, ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Callable
+import inspect
 
 
-def df_filter_options(function, second_df: bool = False):
+def df_filter_options(function: Callable, second_df: bool = False):
+    print(inspect.getfullargspec(function))
+    print(type(function))
     if second_df:
         sec = "2"
     else:
@@ -21,11 +25,11 @@ def df_filter_options(function, second_df: bool = False):
     return function
 
 
-def df_filter_options2(function):
+def df_filter_options2(function: Callable):
     return df_filter_options(function, second_df=True)
 
 
-def get_filtered_df(filters: Dict[str, Any], original_dataset: bool = False, second_df: bool = False):
+def get_filtered_df(filters: Dict[str, Any], original_dataset: bool = False, second_df: bool = False) -> pd.DataFrame:
     # if year is set, it overrides min/max year
     # authors as last names, first names
     print("Filter documents")
@@ -79,7 +83,7 @@ def attributes_to_list(attributes: str) -> List[str]:
     return attributes_list
 
 
-def category_names(filters, second_df: bool = False):
+def category_names(filters: Dict[str, str], second_df: bool = False) -> List[str]:
     category_name = []
     for key, value in filters.items():
         if value is not None and (("2" in key and second_df) or ("2" not in key and not second_df)):

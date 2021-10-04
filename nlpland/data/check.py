@@ -108,7 +108,7 @@ def check_paper_parsing(paper_path: str) -> None:
     print(text)
 
 
-def count_anthology_abstracts():
+def count_anthology_abstracts() -> None:
     from lxml import etree
     path_anthology = os.getenv("PATH_ANTHOLOGY")
     papers = 0

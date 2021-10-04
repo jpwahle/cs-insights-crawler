@@ -39,23 +39,23 @@ def download_papers(df: pd.DataFrame) -> None:
                         f.write(f"{index}\t{url}\n")
 
 
-def get_dataset(original_dataset: bool):
+def get_dataset(original_dataset: bool) -> pd.DataFrame:
     if original_dataset:
         return load_dataset("PATH_DATASET")
     else:
         return load_dataset("PATH_DATASET_EXPANDED")
 
 
-def load_dataset(env_var_name: str):
+def load_dataset(env_var_name: str) -> pd.DataFrame:
     return pd.read_csv(os.getenv(env_var_name), delimiter="\t", low_memory=False, header=0, index_col=0)
 
 
-def save_dataset(df: pd.DataFrame):
+def save_dataset(df: pd.DataFrame) -> None:
     path_dataset_expanded = os.getenv("PATH_DATASET_EXPANDED")
     df.to_csv(path_dataset_expanded, sep="\t", na_rep="NA")
 
 
-def determine_earliest_string(text: str, possible_strings: List[str]):
+def determine_earliest_string(text: str, possible_strings: List[str]) -> (int, str):
     earliest_string = ""
     earliest_pos = -1
     for possible_string in possible_strings:
@@ -143,7 +143,7 @@ def extract_abstracts_rulebased(df_select: pd.DataFrame, df_full: pd.DataFrame, 
     print(f"This took {time.strftime('%Mm %Ss', duration)}.")
 
 
-def extract_abstracts_anthology(df: pd.DataFrame):
+def extract_abstracts_anthology(df: pd.DataFrame) -> None:
     """This always overwrites."""
 
     from lxml import etree
