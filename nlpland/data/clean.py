@@ -35,15 +35,19 @@ def newline_hyphens(input_: str, language_vocabulary: Set[str]) -> str:
 
 
 def tokenize_and_lemmatize(text: str, lemmatizer: nltk.WordNetLemmatizer) -> List[str]:
+    nltk_resource("tokenizers/punkt")
+    nltk_resource("corpora/wordnet")
     tokens = nltk.word_tokenize(text)
     return [lemmatizer.lemmatize(token) for token in tokens]
 
 
 def english_words() -> Set[str]:
+    nltk_resource("corpora/words")
     return set(nltk.corpus.words.words())
 
 
 def stopwords_and_more() -> Set[str]:
+    nltk_resource("corpora/stopwords")
     stops = nltk.corpus.stopwords.words('english')
     stops += [char for char in string.punctuation]
     return set(stops)
@@ -65,3 +69,10 @@ def is_number(s: str) -> bool:
 
 def remove_stopwords(tokens: List[str], stopwords: Set[str]) -> List[str]:
     return [token for token in tokens if token not in stopwords and not is_number(token)]
+
+
+def nltk_resource(name: str) -> None:
+    try:
+        nltk.data.find(name)
+    except LookupError:
+        nltk.download(name.split("/")[-1])
