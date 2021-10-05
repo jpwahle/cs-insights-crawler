@@ -50,7 +50,7 @@ def english_words() -> Set[str]:
 def stopwords_and_more() -> Set[str]:
     nltk_resource("corpora/stopwords")
     stops = nltk.corpus.stopwords.words('english')
-    stops += [char for char in string.punctuation]
+    stops += list(string.punctuation)
     return set(stops)
 
 
@@ -58,9 +58,9 @@ def lemmatizer() -> nltk.WordNetLemmatizer:
     return nltk.stem.WordNetLemmatizer()
 
 
-def is_number(s: str) -> bool:
+def is_number(word: str) -> bool:
     try:
-        float(s)
+        float(word)
         return True
     except ValueError:
         return False

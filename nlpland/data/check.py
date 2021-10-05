@@ -39,11 +39,11 @@ def check_dataset(df: pd.DataFrame) -> None:
     print(f"The amount of not unique IDs in 'AA paper id': {len(df.index.unique()) - len(df.index)}")
     print()
 
-    print(f"To download the papers we also need to check certain columns.")
+    print("To download the papers we also need to check certain columns.")
     print_null_values(df, 'AA url')
     print()
 
-    print(f"Over time more venues and their corresponding websites might get added.")
+    print("Over time more venues and their corresponding websites might get added.")
     known_websites = ("https://www.aclweb.org/anthology/", "http://www.lrec-conf.org/proceedings/",
                       "https://doi.org/", "http://doi.org/", "http://yanran.li/")
     print(f"Websites this code can download from: {known_websites}")
@@ -51,7 +51,7 @@ def check_dataset(df: pd.DataFrame) -> None:
     if len(problematic_urls.index) == 0:
         print("There are no problematic URLs.")
     else:
-        print(f"The code might have issues with the following URLs:")
+        print("The code might have issues with the following URLs:")
         print(problematic_urls['AA url'])
     print()
 

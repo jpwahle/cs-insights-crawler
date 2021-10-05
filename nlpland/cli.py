@@ -144,10 +144,8 @@ def test() -> None:
         'Is this the first document?',
         "one two, three.\n four-five, se-\nven, open-\nsource, se-\nve.n, ",
     ]
-    import nltk
-    print(nltk.stem.WordNetLemmatizer().lemmatize("models"))
-
-    quit()
+    # import nltk
+    # print(nltk.stem.WordNetLemmatizer().lemmatize("models"))
 
 
 if __name__ == '__main__':

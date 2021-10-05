@@ -62,5 +62,6 @@ def plot_word_counts(df1: pd.DataFrame, df2: pd.DataFrame, fast: bool, name: str
     if name is None:
         name = f"st_{CURRENT_TIME}"
     path = f"output/scattertext/{name}.html"
-    open(path, 'w+', encoding="UTF-8").write(html)
-    print(f"File created at {os.path.abspath(path)}")
+    with open(path, 'w+', encoding="UTF-8") as file:
+        file.write(html)
+        print(f"File created at {os.path.abspath(path)}")

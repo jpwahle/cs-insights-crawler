@@ -39,15 +39,14 @@ def download_papers(df: pd.DataFrame) -> None:
                 try:
                     urllib.request.urlretrieve(url, full_path)
                 except urllib.error.HTTPError:
-                    with open(MISSING_PAPERS, "a+") as f:
-                        f.write(f"{index}\t{url}\n")
+                    with open(MISSING_PAPERS, "a+", encoding="utf-8") as file:
+                        file.write(f"{index}\t{url}\n")
 
 
 def get_dataset(original_dataset: bool) -> pd.DataFrame:
     if original_dataset:
         return load_dataset("PATH_DATASET")
-    else:
-        return load_dataset("PATH_DATASET_EXPANDED")
+    return load_dataset("PATH_DATASET_EXPANDED")
 
 
 def load_dataset(env_var_name: str) -> pd.DataFrame:
@@ -168,23 +167,23 @@ def extract_abstracts_anthology(df: pd.DataFrame) -> None:
                         volume_id = ""
                     for paper in volume.iter("paper"):
                         children = paper.getchildren()
-                        id = None
+                        paper_id = None
                         abstract = None
                         for child in children:
                             if child.tag == "url":
                                 if "http" not in child.text:
-                                    id = child.text
+                                    paper_id = child.text
                             if child.tag == "abstract":
                                 if child.text is not None:
                                     abstract = str(child.xpath("string()"))
-                        if id is None:
+                        if paper_id is None:
                             paper_id = paper.attrib["id"]
-                            id = f"{collection_id}-{volume_id}-{paper_id}"
+                            paper_id = f"{collection_id}-{volume_id}-{paper_id}"
 
-                        if id is not None and abstract is not None:
-                            if id in df.index:
-                                df.at[id, COLUMN_ABSTRACT] = abstract
-                                df.at[id, COLUMN_ABSTRACT_SOURCE] = ABSTRACT_SOURCE_ANTHOLOGY
+                        if paper_id is not None and abstract is not None:
+                            if paper_id in df.index:
+                                df.at[paper_id, COLUMN_ABSTRACT] = abstract
+                                df.at[paper_id, COLUMN_ABSTRACT_SOURCE] = ABSTRACT_SOURCE_ANTHOLOGY
                                 abstracts += 1
                             else:
                                 unknown_id += 1
