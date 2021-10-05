@@ -1,8 +1,11 @@
 import os
+
 import numpy as np
 import pandas as pd
 
-from nlpland.constants import COLUMN_ABSTRACT, MISSING_PAPERS, COLUMN_ABSTRACT_SOURCE, ABSTRACT_SOURCE_ANTHOLOGY, ABSTRACT_SOURCE_RULE
+from nlpland.constants import (ABSTRACT_SOURCE_ANTHOLOGY, ABSTRACT_SOURCE_RULE,
+                               COLUMN_ABSTRACT, COLUMN_ABSTRACT_SOURCE,
+                               MISSING_PAPERS)
 
 
 def print_null_values(df: pd.DataFrame, column: str) -> None:

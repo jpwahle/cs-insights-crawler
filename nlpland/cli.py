@@ -1,15 +1,15 @@
 import click
+from dotenv import load_dotenv
 
-import nlpland.data.dataset as dataset_
 import nlpland.data.check as check_
+import nlpland.data.dataset as dataset_
+import nlpland.data.filter as filter_
 import nlpland.modules.count as count_
 import nlpland.modules.scatter as scatter_
-from nlpland.constants import ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY, FILTER_DATATYPES
-from dotenv import load_dotenv
-import nlpland.data.filter as filter_
-import nlpland.modules.topic_model as topic_
 import nlpland.modules.semantic as semantic_
-
+import nlpland.modules.topic_model as topic_
+from nlpland.constants import (ABSTRACT_SOURCE_ANTHOLOGY, ABSTRACT_SOURCE_RULE,
+                               FILTER_DATATYPES)
 
 load_dotenv()
 

@@ -1,12 +1,16 @@
 import os
 import time
-import pandas as pd
 import urllib.request
-from tqdm import tqdm
-from tika import parser
-import tika
 from typing import List, Tuple
-from nlpland.constants import COLUMN_ABSTRACT, MISSING_PAPERS, ABSTRACT_SOURCE_ANTHOLOGY, ABSTRACT_SOURCE_RULE, COLUMN_ABSTRACT_SOURCE
+
+import pandas as pd
+import tika
+from tika import parser
+from tqdm import tqdm
+
+from nlpland.constants import (ABSTRACT_SOURCE_ANTHOLOGY, ABSTRACT_SOURCE_RULE,
+                               COLUMN_ABSTRACT, COLUMN_ABSTRACT_SOURCE,
+                               MISSING_PAPERS)
 from nlpland.data.clean import clean_paper_id, clean_venue_name
 
 

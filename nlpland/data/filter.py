@@ -1,10 +1,13 @@
+from typing import Callable, Dict, List
+
 import click
 import numpy as np
 import pandas as pd
 
 import nlpland.data.dataset as dataset_
-from nlpland.constants import COLUMN_ABSTRACT, COLUMN_ABSTRACT_SOURCE, ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY, FILTER_DATATYPES
-from typing import Dict, List, Callable
+from nlpland.constants import (ABSTRACT_SOURCE_ANTHOLOGY, ABSTRACT_SOURCE_RULE,
+                               COLUMN_ABSTRACT, COLUMN_ABSTRACT_SOURCE,
+                               FILTER_DATATYPES)
 
 
 def df_filter_options(function: Callable, second_df: bool = False):
@@ -84,7 +87,7 @@ def category_names(filters: Dict[str, FILTER_DATATYPES], second_df: bool = False
     category_name = []
     for key, value in filters.items():
         if value is not None and (("2" in key and second_df) or ("2" not in key and not second_df)):
-            if type(value) != bool:
+            if not isinstance(value, bool):
                 category_name.append(value)
             elif value:
                 category_name.append(key)

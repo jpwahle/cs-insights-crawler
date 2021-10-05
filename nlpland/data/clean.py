@@ -1,7 +1,8 @@
-import nltk
-import regex as re
 import string
 from typing import List, Set
+
+import nltk
+import regex as re
 
 
 def clean_paper_id(paper_id: str) -> str:

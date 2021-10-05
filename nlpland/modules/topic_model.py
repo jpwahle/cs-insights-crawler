@@ -1,12 +1,11 @@
 import os
-import pandas as pd
-
-from nlpland.constants import COLUMN_ABSTRACT
-import nlpland.data.clean as clean_
-from nlpland.constants import CURRENT_TIME
 
 import gensim
+import pandas as pd
 import pyLDAvis.gensim_models
+
+import nlpland.data.clean as clean_
+from nlpland.constants import COLUMN_ABSTRACT, CURRENT_TIME
 
 
 def topic(df: pd.DataFrame, topics: int, name: str) -> None:

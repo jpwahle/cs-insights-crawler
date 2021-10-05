@@ -1,12 +1,13 @@
 import os
+from typing import Dict
+
 import pandas as pd
 import scattertext as st
 import spacy
 
 import nlpland.data.clean as clean_
-from nlpland.constants import COLUMN_ABSTRACT, CURRENT_TIME, FILTER_DATATYPES
 import nlpland.data.filter as filter_
-from typing import Dict
+from nlpland.constants import COLUMN_ABSTRACT, CURRENT_TIME, FILTER_DATATYPES
 
 CATEGORY = "category"
 PARSE = "parse"

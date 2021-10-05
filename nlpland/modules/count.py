@@ -1,16 +1,16 @@
 import os
-import pandas as pd
+from typing import Dict, List, Tuple
+
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import sklearn.feature_extraction.text
+from scipy.sparse import csr_matrix
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 import nlpland.data.clean as clean_
 import nlpland.data.filter as filter_
-from typing import List
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from nlpland.constants import COLUMN_ABSTRACT, CURRENT_TIME, FILTER_DATATYPES
-import matplotlib.pyplot as plt
-from scipy.sparse import csr_matrix
-from typing import Dict, Tuple
 
 
 def generate_token_matrices(documents: List[List[str]], n_lower: int, n_upper: int) -> Tuple[List[str], csr_matrix, TfidfTransformer]:

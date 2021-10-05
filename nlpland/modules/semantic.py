@@ -1,9 +1,12 @@
 import os
+
 import pandas as pd
 from gensim.models import FastText
-# from gensim.test.utils import common_texts  # some example sentences
-from nlpland.constants import COLUMN_ABSTRACT, COLUMN_ABSTRACT_SOURCE, CURRENT_TIME
+
 import nlpland.data.clean as clean_
+# from gensim.test.utils import common_texts  # some example sentences
+from nlpland.constants import (COLUMN_ABSTRACT, COLUMN_ABSTRACT_SOURCE,
+                               CURRENT_TIME)
 
 SIZE = 100
 ITER = 10
