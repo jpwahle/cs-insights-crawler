@@ -9,7 +9,7 @@ import gensim
 import pyLDAvis.gensim_models
 
 
-def topic(df: pd.DataFrame, topics: int, name: str):
+def topic(df: pd.DataFrame, topics: int, name: str) -> None:
     print("Preprocess docs")
     english_words = clean_.english_words()
     stopwords = clean_.stopwords_and_more()

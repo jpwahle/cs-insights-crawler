@@ -1,15 +1,19 @@
 import os
 import pandas as pd
 import numpy as np
+import sklearn.feature_extraction.text
+
 import nlpland.data.clean as clean_
 import nlpland.data.filter as filter_
 from typing import List
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from nlpland.constants import COLUMN_ABSTRACT, CURRENT_TIME
+from nlpland.constants import COLUMN_ABSTRACT, CURRENT_TIME, FILTER_DATATYPES
 import matplotlib.pyplot as plt
+from scipy.sparse import csr_matrix
+from typing import Dict, Tuple
 
 
-def generate_token_matrices(documents: List[List[str]], n_lower: int, n_upper: int):
+def generate_token_matrices(documents: List[List[str]], n_lower: int, n_upper: int) -> Tuple[List[str], csr_matrix, TfidfTransformer]:
     english_words = clean_.english_words()
     stopwords = clean_.stopwords_and_more()
     lemmatizer = clean_.lemmatizer()
@@ -22,11 +26,13 @@ def generate_token_matrices(documents: List[List[str]], n_lower: int, n_upper: i
     # the sklearn tokenizer splits "open-source", nltk does not
     counts_matrix = vectorizer.fit_transform(documents)  # is a sparse matrix
     tfidf_matrix = TfidfTransformer(smooth_idf=True, use_idf=True).fit(counts_matrix)
+    print(type(tfidf_matrix))
+    print(type(counts_matrix))
 
     return vectorizer.get_feature_names(), counts_matrix, tfidf_matrix
 
 
-def token_frequencies(df: pd.DataFrame, ngrams: str):
+def token_frequencies(df: pd.DataFrame, ngrams: str) -> pd.DataFrame:
     ngrams_list = filter_.attributes_to_list(ngrams)
     if len(ngrams_list) > 1:
         n_upper = ngrams_list[1]
@@ -42,14 +48,14 @@ def token_frequencies(df: pd.DataFrame, ngrams: str):
     return df_freq
 
 
-def top_k_tokens(k: int, df: pd.DataFrame, ngrams: str):
+def top_k_tokens(k: int, df: pd.DataFrame, ngrams: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     df_freq = token_frequencies(df, ngrams)
     count_top = df_freq.sort_values(by=['tf'], ascending=False).head(k)
     tfidf_top = df_freq.sort_values(by=['tfidf'], ascending=False).head(k)
     return count_top, tfidf_top
 
 
-def counts_over_time(df: pd.DataFrame, k: int, ngrams: str, name: str, tfidf: bool, filters):
+def counts_over_time(df: pd.DataFrame, k: int, ngrams: str, name: str, tfidf: bool, filters: Dict[str, FILTER_DATATYPES]) -> None:
     if tfidf:
         mode = "tfidf"
         filters["tfidf"] = True

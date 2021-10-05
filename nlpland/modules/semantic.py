@@ -9,7 +9,7 @@ SIZE = 100
 ITER = 10
 
 
-def semantic(df_abstracts: pd.DataFrame, train: bool, name: str):
+def semantic(df_abstracts: pd.DataFrame, train: bool, name: str) -> None:
     if name is None:
         name = f"ft_{SIZE}_{ITER}_{CURRENT_TIME}"
     if train:
@@ -59,7 +59,7 @@ def semantic(df_abstracts: pd.DataFrame, train: bool, name: str):
     # print(model.wv.similar_by_word("translation"))
 
 
-def plot(df: pd.DataFrame):
+def plot(df: pd.DataFrame) -> None:
     # digits = load_digits()
     # mapper = umap.UMAP().fit(digits.data)
     # print(digits.target)

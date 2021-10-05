@@ -4,11 +4,12 @@ import nlpland.data.dataset as dataset_
 import nlpland.data.check as check_
 import nlpland.modules.count as count_
 import nlpland.modules.scatter as scatter_
-from nlpland.constants import ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY
+from nlpland.constants import ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY, FILTER_DATATYPES
 from dotenv import load_dotenv
 import nlpland.data.filter as filter_
 import nlpland.modules.topic_model as topic_
 import nlpland.modules.semantic as semantic_
+
 
 load_dotenv()
 
@@ -20,7 +21,7 @@ def cli() -> None:
 
 @cli.command()
 @filter_.df_filter_options
-def download(**kwargs):
+def download(**kwargs: FILTER_DATATYPES) -> None:
     df = filter_.get_filtered_df(kwargs)
     dataset_.download_papers(df)
 
@@ -30,7 +31,7 @@ def download(**kwargs):
 @click.option('--original', is_flag=True)
 @click.option('--overwrite-rule', is_flag=True)  # only overwrites rule based abstracts
 @filter_.df_filter_options
-def extract(mode, original, overwrite_rule, **kwargs):
+def extract(mode: str, original: bool, overwrite_rule: bool, **kwargs: FILTER_DATATYPES) -> None:
     df_full = dataset_.get_dataset(original)
 
     modes = [ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY]
@@ -44,26 +45,26 @@ def extract(mode, original, overwrite_rule, **kwargs):
 
 
 @cli.command()
-def checkencode():
+def checkencode() -> None:
     df = dataset_.get_dataset(False)
     check_.check_encoding_issues(df)
 
 
 @cli.command()
 @click.option('--original', is_flag=True)
-def checkdataset(original):
+def checkdataset(original: bool) -> None:
     df = dataset_.get_dataset(original)
     check_.check_dataset(df)
 
 
 @cli.command()
 @click.argument('paper-path', type=str)
-def checkpaper(paper_path):
+def checkpaper(paper_path: str) -> None:
     check_.check_paper_parsing(paper_path)
 
 
 @cli.command()
-def countabstractsanth():
+def countabstractsanth() -> None:
     check_.count_anthology_abstracts()
 
 
@@ -71,7 +72,7 @@ def countabstractsanth():
 @click.argument('k', type=int)
 @click.option('--ngrams', type=str, default="1")
 @filter_.df_filter_options
-def count(k: int, ngrams: str, **kwargs):
+def count(k: int, ngrams: str, **kwargs: FILTER_DATATYPES) -> None:
     # works like filters:
     # leaving both blank: whole dataset (once)
     # leaving the second blank: only count first one
@@ -88,7 +89,7 @@ def count(k: int, ngrams: str, **kwargs):
 @click.option('--ngrams', type=str, default="1")
 @click.option('--tfidf', is_flag=True)
 @filter_.df_filter_options
-def counts_time(k: int, ngrams: str, name: str, tfidf: bool, **kwargs):
+def counts_time(k: int, ngrams: str, name: str, tfidf: bool, **kwargs: FILTER_DATATYPES) -> None:
     df = filter_.get_filtered_df(kwargs)
     count_.counts_over_time(df, k, ngrams, name, tfidf, kwargs)
 
@@ -98,7 +99,7 @@ def counts_time(k: int, ngrams: str, name: str, tfidf: bool, **kwargs):
 @click.option("-n", "--name", type=str)
 @filter_.df_filter_options
 @filter_.df_filter_options2
-def scatter(fast, name: str, **kwargs):
+def scatter(fast: bool, name: str, **kwargs: FILTER_DATATYPES) -> None:
     df1 = filter_.get_filtered_df(kwargs)
     df2 = filter_.get_filtered_df(kwargs, second_df=True)
 
@@ -109,7 +110,7 @@ def scatter(fast, name: str, **kwargs):
 @click.argument('topics', type=int)
 @click.option("-n", "--name", type=str)
 @filter_.df_filter_options
-def topic_train(topics: int, name: str, **kwargs):
+def topic_train(topics: int, name: str, **kwargs: FILTER_DATATYPES) -> None:
     df = filter_.get_filtered_df(kwargs)
     topic_.topic(df, topics, name)
 
@@ -118,7 +119,7 @@ def topic_train(topics: int, name: str, **kwargs):
 @click.option('--train', is_flag=True)
 @click.option("-n", "--name", type=str)
 @filter_.df_filter_options
-def fasttext(train: bool, name: str, **kwargs):
+def fasttext(train: bool, name: str, **kwargs: FILTER_DATATYPES) -> None:
     df = filter_.get_filtered_df(kwargs)
     semantic_.semantic(df, train, name)
 
@@ -126,13 +127,13 @@ def fasttext(train: bool, name: str, **kwargs):
 @cli.command()
 @click.option('--train', is_flag=True)
 @filter_.df_filter_options
-def umap(**kwargs):
+def umap(**kwargs: FILTER_DATATYPES) -> None:
     df = filter_.get_filtered_df(kwargs)
     semantic_.plot(df)
 
 
 @cli.command()
-def test():
+def test() -> None:
     # from nlpland.data_cleanup import clean_and_tokenize
     # test_ = "one two, three.\n four-five, se-\nven, open-\nsource, se-\nve.n, "
 

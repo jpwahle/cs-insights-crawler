@@ -53,7 +53,7 @@ def check_dataset(df: pd.DataFrame) -> None:
     print()
 
     print("How many papers does the dataset contain?")
-    path_papers = os.getenv("PATH_PAPERS")
+    path_papers = os.getenv("PATH_PAPERS", "")
     downloaded = sum([len(files) for r, d, files in os.walk(path_papers)])
     print(f"Files downloaded: {downloaded}")
     dataset_size = len(df.index)

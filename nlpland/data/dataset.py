@@ -5,7 +5,7 @@ import urllib.request
 from tqdm import tqdm
 from tika import parser
 import tika
-from typing import List
+from typing import List, Tuple
 from nlpland.constants import COLUMN_ABSTRACT, MISSING_PAPERS, ABSTRACT_SOURCE_ANTHOLOGY, ABSTRACT_SOURCE_RULE, COLUMN_ABSTRACT_SOURCE
 from nlpland.data.clean import clean_paper_id, clean_venue_name
 
@@ -55,7 +55,7 @@ def save_dataset(df: pd.DataFrame) -> None:
     df.to_csv(path_dataset_expanded, sep="\t", na_rep="NA")
 
 
-def determine_earliest_string(text: str, possible_strings: List[str]) -> (int, str):
+def determine_earliest_string(text: str, possible_strings: List[str]) -> Tuple[int, str]:
     earliest_string = ""
     earliest_pos = -1
     for possible_string in possible_strings:

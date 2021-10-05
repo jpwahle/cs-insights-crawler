@@ -3,14 +3,11 @@ import numpy as np
 import pandas as pd
 
 import nlpland.data.dataset as dataset_
-from nlpland.constants import COLUMN_ABSTRACT, COLUMN_ABSTRACT_SOURCE, ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY
-from typing import Dict, Any, List, Callable
-import inspect
+from nlpland.constants import COLUMN_ABSTRACT, COLUMN_ABSTRACT_SOURCE, ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY, FILTER_DATATYPES
+from typing import Dict, List, Callable
 
 
 def df_filter_options(function: Callable, second_df: bool = False):
-    print(inspect.getfullargspec(function))
-    print(type(function))
     if second_df:
         sec = "2"
     else:
@@ -29,7 +26,7 @@ def df_filter_options2(function: Callable):
     return df_filter_options(function, second_df=True)
 
 
-def get_filtered_df(filters: Dict[str, Any], original_dataset: bool = False, second_df: bool = False) -> pd.DataFrame:
+def get_filtered_df(filters: Dict[str, FILTER_DATATYPES], original_dataset: bool = False, second_df: bool = False) -> pd.DataFrame:
     # if year is set, it overrides min/max year
     # authors as last names, first names
     print("Filter documents")
@@ -41,7 +38,7 @@ def get_filtered_df(filters: Dict[str, Any], original_dataset: bool = False, sec
 
     venues = filters["venues" + sec]
     if venues is not None:
-        venues_list = set(attributes_to_list(venues))
+        venues_list = set(attributes_to_list(str(venues)))
         df = df[df["NS venue name"].isin(venues_list)]
 
     year = filters["year" + sec]
@@ -60,11 +57,11 @@ def get_filtered_df(filters: Dict[str, Any], original_dataset: bool = False, sec
 
     fauthor = filters["fauthor" + sec]
     if fauthor is not None:
-        df = df[df["AA first author full name"].str.lower() == fauthor.lower()]
+        df = df[df["AA first author full name"].str.lower() == str(fauthor).lower()]
 
     data = filters["data" + sec]
     if data:
-        selection = set(attributes_to_list(data))
+        selection = set(attributes_to_list(str(data)))
         if "all" not in selection:
             if "titles" not in selection:
                 df["AA title"] = np.nan
@@ -83,7 +80,7 @@ def attributes_to_list(attributes: str) -> List[str]:
     return attributes_list
 
 
-def category_names(filters: Dict[str, str], second_df: bool = False) -> List[str]:
+def category_names(filters: Dict[str, FILTER_DATATYPES], second_df: bool = False) -> List[str]:
     category_name = []
     for key, value in filters.items():
         if value is not None and (("2" in key and second_df) or ("2" not in key and not second_df)):

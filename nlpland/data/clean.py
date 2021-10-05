@@ -57,8 +57,6 @@ def lemmatizer() -> nltk.WordNetLemmatizer:
     return nltk.stem.WordNetLemmatizer()
 
 
-# TODO add download nltk corpus
-
 def is_number(s: str) -> bool:
     try:
         float(s)
