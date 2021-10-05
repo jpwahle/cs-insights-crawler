@@ -12,6 +12,7 @@ jobs:
       - name: Run typer
         run: |
           curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+          export PATH=$PATH:$HOME/.poetry/bin
           poetry install
           poetry run py.test tests -s --cov=nlpland --cov-report=term-missing --cov-fail-under 95
   linting:
@@ -24,6 +25,7 @@ jobs:
       - name: Run linter
         run: |
           curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+          export PATH=$PATH:$HOME/.poetry/bin
           poetry install
           poetry run pylint nlpland -j 4 --reports=y
   tests:
@@ -36,5 +38,6 @@ jobs:
       - name: Run tests
         run: |
           curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+          export PATH=$PATH:$HOME/.poetry/bin
           poetry install
           poetry run pyright nlpland
