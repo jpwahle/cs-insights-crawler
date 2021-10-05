@@ -2,7 +2,7 @@
 name: Tests
 on: push
 jobs:
-  typing:
+  tests:
     runs-on: [self-hosted, linux, dke]
     steps:
       - uses: actions/checkout@v2
@@ -28,7 +28,7 @@ jobs:
           export PATH=$PATH:$HOME/.poetry/bin
           poetry install
           poetry run pylint nlpland -j 4 --reports=y
-  tests:
+  typing:
     runs-on: [self-hosted, linux, dke]
     steps:
       - uses: actions/checkout@v2
