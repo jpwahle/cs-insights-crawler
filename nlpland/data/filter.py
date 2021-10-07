@@ -15,6 +15,17 @@ from nlpland.constants import (
 
 
 def df_filter_options(function: Callable, second_df: bool = False):
+    """Combine multiple CLI filter options in one annotation.
+
+    The use of second_df enables the use of a second set of the same filters.
+
+    Args:
+        function: Function which we extend.
+        second_df: If True, add "2" to the name of options.
+
+    Returns:
+        Expanded function for the annotation.
+    """
     if second_df:
         sec = "2"
     else:
@@ -30,14 +41,31 @@ def df_filter_options(function: Callable, second_df: bool = False):
 
 
 def df_filter_options2(function: Callable):
+    """Provide an annotation for a second set of the same CLI filter options.
+
+    Args:
+        function: Function we expand.
+
+    Returns:
+        Expanded function.
+    """
     return df_filter_options(function, second_df=True)
 
 
-def filter_data_by_source(df_filtered: pd.DataFrame,
-                          source_filter: str,
-                          ) -> pd.DataFrame:
-    if source_filter:
-        selection = set(attributes_to_list(str(source_filter)))
+def mask_data(df_filtered: pd.DataFrame,
+              data_filter: str,
+              ) -> pd.DataFrame:
+    """Mask the data (tiles/abstracts) in given dataframe based on given conditions.
+
+    Args:
+        df_filtered: Dataframe with the data to mask.
+        data_filter: Filter for the data.
+
+    Returns:
+        Dataframe with (partially) masked data.
+    """
+    if data_filter:
+        selection = set(attributes_to_list(str(data_filter)))
         if "all" not in selection:
             if "titles" not in selection:
                 df_filtered["AA title"] = np.nan
@@ -58,6 +86,18 @@ def get_filtered_df(
     original_dataset: bool = False,
     second_df: bool = False,
 ) -> pd.DataFrame:
+    """Filter a dataframe with papers based on a given Dict of filters.
+
+    Ignore the second set of filters, which options end with "2", unless specified.
+
+    Args:
+        filters: Dictionary of filters to apply.
+        original_dataset: If True, load the original not expanded dataset.
+        second_df: If True, filter only using the options which names end with "2".
+
+    Returns:
+        Filtered and masked dataframe.
+    """
     # if year is set, it overrides min/max year
     # authors as last names, first names
     print("Filter documents")
@@ -65,7 +105,7 @@ def get_filtered_df(
         sec = "2"
     else:
         sec = ""
-    df_filtered = dataset_.get_dataset(original_dataset)
+    df_filtered = dataset_.load_dataset(original_dataset)
 
     venues = filters["venues" + sec]
     if venues is not None:
@@ -95,12 +135,20 @@ def get_filtered_df(
         ]
 
     source_filter = str(filters["data" + sec])
-    filter_data_by_source(df_filtered, source_filter)
+    mask_data(df_filtered, source_filter)
 
     return df_filtered
 
 
 def attributes_to_list(attributes: str) -> List[str]:
+    """Transform a string with potentially multiple attributes to a list of the attributes.
+
+    Args:
+        attributes: Attributes as a single string.
+
+    Returns:
+        List of attributes.
+    """
     attributes_list = attributes.split(",")
     attributes_list = [venue.strip(" ") for venue in attributes_list]
     return attributes_list
@@ -109,6 +157,17 @@ def attributes_to_list(attributes: str) -> List[str]:
 def category_names(
     filters: Dict[str, FILTER_DATATYPES], second_df: bool = False
 ) -> List[str]:
+    """Turn the dict of filters into a list of attributes of the set filters to name a category.
+
+    Ignore the second set of filters, which options end with "2", unless specified.
+
+    Args:
+        filters: Dict of filters to convert.
+        second_df: If True, filter only using the options which names end with "2".
+
+    Returns:
+        List of set filter attributes.
+    """
     category_name = []
     for key, value in filters.items():
         if value is not None and (

@@ -1,3 +1,5 @@
+"""This module offers functions to create the dataset (download papers, extract abstracts), save and
+load it."""
 import os
 import time
 import urllib.request
@@ -20,6 +22,11 @@ from nlpland.data.clean import clean_paper_id, clean_venue_name
 
 
 def download_papers(df_papers: pd.DataFrame) -> None:
+    """Download papers given the links in a Dataframe.
+
+    Args:
+        df_papers: Dataframe with the link to the papers and other metadata.
+    """
     path_papers = os.getenv("PATH_PAPERS")
     df_missing = pd.read_csv(
         MISSING_PAPERS, delimiter="\t", low_memory=False, header=None
@@ -52,19 +59,33 @@ def download_papers(df_papers: pd.DataFrame) -> None:
                         file.write(f"{index}\t{url}\n")
 
 
-def get_dataset(original_dataset: bool) -> pd.DataFrame:
+def load_dataset(original_dataset: bool) -> pd.DataFrame:
+    """Load the original unedited dataset or the expanded one.
+
+    Args:
+        original_dataset: If True, load the original dataset, otherwise the expanded one.
+
+    Returns:
+        Dataset as Dataframe.
+    """
     if original_dataset:
-        return load_dataset("PATH_DATASET")
-    return load_dataset("PATH_DATASET_EXPANDED")
+        env_var_name = "PATH_DATASET"
+    else:
+        env_var_name = "PATH_DATASET_EXPANDED"
 
-
-def load_dataset(env_var_name: str) -> pd.DataFrame:
     return pd.read_csv(
         os.getenv(env_var_name), delimiter="\t", low_memory=False, header=0, index_col=0
     )
 
 
 def save_dataset(df_papers: pd.DataFrame) -> None:
+    """Save the given dataset:
+
+    This overwrites the expanded dataset, if its already exists.
+
+    Args:
+        df_papers: Dataframe to save.
+    """
     path_dataset_expanded = os.getenv("PATH_DATASET_EXPANDED")
     df_papers.to_csv(path_dataset_expanded, sep="\t", na_rep="NA")
 
@@ -72,6 +93,16 @@ def save_dataset(df_papers: pd.DataFrame) -> None:
 def determine_earliest_string(
     text: str, possible_strings: List[str]
 ) -> Tuple[int, str]:
+    """Determine the earliest occurrence of any of the given list of strings as a substring in
+     another string.
+
+    Args:
+        text: Text to search the substrings in.
+        possible_strings: List of string to search in "text".
+
+    Returns:
+        Tuple of earliest position of a string and earliest occurring string.
+    """
     earliest_string = ""
     earliest_pos = -1
     for possible_string in possible_strings:
@@ -85,6 +116,14 @@ def determine_earliest_string(
 def extract_abstracts_rulebased(
     df_select: pd.DataFrame, df_full: pd.DataFrame, overwrite_rule: bool = False
 ) -> None:
+    """Extract the abstract of papers from PDF files based on a defined set of rules.
+
+    Args:
+        df_select: The dataset of papers to extract abstract from.
+        df_full: The full dataset of papers for statistical purposes.
+        overwrite_rule: If True, overwrites any abstracts previously extracted with this rule-based
+        system that are in the selection "df_select".
+    """
     start = time.time()
     iterated = 0
     searched = 0
@@ -185,7 +224,13 @@ def extract_abstracts_rulebased(
 
 
 def extract_abstracts_anthology(df_papers: pd.DataFrame) -> None:
-    """This always overwrites."""
+    """Extract abstract from the ACL Anthology XML files.
+
+    This always overwrites the abstracts for all papers which have an abstract in the XML files.
+
+    Args:
+        df_papers: Dataframe of the papers to match the entries in the XML files against.
+    """
     start = time.time()
     abstracts = 0
     unknown_id = 0

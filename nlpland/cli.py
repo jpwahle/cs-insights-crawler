@@ -37,7 +37,7 @@ def download(**kwargs: FILTER_DATATYPES) -> None:
 def extract(
     mode: str, original: bool, overwrite_rule: bool, **kwargs: FILTER_DATATYPES
 ) -> None:
-    df_full = dataset_.get_dataset(original)
+    df_full = dataset_.load_dataset(original)
 
     modes = [ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY]
     if mode not in modes:
@@ -53,14 +53,14 @@ def extract(
 
 @cli.command()
 def checkencode() -> None:
-    df_papers = dataset_.get_dataset(False)
+    df_papers = dataset_.load_dataset(False)
     check_.check_encoding_issues(df_papers)
 
 
 @cli.command()
 @click.option("--original", is_flag=True)
 def checkdataset(original: bool) -> None:
-    df_papers = dataset_.get_dataset(original)
+    df_papers = dataset_.load_dataset(original)
     check_.check_dataset(df_papers)
 
 
