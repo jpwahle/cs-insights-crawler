@@ -3,7 +3,7 @@ name: Tests
 on: push
 jobs:
   tests:
-    runs-on: [self-hosted, linux, dke]
+    runs-on: [self-hosted, ubuntu-latest]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -16,7 +16,7 @@ jobs:
           poetry install
           poetry run py.test tests -s --cov=nlpland --cov-report=term-missing --cov-fail-under 95
   linting:
-    runs-on: [self-hosted, linux, dke]
+    runs-on: [self-hosted, ubuntu-latest]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -29,7 +29,7 @@ jobs:
           poetry install
           poetry run pylint nlpland -j 4 --reports=y
   typing:
-    runs-on: [self-hosted, linux, dke]
+    runs-on: [self-hosted, ubuntu-latest]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
