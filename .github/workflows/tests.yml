@@ -9,11 +9,13 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.7
-      - name: Run typer
+      - name: Install dependencies
         run: |
           curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
           export PATH=$PATH:$HOME/.poetry/bin
           poetry install
+      - name: Run typer
+        run: |
           poetry run py.test tests -s --cov=nlpland --cov-report=term-missing --cov-fail-under 95
   linting:
     runs-on: [self-hosted, ubuntu-latest]
@@ -22,11 +24,13 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.7
-      - name: Run linter
+      - name: Install dependencies
         run: |
           curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
           export PATH=$PATH:$HOME/.poetry/bin
           poetry install
+      - name: Run linter
+        run: |
           poetry run pylint nlpland -j 4 --reports=y
   typing:
     runs-on: [self-hosted, ubuntu-latest]
@@ -35,9 +39,11 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.7
-      - name: Run tests
+      - name: Install dependencies
         run: |
           curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
           export PATH=$PATH:$HOME/.poetry/bin
           poetry install
+      - name: Run tests
+        run: |
           poetry run pyright nlpland
