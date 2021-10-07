@@ -6,14 +6,35 @@ import regex as re
 
 
 def clean_paper_id(paper_id: str) -> str:
+    """Clean the paper Id, by removing or replacing symbols that are not allowed in a file name.
+
+    Args:
+        paper_id: Original id of the paper.
+
+    Returns:
+        Cleaned Id of the paper.
+    """
     return paper_id.replace(".", "_")
 
 
 def clean_venue_name(venue_name: str) -> str:
+    """Clean the venue name, by removing or replacing symbols that are not allowed in a file name.
+
+    Args:
+        venue_name: Original venue name.
+
+    Returns:
+        Cleaned venue name..
+    """
     return venue_name.replace("*", "").replace("/", "_").replace(" ", "_")
 
 
-def preprocess_text(text: str, language_vocabulary: Set[str], lemmatizer: nltk.WordNetLemmatizer, stopwords: Set[str]) -> List[str]:
+def preprocess_text(
+    text: str,
+    language_vocabulary: Set[str],
+    lemmatizer: nltk.WordNetLemmatizer,
+    stopwords: Set[str],
+) -> List[str]:
     text = newline_hyphens(text, language_vocabulary)
     tokens = tokenize_and_lemmatize(text, lemmatizer)
     tokens = remove_stopwords(tokens, stopwords)
@@ -49,12 +70,12 @@ def english_words() -> Set[str]:
 
 def stopwords_and_more() -> Set[str]:
     nltk_resource("corpora/stopwords")
-    stops = nltk.corpus.stopwords.words('english')
+    stops = nltk.corpus.stopwords.words("english")
     stops += list(string.punctuation)
     return set(stops)
 
 
-def lemmatizer() -> nltk.WordNetLemmatizer:
+def get_lemmatizer() -> nltk.WordNetLemmatizer:
     return nltk.stem.WordNetLemmatizer()
 
 
@@ -67,7 +88,9 @@ def is_number(word: str) -> bool:
 
 
 def remove_stopwords(tokens: List[str], stopwords: Set[str]) -> List[str]:
-    return [token for token in tokens if token not in stopwords and not is_number(token)]
+    return [
+        token for token in tokens if token not in stopwords and not is_number(token)
+    ]
 
 
 def nltk_resource(name: str) -> None:

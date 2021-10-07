@@ -2,26 +2,33 @@ import os
 import time
 import urllib.request
 from typing import List, Tuple
+from lxml import etree
 
 import pandas as pd
 import tika
 from tika import parser
 from tqdm import tqdm
 
-from nlpland.constants import (ABSTRACT_SOURCE_ANTHOLOGY, ABSTRACT_SOURCE_RULE,
-                               COLUMN_ABSTRACT, COLUMN_ABSTRACT_SOURCE,
-                               MISSING_PAPERS)
+from nlpland.constants import (
+    ABSTRACT_SOURCE_ANTHOLOGY,
+    ABSTRACT_SOURCE_RULE,
+    COLUMN_ABSTRACT,
+    COLUMN_ABSTRACT_SOURCE,
+    MISSING_PAPERS,
+)
 from nlpland.data.clean import clean_paper_id, clean_venue_name
 
 
-def download_papers(df: pd.DataFrame) -> None:
+def download_papers(df_papers: pd.DataFrame) -> None:
     path_papers = os.getenv("PATH_PAPERS")
-    df_missing = pd.read_csv(MISSING_PAPERS, delimiter="\t", low_memory=False, header=None)
+    df_missing = pd.read_csv(
+        MISSING_PAPERS, delimiter="\t", low_memory=False, header=None
+    )
 
-    years = sorted(df["AA year of publication"].unique())
+    years = sorted(df_papers["AA year of publication"].unique())
     for year in years:
         print(f"Downloading papers from {year}.")
-        df_year = df[df["AA year of publication"] == year]
+        df_year = df_papers[df_papers["AA year of publication"] == year]
         for index, row in tqdm(df_year.iterrows(), total=df_year.shape[0]):
             venue = clean_venue_name(row["NS venue name"])
             output_dir = f"{path_papers}/{year}/{venue}"
@@ -29,12 +36,14 @@ def download_papers(df: pd.DataFrame) -> None:
             filename = clean_paper_id(index)
             full_path = f"{output_dir}/{filename}.pdf"
 
-            if not os.path.isfile(full_path) and index not in df_missing.iloc[:, [0]].values:
+            if (
+                not os.path.isfile(full_path)
+                and index not in df_missing.iloc[:, [0]].values
+            ):
                 url = row["AA url"]
                 if str.startswith(url, "https://www.aclweb.org/anthology/"):
                     url = f"{url}.pdf"
                 elif str.startswith(url, "http://yanran.li/"):
-                    # TODO
                     pass
                 try:
                     urllib.request.urlretrieve(url, full_path)
@@ -50,15 +59,19 @@ def get_dataset(original_dataset: bool) -> pd.DataFrame:
 
 
 def load_dataset(env_var_name: str) -> pd.DataFrame:
-    return pd.read_csv(os.getenv(env_var_name), delimiter="\t", low_memory=False, header=0, index_col=0)
+    return pd.read_csv(
+        os.getenv(env_var_name), delimiter="\t", low_memory=False, header=0, index_col=0
+    )
 
 
-def save_dataset(df: pd.DataFrame) -> None:
+def save_dataset(df_papers: pd.DataFrame) -> None:
     path_dataset_expanded = os.getenv("PATH_DATASET_EXPANDED")
-    df.to_csv(path_dataset_expanded, sep="\t", na_rep="NA")
+    df_papers.to_csv(path_dataset_expanded, sep="\t", na_rep="NA")
 
 
-def determine_earliest_string(text: str, possible_strings: List[str]) -> Tuple[int, str]:
+def determine_earliest_string(
+    text: str, possible_strings: List[str]
+) -> Tuple[int, str]:
     earliest_string = ""
     earliest_pos = -1
     for possible_string in possible_strings:
@@ -69,7 +82,9 @@ def determine_earliest_string(text: str, possible_strings: List[str]) -> Tuple[i
     return earliest_pos, earliest_string
 
 
-def extract_abstracts_rulebased(df_select: pd.DataFrame, df_full: pd.DataFrame, overwrite_rule: bool = False) -> None:
+def extract_abstracts_rulebased(
+    df_select: pd.DataFrame, df_full: pd.DataFrame, overwrite_rule: bool = False
+) -> None:
     start = time.time()
     iterated = 0
     searched = 0
@@ -81,11 +96,12 @@ def extract_abstracts_rulebased(df_select: pd.DataFrame, df_full: pd.DataFrame, 
     path_papers = os.getenv("PATH_PAPERS")
 
     tika.initVM()
-    #TODO vectorize
 
     for index, row in tqdm(df_select.iterrows(), total=df_select.shape[0]):
         iterated += 1
-        if (overwrite_rule and row[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_RULE) or pd.isnull(row[COLUMN_ABSTRACT]):
+        if (
+            overwrite_rule and row[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_RULE
+        ) or pd.isnull(row[COLUMN_ABSTRACT]):
             paper_id = clean_paper_id(index)
             venue = clean_venue_name(row["NS venue name"])
             year = row["AA year of publication"]
@@ -99,16 +115,38 @@ def extract_abstracts_rulebased(df_select: pd.DataFrame, df_full: pd.DataFrame, 
                 if text is None:
                     nones += 1
                 else:
-                    start_strings = ["Abstract ", "Abstract\n", "ABSTRACT ", "ABSTRACT\n", "A b s t r a c t ", "A b s t r a c t\n"]
-                    start_pos, start_string = determine_earliest_string(text, start_strings)
+                    start_strings = [
+                        "Abstract ",
+                        "Abstract\n",
+                        "ABSTRACT ",
+                        "ABSTRACT\n",
+                        "A b s t r a c t ",
+                        "A b s t r a c t\n",
+                    ]
+                    start_pos, start_string = determine_earliest_string(
+                        text, start_strings
+                    )
                     start_pos += len(start_string)
 
-                    end_strings_1 = ["\n\nTITLE AND ABSTRACT IN ", "\n\nTitle and Abstract in ", "KEYWORDS:", "Keywords:", "Keywords :", "KEYWORDS :"]
+                    end_strings_1 = [
+                        "\n\nTITLE AND ABSTRACT IN ",
+                        "\n\nTitle and Abstract in ",
+                        "KEYWORDS:",
+                        "Keywords:",
+                        "Keywords :",
+                        "KEYWORDS :",
+                    ]
                     end_pos, end_string = determine_earliest_string(text, end_strings_1)
                     if end_pos == -1:
-                        end_strings_2 = ["\n\n1 Introduction", "\n\n1. Introduction",
-                                         "\n\n1 Task Description", "\n\n1. Task Description",
-                                         "\n\nIntroduction\n\n", "\n\n1 ", "\n\n1. "]
+                        end_strings_2 = [
+                            "\n\n1 Introduction",
+                            "\n\n1. Introduction",
+                            "\n\n1 Task Description",
+                            "\n\n1. Task Description",
+                            "\n\nIntroduction\n\n",
+                            "\n\n1 ",
+                            "\n\n1. ",
+                        ]
                         for end_string in end_strings_2:
                             end_pos = text.find(end_string, start_pos)
                             if end_pos != -1:
@@ -142,14 +180,12 @@ def extract_abstracts_rulebased(df_select: pd.DataFrame, df_full: pd.DataFrame, 
     print(f"index: {index_err} abstracts not found")
     print(f"no_file: {no_file} papers not downloaded")
     print(f"long_abstract: {no_file} papers with (too) long abstracts")
-    duration = time.gmtime(time.time()-start)
+    duration = time.gmtime(time.time() - start)
     print(f"This took {time.strftime('%Mm %Ss', duration)}.")
 
 
-def extract_abstracts_anthology(df: pd.DataFrame) -> None:
+def extract_abstracts_anthology(df_papers: pd.DataFrame) -> None:
     """This always overwrites."""
-
-    from lxml import etree
     start = time.time()
     abstracts = 0
     unknown_id = 0
@@ -181,15 +217,17 @@ def extract_abstracts_anthology(df: pd.DataFrame) -> None:
                             paper_id = f"{collection_id}-{volume_id}-{paper_id}"
 
                         if paper_id is not None and abstract is not None:
-                            if paper_id in df.index:
-                                df.at[paper_id, COLUMN_ABSTRACT] = abstract
-                                df.at[paper_id, COLUMN_ABSTRACT_SOURCE] = ABSTRACT_SOURCE_ANTHOLOGY
+                            if paper_id in df_papers.index:
+                                df_papers.at[paper_id, COLUMN_ABSTRACT] = abstract
+                                df_papers.at[
+                                    paper_id, COLUMN_ABSTRACT_SOURCE
+                                ] = ABSTRACT_SOURCE_ANTHOLOGY
                                 abstracts += 1
                             else:
                                 unknown_id += 1
                         else:
                             no_id_abstract += 1
-    save_dataset(df)
+    save_dataset(df_papers)
     print(f"Abstracts added/overwritten: {abstracts}")
     duration = time.gmtime(time.time() - start)
     print(f"This took {time.strftime('%Mm %Ss', duration)}.")

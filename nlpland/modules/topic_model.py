@@ -8,26 +8,36 @@ import nlpland.data.clean as clean_
 from nlpland.constants import COLUMN_ABSTRACT, CURRENT_TIME
 
 
-def topic(df: pd.DataFrame, topics: int, name: str) -> None:
+def topic(df_papers: pd.DataFrame, topics: int, name: str) -> None:
     print("Preprocess docs")
     english_words = clean_.english_words()
     stopwords = clean_.stopwords_and_more()
-    lemmatizer = clean_.lemmatizer()
-    abstracts = df[COLUMN_ABSTRACT].dropna()
-    titles = df["AA title"].dropna()
-    cleaned_abstracts = list(abstracts.apply(lambda text: clean_.preprocess_text(text, english_words, lemmatizer, stopwords)))
-    cleaned_titles = list(titles.apply(lambda text: clean_.preprocess_text(text, english_words, lemmatizer, stopwords)))
+    lemmatizer = clean_.get_lemmatizer()
+    abstracts = df_papers[COLUMN_ABSTRACT].dropna()
+    titles = df_papers["AA title"].dropna()
+    cleaned_abstracts = list(
+        abstracts.apply(
+            lambda text: clean_.preprocess_text(
+                text, english_words, lemmatizer, stopwords
+            )
+        )
+    )
+    cleaned_titles = list(
+        titles.apply(
+            lambda text: clean_.preprocess_text(
+                text, english_words, lemmatizer, stopwords
+            )
+        )
+    )
     cleaned_docs = cleaned_titles + cleaned_abstracts
 
     print("Create model")
     dictionary = gensim.corpora.Dictionary(cleaned_docs)
     bow_corpus = [dictionary.doc2bow(doc) for doc in cleaned_docs]
 
-    lda_model = gensim.models.LdaMulticore(bow_corpus,
-                                           num_topics=topics,
-                                           id2word=dictionary,
-                                           passes=10,
-                                           workers=2)
+    lda_model = gensim.models.LdaMulticore(
+        bow_corpus, num_topics=topics, id2word=dictionary, passes=10, workers=2
+    )
     print("Save model and results")
     if name is None:
         name_model = f"lda_{topics}_{CURRENT_TIME}"
