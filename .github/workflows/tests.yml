@@ -1,0 +1,43 @@
+# .github/workflows/tests.yml
+name: Tests
+on: push
+jobs:
+  tests:
+    runs-on: [self-hosted, linux, dke]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Run typer
+        run: |
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+          export PATH=$PATH:$HOME/.poetry/bin
+          poetry install
+          poetry run py.test tests -s --cov=nlpland --cov-report=term-missing --cov-fail-under 95
+  linting:
+    runs-on: [self-hosted, linux, dke]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Run linter
+        run: |
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+          export PATH=$PATH:$HOME/.poetry/bin
+          poetry install
+          poetry run pylint nlpland -j 4 --reports=y
+  typing:
+    runs-on: [self-hosted, linux, dke]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Run tests
+        run: |
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+          export PATH=$PATH:$HOME/.poetry/bin
+          poetry install
+          poetry run pyright nlpland

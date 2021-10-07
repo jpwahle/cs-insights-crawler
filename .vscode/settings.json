@@ -1,0 +1,16 @@
+{
+  "python.linting.enabled": true,
+  "python.linting.lintOnSave": true,
+  "python.linting.maxNumberOfProblems": 100,
+  "python.linting.mypyEnabled": true,
+  "python.linting.mypyCategorySeverity.error": "Error",
+  "python.linting.mypyArgs": ["--disallow-untyped-defs"],
+  "python.formatting.provider": "black",
+  "python.formatting.blackArgs": [
+    "--line-length",
+    "99",
+    "--experimental-string-processing"
+  ],
+  "editor.formatOnSave": true,
+  "editor.rulers": [100]
+}

@@ -1,4 +1,5 @@
 # NLPLand
+[![Tests](https://github.com/ag-gipp/NLPLand/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/ag-gipp/NLPLand/actions/workflows/tests.yml)
 
 This repository is part of the project titled "NLPLand and its Secrets".
 The project is within the scope of the Information Retrieval course at the Bergische University of Wuppertal in the summer semester of 2021.
