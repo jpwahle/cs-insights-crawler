@@ -64,20 +64,20 @@ def mask_data(df_filtered: pd.DataFrame,
     Returns:
         Dataframe with (partially) masked data.
     """
-    if data_filter:
-        selection = set(attributes_to_list(str(data_filter)))
-        if "all" not in selection:
-            if "titles" not in selection:
-                df_filtered["AA title"] = np.nan
-            if "abstracts" not in selection:
-                if "abstracts-rule" not in selection:
-                    df_filtered[COLUMN_ABSTRACT] = df_filtered[COLUMN_ABSTRACT].mask(
-                        df_filtered[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_RULE
-                    )
-                if "abstracts-anth" not in selection:
-                    df_filtered[COLUMN_ABSTRACT] = df_filtered[COLUMN_ABSTRACT].mask(
-                        df_filtered[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_ANTHOLOGY
-                    )
+    selection = set(attributes_to_list(str(data_filter)))
+    print("selection:", selection)
+    if "all" not in selection:
+        if "titles" not in selection:
+            df_filtered["AA title"] = np.nan
+        if "abstracts" not in selection:
+            if "abstracts-rule" not in selection:
+                df_filtered[COLUMN_ABSTRACT] = df_filtered[COLUMN_ABSTRACT].mask(
+                    df_filtered[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_RULE
+                )
+            if "abstracts-anth" not in selection:
+                df_filtered[COLUMN_ABSTRACT] = df_filtered[COLUMN_ABSTRACT].mask(
+                    df_filtered[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_ANTHOLOGY
+                )
     return df_filtered
 
 
@@ -92,8 +92,8 @@ def get_filtered_df(
 
     Args:
         filters: Dictionary of filters to apply.
-        original_dataset: If True, load the original not expanded dataset.
-        second_df: If True, filter only using the options which names end with "2".
+        original_dataset: If True, load the original, not the expanded, dataset.
+        second_df: If True, only use the options which names end with "2" to filter.
 
     Returns:
         Filtered and masked dataframe.
@@ -134,8 +134,9 @@ def get_filtered_df(
             df_filtered["AA first author full name"].str.lower() == str(fauthor).lower()
         ]
 
-    source_filter = str(filters["data" + sec])
-    mask_data(df_filtered, source_filter)
+    data_filter = filters["data" + sec]
+    if data_filter:
+        df_filtered = mask_data(df_filtered, str(data_filter))
 
     return df_filtered
 
@@ -163,7 +164,7 @@ def category_names(
 
     Args:
         filters: Dict of filters to convert.
-        second_df: If True, filter only using the options which names end with "2".
+        second_df: If True, only use the options which names end with "2" to filter.
 
     Returns:
         List of set filter attributes.
