@@ -7,7 +7,8 @@ assignees: ''
 
 ---
 
-** Description of the Epic's Goal**
+**Description of the Epic's Goal**
 
-** Issues to resolve the Epic **
-- [ ]
+**Issues to resolve the Epic**
+
+- [ ] issue number
