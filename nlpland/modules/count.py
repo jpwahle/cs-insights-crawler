@@ -1,3 +1,4 @@
+"""This module offers methods for count-based analysis."""
 import os
 from typing import Dict, List, Tuple
 
@@ -15,6 +16,23 @@ from nlpland.constants import COLUMN_ABSTRACT, CURRENT_TIME, FILTER_DATATYPES
 def generate_token_matrices(
     documents: List[List[str]], n_lower: int, n_upper: int
 ) -> Tuple[List[str], csr_matrix, TfidfTransformer]:
+    """Generate a sparse term-document co-occurrence matrix and create a TfIdfTransformer that can
+    be used to derive the idf scores and a matrix of tf-idf scores for term-document pairs from the
+    first matrix.
+
+    Occurrences can additionally also be counted for n-grams using the n_lower and n_upper
+    parameters, e.g. n_lower=1 and n_upper=2 will results in all unigrams and bigrams being counted.
+
+    Args:
+        documents: The documents to count term occurrences in.
+        n_lower: The lower bound for n-grams.
+        n_upper: The upper bound for n-grams.
+
+    Returns:
+        List of all words.
+        Sparse co-occurrence matrix of term-document pairs.
+        TfIdfTransformer that can extract a tf-idf matrix or the idf vector.
+    """
     english_words = clean_.english_words()
     stopwords = clean_.stopwords_and_more()
     lemmatizer = clean_.get_lemmatizer()
@@ -30,13 +48,20 @@ def generate_token_matrices(
     # the sklearn tokenizer splits "open-source", nltk does not
     counts_matrix = vectorizer.fit_transform(documents)  # is a sparse matrix
     tfidf_matrix = TfidfTransformer(smooth_idf=True, use_idf=True).fit(counts_matrix)
-    print(type(tfidf_matrix))
-    print(type(counts_matrix))
 
     return vectorizer.get_feature_names(), counts_matrix, tfidf_matrix
 
 
 def token_frequencies(df_papers: pd.DataFrame, ngrams: str) -> pd.DataFrame:
+    """Calculate token frequencies and tf-idf scores and put them into one Dataframe.
+
+    Args:
+        df_papers: Dataframe with the papers to process.
+        ngrams: The lower and upper bound of the n_grams, e.g. "1", "2", "1,2" or "1, 3".
+
+    Returns:
+        Dataframe with all terms and their tf and tf-idf scores.
+    """
     ngrams_list = filter_.attributes_to_list(ngrams)
     if len(ngrams_list) > 1:
         n_upper = ngrams_list[1]
@@ -57,6 +82,17 @@ def token_frequencies(df_papers: pd.DataFrame, ngrams: str) -> pd.DataFrame:
 def top_k_tokens(
     k: int, df_papers: pd.DataFrame, ngrams: str
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Extract the top k token from a dataframe both in regards to tf and tfidf score.
+
+    Args:
+        k: Determines how many tokens we show.
+        df_papers: Dataframe with the papers to process.
+        ngrams: The lower and upper bound of the n_grams, e.g. "1", "2", "1,2" or "1, 3".
+
+    Returns:
+        Dataframe with the top k entries by tf score.
+        Dataframe with the top k entries by tf-idf score.
+    """
     df_freq = token_frequencies(df_papers, ngrams)
     count_top = df_freq.sort_values(by=["tf"], ascending=False).head(k)
     tfidf_top = df_freq.sort_values(by=["tfidf"], ascending=False).head(k)
@@ -71,6 +107,17 @@ def counts_over_time(
     tfidf: bool,
     filters: Dict[str, FILTER_DATATYPES],
 ) -> None:
+    """Plot the counts of all terms, that were in a top k in at least one year, over time. The time
+    can be selected via the filters.
+
+    Args:
+        df_papers: Dataframe with the papers to process.
+        k: Determines how many tokens we show.
+        ngrams: The lower and upper bound of the n_grams, e.g. "1", "2", "1,2" or "1, 3"
+        name: Name of the output file.
+        tfidf: If True, will rank by tf-idf not tf scores.
+        filters: Dict of filters applied.
+    """
     if tfidf:
         mode = "tfidf"
         filters["tfidf"] = True
