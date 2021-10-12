@@ -173,7 +173,7 @@ def check_paper_parsing(paper_path: str) -> None:
     """Parse a specific paper with tika and print its output.
 
     Args:
-        paper_path: Filepath to the paper to check.
+        paper_path: Filepath of the paper to check.
     """
     # full_path = "E:/nlp/NLP_Scholar_Papers/2012/COLING/C12-2031.pdf"
     raw = parser.from_file(paper_path)

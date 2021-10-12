@@ -1,3 +1,4 @@
+"""This module offers functions to train and evaluate a semantic model."""
 import os
 
 import pandas as pd
@@ -13,6 +14,15 @@ ITER = 10
 
 
 def semantic(df_abstracts: pd.DataFrame, train: bool, name: str) -> None:
+    """Train a semantic model using fastText with the given data, save it and evaluate it.
+
+    Additionally evaluate the model with some tests.
+
+    Args:
+        df_abstracts: Dataframe that contains the abstracts of the papers.
+        train: If True, retrain the model with the given data.
+        name: Name of the model.
+    """
     if name is None:
         name = f"ft_{SIZE}_{ITER}_{CURRENT_TIME}"
     if train:

@@ -1,3 +1,6 @@
+"""This module provides some constants that are used throughout the project.
+
+These do not have to be changed by the user."""
 from datetime import datetime
 from typing import Union
 

@@ -1,4 +1,4 @@
-"""This module offers methods for count-based analysis."""
+"""This module offers functions for count-based analysis."""
 import os
 from typing import Dict, List, Tuple
 
@@ -112,9 +112,9 @@ def counts_over_time(
 
     Args:
         df_papers: Dataframe with the papers to process.
-        k: Determines how many tokens we show.
+        k: Determines how many tokens are shown.
         ngrams: The lower and upper bound of the n_grams, e.g. "1", "2", "1,2" or "1, 3"
-        name: Name of the output file.
+        name: Name of the output image.
         tfidf: If True, will rank by tf-idf not tf scores.
         filters: Dict of filters applied.
     """

@@ -118,11 +118,14 @@ def extract_abstracts_rulebased(
 ) -> None:
     """Extract the abstract of papers from PDF files based on a defined set of rules.
 
+    This function will never overwrite abstracts extracted from the anthology itself. It can be set
+    to overwrite abstracts previously extracted with this rule-based system/function that are also
+    in the selection "df_select".
+
     Args:
         df_select: The dataset of papers to extract abstract from.
         df_full: The full dataset of papers for statistical purposes.
-        overwrite_rule: If True, overwrites any abstracts previously extracted with this rule-based
-        system that are in the selection "df_select".
+        overwrite_rule: If True, overwrites abstracts previously extracted with this function.
     """
     start = time.time()
     iterated = 0

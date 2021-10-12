@@ -1,3 +1,4 @@
+"""This module provides functions to train and evaluate a topic model based on the given data."""
 import os
 
 import gensim
@@ -9,6 +10,16 @@ from nlpland.constants import COLUMN_ABSTRACT, CURRENT_TIME
 
 
 def topic(df_papers: pd.DataFrame, topics: int, name: str) -> None:
+    """Train a topic model and create an interactive visualization using pyLDAvis.
+
+    Args:
+        df_papers: Dataframe with the papers to build the model from.
+        topics: The amount of topics to train.
+        name: The name of the model and output HTML file.
+
+    Returns:
+
+    """
     print("Preprocess docs")
     english_words = clean_.english_words()
     stopwords = clean_.stopwords_and_more()

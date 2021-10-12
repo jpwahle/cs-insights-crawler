@@ -1,3 +1,4 @@
+"""This module offers functions for the count-based analysis using the package scattertext."""
 import os
 from typing import Dict
 
@@ -14,6 +15,17 @@ PARSE = "parse"
 
 
 def preprocess_dfs(df_y: pd.DataFrame, df_x: pd.DataFrame, fast: bool) -> pd.DataFrame:
+    """Preprocess the two given dataframes, so scattertext can distinguish the two classes it is
+    supposed to visualize, and combine them into one dataframe.
+
+    Args:
+        df_y: Dataframe that holds the data that will go on the y-axis.
+        df_x: Dataframe that holds the data that will go on the x-axis.
+        fast: If True, scattertext will be faster, but less accurate, by using a different model.
+
+    Returns:
+        Preprocessed and combined dataframe.
+    """
     df_y[CATEGORY] = "c1"
     df_x[CATEGORY] = "c2"
     df_full = pd.concat([df_y, df_x])
@@ -50,6 +62,17 @@ def plot_word_counts(
     name: str,
     filters: Dict[str, FILTER_DATATYPES],
 ) -> None:
+    """Plot the word counts using the package scattertext, by comparing two given sets of data.
+
+    Highlight which words were more common in which set of data.
+
+    Args:
+        df_y: Dataframe that holds the data that will go on the y-axis.
+        df_x: Dataframe that holds the data that will go on the x-axis.
+        fast: If True, scattertext will be faster, but less accurate, by using a different model.
+        name: Name of the output HTML file.
+        filters: Filters that were applied to the subsets.
+    """
     df_full = preprocess_dfs(df_y, df_x, fast)
     stopwords = clean_.stopwords_and_more()
 

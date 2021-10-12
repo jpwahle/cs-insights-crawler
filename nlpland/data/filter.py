@@ -1,3 +1,4 @@
+"""This module offer functions to filter and transform the data."""
 from typing import Callable, Dict, List
 
 import click
