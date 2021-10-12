@@ -3,13 +3,14 @@ import os
 
 import gensim
 import pandas as pd
+import pyLDAvis
 import pyLDAvis.gensim_models
 
 import nlpland.data.clean as clean_
 from nlpland.constants import COLUMN_ABSTRACT, CURRENT_TIME
 
 
-def topic(df_papers: pd.DataFrame, topics: int, name: str) -> None:
+def topic(df_papers: pd.DataFrame, topics: int, name: str) -> None:  # pylint: disable=R0914
     """Train a topic model and create an interactive visualization using pyLDAvis.
 
     Args:
@@ -28,16 +29,12 @@ def topic(df_papers: pd.DataFrame, topics: int, name: str) -> None:
     titles = df_papers["AA title"].dropna()
     cleaned_abstracts = list(
         abstracts.apply(
-            lambda text: clean_.preprocess_text(
-                text, english_words, lemmatizer, stopwords
-            )
+            lambda text: clean_.preprocess_text(text, english_words, lemmatizer, stopwords)
         )
     )
     cleaned_titles = list(
         titles.apply(
-            lambda text: clean_.preprocess_text(
-                text, english_words, lemmatizer, stopwords
-            )
+            lambda text: clean_.preprocess_text(text, english_words, lemmatizer, stopwords)
         )
     )
     cleaned_docs = cleaned_titles + cleaned_abstracts

@@ -99,7 +99,7 @@ def top_k_tokens(
     return count_top, tfidf_top
 
 
-def counts_over_time(
+def counts_over_time(  # pylint: disable=R0913, R0914
     df_papers: pd.DataFrame,
     k: int,
     ngrams: str,
@@ -118,6 +118,7 @@ def counts_over_time(
         tfidf: If True, will rank by tf-idf not tf scores.
         filters: Dict of filters applied.
     """
+
     if tfidf:
         mode = "tfidf"
         filters["tfidf"] = True
@@ -129,9 +130,7 @@ def counts_over_time(
     years = sorted(df_papers["AA year of publication"].unique())
     for year in years:
         df_year = df_papers[df_papers["AA year of publication"] == year]
-        count_top = token_frequencies(df_year, ngrams).sort_values(
-            by=[mode], ascending=False
-        )
+        count_top = token_frequencies(df_year, ngrams).sort_values(by=[mode], ascending=False)
         tokens.update(count_top.head(k).index)
         years_freqs[str(year)] = count_top
     df_years = pd.concat(years_freqs, axis=1)

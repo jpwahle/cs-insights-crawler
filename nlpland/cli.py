@@ -1,5 +1,6 @@
 """This module provides the entry points for the CLI commands."""
 import click
+from click.testing import CliRunner
 from dotenv import load_dotenv
 
 import nlpland.data.check as check_
@@ -40,9 +41,7 @@ def download(**kwargs: FILTER_DATATYPES) -> None:
 @click.option("--original", is_flag=True)
 @click.option("--overwrite-rule", is_flag=True)  # only overwrites rule based abstracts
 @filter_.df_filter_options
-def extract(
-    mode: str, original: bool, overwrite_rule: bool, **kwargs: FILTER_DATATYPES
-) -> None:
+def extract(mode: str, original: bool, overwrite_rule: bool, **kwargs: FILTER_DATATYPES) -> None:
     """Extract abstracts with the specified method.
 
     Currently abstracts can be extracted from the ACL Anthology XML files and from the papers PDF
@@ -61,9 +60,7 @@ def extract(
         print(f"Unsupported mode '{mode}'. Choose from {modes}.")
     if mode == ABSTRACT_SOURCE_RULE:
         df_select = filter_.get_filtered_df(kwargs, original_dataset=original)
-        dataset_.extract_abstracts_rulebased(
-            df_select, df_full, overwrite_rule=overwrite_rule
-        )
+        dataset_.extract_abstracts_rulebased(df_select, df_full, overwrite_rule=overwrite_rule)
     elif mode == ABSTRACT_SOURCE_ANTHOLOGY:
         dataset_.extract_abstracts_anthology(df_full)
 
@@ -132,9 +129,7 @@ def count(k: int, ngrams: str, **kwargs: FILTER_DATATYPES) -> None:
 @click.option("--ngrams", type=str, default="1")
 @click.option("--tfidf", is_flag=True)
 @filter_.df_filter_options
-def counts_time(
-    k: int, ngrams: str, name: str, tfidf: bool, **kwargs: FILTER_DATATYPES
-) -> None:
+def counts_time(k: int, ngrams: str, name: str, tfidf: bool, **kwargs: FILTER_DATATYPES) -> None:
     """Plot the counts of all terms, that were in a top k in at least one year, over time. The time
     can be selected via the filters.
 
@@ -146,7 +141,7 @@ def counts_time(
         **kwargs: Dict of filter to apply to the data before analyzing the data.
     """
     df_filtered = filter_.get_filtered_df(kwargs)
-    count_.counts_over_time(df_filtered, k, ngrams, name, tfidf, kwargs)
+    count_.counts_over_time(df_filtered, k, ngrams, name, tfidf, kwargs)  # pylint: disable=R0913
 
 
 @cli.command()
@@ -235,7 +230,6 @@ def test() -> None:
 
 if __name__ == "__main__":
     # this is for debugging via IDE
-    from click.testing import CliRunner
 
     runner = CliRunner()
     result = runner.invoke(count, args=["5"], catch_exceptions=False)

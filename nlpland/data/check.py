@@ -7,9 +7,13 @@ import pandas as pd
 from lxml import etree
 from tika import parser
 
-from nlpland.constants import (ABSTRACT_SOURCE_ANTHOLOGY, ABSTRACT_SOURCE_RULE,
-                               COLUMN_ABSTRACT, COLUMN_ABSTRACT_SOURCE,
-                               MISSING_PAPERS)
+from nlpland.constants import (
+    ABSTRACT_SOURCE_ANTHOLOGY,
+    ABSTRACT_SOURCE_RULE,
+    COLUMN_ABSTRACT,
+    COLUMN_ABSTRACT_SOURCE,
+    MISSING_PAPERS,
+)
 
 
 def print_null_values(column: pd.Series) -> None:
@@ -41,9 +45,9 @@ def print_abstracts_per_year(df_papers: pd.DataFrame) -> None:
     if COLUMN_ABSTRACT in df_papers.columns:
         abstracts = df_papers[COLUMN_ABSTRACT].count()
         rows = len(df_papers.index)
-        anth = df_papers[
-            df_papers[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_ANTHOLOGY
-            ][COLUMN_ABSTRACT_SOURCE].count()
+        anth = df_papers[df_papers[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_ANTHOLOGY][
+            COLUMN_ABSTRACT_SOURCE
+        ].count()
         rule = df_papers[df_papers[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_RULE][
             COLUMN_ABSTRACT_SOURCE
         ].count()
@@ -51,20 +55,12 @@ def print_abstracts_per_year(df_papers: pd.DataFrame) -> None:
         print(f"{anth} abstracts were extracted from the anthology.")
         print(f"{rule} abstracts were extracted with the rule-based system.")
         print("The amount of abstracts per year we get from the anthology:")
-        df_anth = df_papers[
-            df_papers[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_ANTHOLOGY
-            ]
+        df_anth = df_papers[df_papers[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_ANTHOLOGY]
         df_rule = df_papers[df_papers[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_RULE]
         df_source = pd.DataFrame()
-        df_source["total"] = df_papers.groupby(["AA year of publication"]).count()[
-            "AA url"
-        ]
-        df_source["anth"] = df_anth.groupby(["AA year of publication"])[
-            COLUMN_ABSTRACT
-        ].count()
-        df_source["rule"] = df_rule.groupby(["AA year of publication"])[
-            COLUMN_ABSTRACT
-        ].count()
+        df_source["total"] = df_papers.groupby(["AA year of publication"]).count()["AA url"]
+        df_source["anth"] = df_anth.groupby(["AA year of publication"])[COLUMN_ABSTRACT].count()
+        df_source["rule"] = df_rule.groupby(["AA year of publication"])[COLUMN_ABSTRACT].count()
         print(df_source)
         # print(pd.concat([years_total, years_anth, years_rule], axis=1))
     else:
@@ -136,9 +132,7 @@ def check_dataset(df_papers: pd.DataFrame) -> None:
     print(f"Files downloaded: {downloaded}")
     dataset_size = len(df_papers.index)
     print(f"Papers in dataset: {dataset_size}")
-    df_missing = pd.read_csv(
-        MISSING_PAPERS, delimiter="\t", low_memory=False, header=None
-    )
+    df_missing = pd.read_csv(MISSING_PAPERS, delimiter="\t", low_memory=False, header=None)
     missing_papers = len(df_missing.index)
     print(f"Papers in {MISSING_PAPERS}: {missing_papers}")
     print(f"Unaccounted: {dataset_size - downloaded - missing_papers}")
@@ -188,9 +182,7 @@ def count_anthology_abstracts() -> None:
     abstracts = 0
     for file in os.listdir(path_anthology):
         if file.endswith(".xml"):
-            tree = etree.parse(f"{path_anthology}/{file}")
+            tree = etree.parse(f"{path_anthology}/{file}")  # pylint: disable=I1101
             papers += tree.xpath("count(//paper)")
             abstracts += tree.xpath("count(//abstract)")
-    print(
-        f"ACL Anthology contains {int(papers)} papers with {int(abstracts)} abstracts."
-    )
+    print(f"ACL Anthology contains {int(papers)} papers with {int(abstracts)} abstracts.")
