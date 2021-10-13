@@ -78,6 +78,17 @@ We group issues using a task list in another issue that has the `Epic` label. Th
 Each issue with the `Epic` label has a task list with each element of the task list being a issue (e.g., this one [#47](https://github.com/ag-gipp/NLPLand/issues/47)).
 Whenever a pull request with the above convention gets merged, the corresponding issue gets closed, and the task in the Epic gets checked.
 
+`PATH_DATASET` is the path to the `.txt` file of the [NLP Scholar dataset](http://saifmohammad.com/WebPages/nlpscholar.html). 
+
+`PATH_DATASET_EXPANDED` is the path to the `.txt` file of the expanded dataset or where it is supposed to be created.
+
+### Getting Started
+To get started we recommend downloading the ACL Anthology XML files and the NLP Scholar dataset and enter their paths into the .env.
+Then set `PATH_DATASET_EXPANDED` in the .env to a path of your choice.
+Next, run `cli extract anth --original` to create an extended dataset.
+You can find out more about the command in the documentation further down.
+Now you should be able to run all implemented analyses.
+
 ## Commands
 
 All commands are preceded with `cli`.
