@@ -29,9 +29,11 @@ en-core-web-trf = {url = "https://github.com/explosion/spacy-models/releases/dow
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
-pylint = "^2.11.1"
-pyright = "^0.0.10"
 pytest-cov = "^3.0.0"
+black = "^21.9b0"
+isort = "^5.9.3"
+pyright = "^0.0.10"
+pylint = "^2.11.1"
 
 [tool.poetry.scripts]
 cli = "nlpland.cli:cli"

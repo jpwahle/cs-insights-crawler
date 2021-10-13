@@ -32,10 +32,16 @@ You have to rename the file `empty.env` to `.env`. In this file you have to set 
 `PATH_ANTHOLOGY` is the path to the `xml` [directory in the ACL Anthology](https://github.com/acl-org/acl-anthology/tree/master/data/xml).
 (Only used in abstract extraction)
 
-`PATH_DATASET` is the path to the `.txt` file of the NLP Scholar dataset. 
+`PATH_DATASET` is the path to the `.txt` file of the [NLP Scholar dataset](http://saifmohammad.com/WebPages/nlpscholar.html). 
 
 `PATH_DATASET_EXPANDED` is the path to the `.txt` file of the expanded dataset or where it is supposed to be created.
 
+### Getting Started
+To get started we recommend downloading the ACL Anthology XML files and the NLP Scholar dataset and enter their paths into the .env.
+Then set `PATH_DATASET_EXPANDED` in the .env to a path of your choice.
+Next, run `cli extract anth --original` to create an extended dataset.
+You can find out more about the command in the documentation further down.
+Now you should be able to run all implemented analyses.
 
 ## Commands
 All commands are preceded with `cli`.
