@@ -32,7 +32,7 @@ def print_possible_values(column: pd.Series) -> None:
         column: Column to evaluate.
     """
     print(f"Possible values in '{column.name}':")
-    print(np.sort(column.unique()))
+    print(np.sort(column.dropna().unique()))
 
 
 def print_abstracts_per_year(df_papers: pd.DataFrame) -> None:

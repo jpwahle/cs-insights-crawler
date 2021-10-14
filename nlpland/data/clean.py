@@ -116,7 +116,7 @@ def english_words() -> Set[str]:
 
 def stopwords_and_more() -> Set[str]:
     """Return a set of stopwords from the nltk corpus "stopwords" including punctuation from
-    "string.punctuation".
+    string.punctuation".
 
     Returns:
         List of stopwords including punctuation.

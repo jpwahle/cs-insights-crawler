@@ -2,6 +2,7 @@ from typing import List
 
 import nltk
 import pytest
+import pytest_mock
 
 import nlpland.data.clean as clean_
 
@@ -101,15 +102,18 @@ def test_remove_stopwords(tokens: List[str], expected: List[str]):
     assert clean_.remove_stopwords(tokens, stopwords) == expected
 
 
-# @pytest.mark.parametrize(
-#     "name",
-#     [
-#         "corpora/words",
-#         "tokenizer/punkt",
-#     ],
-# )
-# def test_nltk_resource(mocker, name: str):
-#     # stopwords = {"to", "be", "or", "not"}
-#     print(type(mocker))
-#     mocker.patch("nltk.data.find", side_effects=[LookupError])
-#     assert clean_.nltk_resource(name) == LookupError
+def test_nltk_resource(mocker: pytest_mock.MockerFixture):
+    find = mocker.patch("nltk.data.find")
+    download = mocker.patch("nltk.download")
+
+    resource = "corpora/words"
+    clean_.nltk_resource(resource)
+    find.assert_called_once_with(resource)
+    download.assert_not_called()
+
+    find.reset_mock()
+    find.side_effect = LookupError()
+    resource = "tokenizer/punkt"
+    clean_.nltk_resource(resource)
+    find.assert_called_once_with(resource)
+    download.assert_called_once_with("punkt")
