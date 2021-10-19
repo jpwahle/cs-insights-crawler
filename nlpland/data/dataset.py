@@ -126,27 +126,25 @@ def print_results_extract_abstracts_rulebased(
     Returns:
         None
     """
-    print(f"Papers count_dict['iterated']: {count_dict['iterated']} matching filters")
+    print(f"Papers iterated: {count_dict['iterated']} matching filters")
     print(
-        f"Abstracts count_dict['searched':] {count_dict['searched']} abstracts"
-        f" {count_dict['searched']}"
+        f"Abstracts searched: {count_dict['searched']} abstracts searched"
     )
     print(f"Abstracts skipped: {count_dict['skipped']} already existed")
     print(f"none: {count_dict['nones']} texts of papers are None")
     print(f"index: {count_dict['index_err']} abstracts not found")
     print(f"no_file: {count_dict['no_file']} papers not downloaded")
-    print(f"long_abstract: {count_dict['no_file']} papers with (too) long abstracts")
+    print(f"long_abstract: {count_dict['long_abstracts']} papers with (too) long abstracts")
     print(f"This took {time.strftime('%Mm %Ss', duration)}.")
 
 
 def helper_abstracts_rulebased(
-    index: str, row, count_dict: Dict[str, int], path_papers: str, df_full: pd.DataFrame
+    index: str, count_dict: Dict[str, int], path_papers: str, df_full: pd.DataFrame
 ) -> pd.DataFrame:
     """Helper function for the abstract extraction method
 
     Args:
         index: The current index.
-        row: The current row
         count_dict: Dict to count everything
         path_papers: Path to the downloaded papers.
         df_full: Dataframe containing all relevant information for extraction
@@ -155,10 +153,10 @@ def helper_abstracts_rulebased(
         Tuple of earliest position of a string and earliest occurring string.
     """
     paper_id = clean_paper_id(index)
-    venue = clean_venue_name(row["NS venue name"])
-    year = row["AA year of publication"]
+    venue = clean_venue_name(df_full.at[index, "NS venue name"])
+    year = df_full.at[index, "AA year of publication"]
 
-    full_path = os.path.join(path_papers, year, venue, paper_id + ".pdf")
+    full_path = f"{path_papers}/{year}/{venue}/{paper_id}.pdf"
 
     if os.path.isfile(full_path):
         count_dict["searched"] += 1
@@ -215,7 +213,7 @@ def extract_abstracts_rulebased(
     start = time.time()
     count_dict: dict = defaultdict(int)
 
-    path_papers = os.getenv("PATH_PAPERS") or ""
+    path_papers = os.getenv("PATH_PAPERS", default="")
     tika.initVM()
 
     for index, row in tqdm(df_select.iterrows(), total=df_select.shape[0]):
@@ -223,7 +221,7 @@ def extract_abstracts_rulebased(
         if (overwrite_rule and row[COLUMN_ABSTRACT_SOURCE] == ABSTRACT_SOURCE_RULE) or pd.isnull(
             row[COLUMN_ABSTRACT]
         ):
-            df_full = helper_abstracts_rulebased(index, row, count_dict, path_papers, df_full)
+            df_full = helper_abstracts_rulebased(index, count_dict, path_papers, df_full)
         else:
             count_dict["skipped"] += 1
         if count_dict["iterated"] % 1000 == 0 and count_dict["iterated"] > 0:
@@ -234,7 +232,7 @@ def extract_abstracts_rulebased(
 
 
 def helper_abstracts_anthology(
-    paper,
+    volume,
     df_papers: pd.DataFrame,
     counter_dict: Dict[str, int],
     collection_id: str,
@@ -247,35 +245,36 @@ def helper_abstracts_anthology(
     in the selection "df_select".
 
     Args:
-        paper: The current paper.
+        volume: The current volume.
         df_papers: The full dataset of papers for statistical purposes.
         counter_dict: The count dict for all counts.
         collection_id: The current collection id.
         volume_id: The current volume id.
     """
-    children = paper.getchildren()
-    paper_id = None
-    abstract = None
-    for child in children:
-        if child.tag == "url":
-            if "http" not in child.text:
-                paper_id = child.text
-        if child.tag == "abstract":
-            if child.text is not None:
-                abstract = str(child.xpath("string()"))
-    if paper_id is None:
-        paper_id = paper.attrib["id"]
-        paper_id = f"{collection_id}-{volume_id}-{paper_id}"
+    for paper in volume.iter("paper"):
+        children = paper.getchildren()
+        paper_id = None
+        abstract = None
+        for child in children:
+            if child.tag == "url":
+                if "http" not in child.text:
+                    paper_id = child.text
+            if child.tag == "abstract":
+                if child.text is not None:
+                    abstract = str(child.xpath("string()"))
+        if paper_id is None:
+            paper_id = paper.attrib["id"]
+            paper_id = f"{collection_id}-{volume_id}-{paper_id}"
 
-    if paper_id is not None and abstract is not None:
-        if paper_id in df_papers.index:
-            df_papers.at[paper_id, COLUMN_ABSTRACT] = abstract
-            df_papers.at[paper_id, COLUMN_ABSTRACT_SOURCE] = ABSTRACT_SOURCE_ANTHOLOGY
-            counter_dict["abstracts"] += 1
+        if paper_id is not None and abstract is not None:
+            if paper_id in df_papers.index:
+                df_papers.at[paper_id, COLUMN_ABSTRACT] = abstract
+                df_papers.at[paper_id, COLUMN_ABSTRACT_SOURCE] = ABSTRACT_SOURCE_ANTHOLOGY
+                counter_dict["abstracts"] += 1
+            else:
+                counter_dict["unknown_id"] += 1
         else:
-            counter_dict["unknown_id"] += 1
-    else:
-        counter_dict["no_id_abstract"] += 1
+            counter_dict["no_id_abstract"] += 1
 
     return counter_dict, df_papers
 
@@ -289,10 +288,7 @@ def extract_abstracts_anthology(df_papers: pd.DataFrame) -> None:
         df_papers: Dataframe of the papers to match the entries in the XML files against.
     """
     start = time.time()
-    counter_dict: dict = defaultdict(int)
-    # abstracts = 0
-    # unknown_id = 0
-    # no_id_abstract = 0
+    count_dict: dict = defaultdict(int)
     path_anthology = os.getenv("PATH_ANTHOLOGY")
     for file in tqdm(os.listdir(path_anthology), total=len(os.listdir(path_anthology))):
         assert file is not None
@@ -305,14 +301,10 @@ def extract_abstracts_anthology(df_papers: pd.DataFrame) -> None:
                 for volume in collection.iter("volume"):
                     if len(volume.attrib) > 0:
                         volume_id = volume.attrib["id"]
-                    else:
-                        volume_id = ""
-                    for paper in volume.iter("paper"):
-                        counter_dict, df_papers = helper_abstracts_anthology(
-                            paper, df_papers, counter_dict, collection_id, volume_id
+                        count_dict, df_papers = helper_abstracts_anthology(
+                            volume, df_papers, count_dict, collection_id, volume_id
                         )
-
     save_dataset(df_papers)
-    print(f"Abstracts added/overwritten: {counter_dict['abstracts']}")
+    print(f"Abstracts added/overwritten: {count_dict['abstracts']}")
     duration = time.gmtime(time.time() - start)
     print(f"This took {time.strftime('%Mm %Ss', duration)}.")
