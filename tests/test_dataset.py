@@ -3,6 +3,7 @@ import urllib.error
 from collections import defaultdict
 from unittest.mock import mock_open
 
+import numpy as np
 import pandas as pd
 import pytest
 from mock import call
@@ -112,7 +113,7 @@ def test_download_papers_error(
 def test_save_load_dataset(monkeypatch):
     df_paper = pd.DataFrame(
         {
-            "NS venue name": ["EMNLP"],
+            "NS venue name": [np.nan],
             "AA url": ["http://abc/a.pdf"],
         },
         index=["a"],
