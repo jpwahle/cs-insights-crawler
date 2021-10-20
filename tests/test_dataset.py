@@ -86,9 +86,7 @@ def test_download_papers_skip_request(
     urlretrieve.assert_not_called()
 
 
-def test_download_papers_error(
-    mocker: MockerFixture, mock_env_papers, readcsv, makedirs
-):
+def test_download_papers_error(mocker: MockerFixture, mock_env_papers, readcsv, makedirs):
     df_paper = pd.DataFrame(
         {
             "AA year of publication": [2010],
@@ -144,9 +142,7 @@ def test_save_load_dataset(monkeypatch):
         ("cb ad", ["a", "c"], 0, "c"),
     ],
 )
-def test_determine_earliest_string(
-    text, possible_strings, earliest_pos, earliest_string
-):
+def test_determine_earliest_string(text, possible_strings, earliest_pos, earliest_string):
     assert (earliest_pos, earliest_string) == dataset.determine_earliest_string(
         text, possible_strings
     )
@@ -183,9 +179,7 @@ def test_helper_abstracts_rulebased(mocker, text, expected):
 
     count_dict: dict = defaultdict(int)
     index = df_paper.index[0]
-    df_result = dataset.helper_abstracts_rulebased(
-        index, count_dict, "papers", df_paper
-    )
+    df_result = dataset.helper_abstracts_rulebased(index, count_dict, "papers", df_paper)
     assert df_result.at[index, COLUMN_ABSTRACT] == expected
 
 
@@ -211,9 +205,7 @@ def test_extract_abstracts_rulebased(mocker, monkeypatch, overwrite, calls):
     monkeypatch.setenv("PATH_PAPERS", "papers")
     init = mocker.patch("tika.initVM")
     save = mocker.patch("nlpland.data.dataset.save_dataset")
-    helper = mocker.patch(
-        "nlpland.data.dataset.helper_abstracts_rulebased", return_value=df_return
-    )
+    helper = mocker.patch("nlpland.data.dataset.helper_abstracts_rulebased", return_value=df_return)
     mocker.patch("nlpland.data.dataset.print_results_extract_abstracts_rulebased")
 
     dataset.extract_abstracts_rulebased(df_select, df_full, overwrite_rule=overwrite)

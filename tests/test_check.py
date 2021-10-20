@@ -1,7 +1,12 @@
 import pytest
 import nlpland.data.check as check_
 import pandas as pd
-from nlpland.constants import ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY, COLUMN_ABSTRACT, COLUMN_ABSTRACT_SOURCE
+from nlpland.constants import (
+    ABSTRACT_SOURCE_RULE,
+    ABSTRACT_SOURCE_ANTHOLOGY,
+    COLUMN_ABSTRACT,
+    COLUMN_ABSTRACT_SOURCE,
+)
 import os
 
 
@@ -27,10 +32,21 @@ def test_print_possible_values(capfd):
 
 
 def test_print_abstracts_per_year(capfd):
-    test_df = pd.DataFrame({COLUMN_ABSTRACT: ["1", "2", "34", "2", None, pd.NA],
-                            COLUMN_ABSTRACT_SOURCE: [ABSTRACT_SOURCE_RULE, ABSTRACT_SOURCE_ANTHOLOGY, ABSTRACT_SOURCE_ANTHOLOGY, ABSTRACT_SOURCE_ANTHOLOGY, None, None],
-                            "AA year of publication": [2000, 2001, 2000, 2003, 2000, 2000],
-                            "AA url": ["", "", "", "", "", ""]})
+    test_df = pd.DataFrame(
+        {
+            COLUMN_ABSTRACT: ["1", "2", "34", "2", None, pd.NA],
+            COLUMN_ABSTRACT_SOURCE: [
+                ABSTRACT_SOURCE_RULE,
+                ABSTRACT_SOURCE_ANTHOLOGY,
+                ABSTRACT_SOURCE_ANTHOLOGY,
+                ABSTRACT_SOURCE_ANTHOLOGY,
+                None,
+                None,
+            ],
+            "AA year of publication": [2000, 2001, 2000, 2003, 2000, 2000],
+            "AA url": ["", "", "", "", "", ""],
+        }
+    )
     check_.print_abstracts_per_year(test_df)
     capture = capfd.readouterr()
     assert "1" in capture.out
@@ -42,15 +58,18 @@ def test_print_abstracts_per_year(capfd):
 
 
 def test_check_dataset(mocker):
-    test_df = pd.DataFrame({COLUMN_ABSTRACT: ["1"],
-                            COLUMN_ABSTRACT_SOURCE: [ABSTRACT_SOURCE_RULE],
-                            "AA year of publication": [2000],
-                            "GS year of publication": [2000],
-                            "AA url": [""],
-                            "NS venue name": ["ACL"],
-                            "AA venue code": ["acl"],
-                            "AA first author full name": ["Jan"]
-                            })
+    test_df = pd.DataFrame(
+        {
+            COLUMN_ABSTRACT: ["1"],
+            COLUMN_ABSTRACT_SOURCE: [ABSTRACT_SOURCE_RULE],
+            "AA year of publication": [2000],
+            "GS year of publication": [2000],
+            "AA url": [""],
+            "NS venue name": ["ACL"],
+            "AA venue code": ["acl"],
+            "AA first author full name": ["Jan"],
+        }
+    )
     null = mocker.patch("nlpland.data.check.print_null_values")
     unique = mocker.patch("nlpland.data.check.print_possible_values")
     year = mocker.patch("nlpland.data.check.print_abstracts_per_year")
@@ -62,10 +81,13 @@ def test_check_dataset(mocker):
 
 
 def test_check_encoding_issues(capfd):
-    test_df = pd.DataFrame({"AA year of publication": [2000, 2000, 2000, 2001, 2001],
-                            "NS venue name": ["ACL", "ACL", "ACL", "ACL", "ACL"],
-                            COLUMN_ABSTRACT: ["���", "��", "", "�", ""]
-                            })
+    test_df = pd.DataFrame(
+        {
+            "AA year of publication": [2000, 2000, 2000, 2001, 2001],
+            "NS venue name": ["ACL", "ACL", "ACL", "ACL", "ACL"],
+            COLUMN_ABSTRACT: ["���", "��", "", "�", ""],
+        }
+    )
     check_.check_encoding_issues(test_df)
     capture = capfd.readouterr()
     assert "3" in capture.out
@@ -73,8 +95,8 @@ def test_check_encoding_issues(capfd):
 
 def test_check_paper_parsing(mocker, capfd):
     text = "Hallo Welt!"
-    paper_path = 'hello.pdf'
-    parser = mocker.patch("tika.parser.from_file", return_value={"content": "\n"+text})
+    paper_path = "hello.pdf"
+    parser = mocker.patch("tika.parser.from_file", return_value={"content": "\n" + text})
 
     check_.check_paper_parsing(paper_path)
     capture = capfd.readouterr()
@@ -131,6 +153,3 @@ def test_count_anthology_abstracts(mocker, capfd):
     os.remove(dir_name + "/xml2.xml")
     os.remove(dir_name + "/text.txt")
     os.rmdir(dir_name)
-
-
-

@@ -32,9 +32,7 @@ def test_mask_data():
     assert df_result.equals(df_papers)
 
     df_result = filter_.mask_data(df_papers.copy(), "titles")
-    assert df_result.drop(COLUMN_ABSTRACT, axis=1).equals(
-        df_papers.drop(COLUMN_ABSTRACT, axis=1)
-    )
+    assert df_result.drop(COLUMN_ABSTRACT, axis=1).equals(df_papers.drop(COLUMN_ABSTRACT, axis=1))
     assert df_result[COLUMN_ABSTRACT].isna().values.any()
 
     df_result = filter_.mask_data(df_papers.copy(), "abstracts")
