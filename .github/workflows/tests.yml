@@ -25,7 +25,7 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       - name: Run tests
         run: |
-          poetry run py.test tests -s --cov=nlpland --cov-report=term-missing --cov-fail-under 90
+          poetry run py.test tests -s --cov=nlpland --cov-report=term-missing --cov-fail-under 97
   linting:
     runs-on: [self-hosted, dke]
     steps:
