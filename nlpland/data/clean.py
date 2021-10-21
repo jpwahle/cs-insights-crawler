@@ -7,13 +7,13 @@ import regex as re
 
 
 def clean_paper_id(paper_id: str) -> str:
-    """Clean the paper Id, by removing or replacing symbols that are not allowed in a file name.
+    """Clean the paper id, by removing or replacing symbols that are not allowed in a file name.
 
     Args:
         paper_id: Original id of the paper.
 
     Returns:
-        Cleaned Id of the paper.
+        Cleaned id of the paper.
     """
     return paper_id.replace(".", "_")
 
@@ -62,9 +62,9 @@ def newline_hyphens(text: str, language_vocabulary: Set[str]) -> str:
     The regex used will match a whitespace character at the start and end of the sequence with an
     arbitrary amount of characters and "-\n" somewhere in between.
 
-    Example:
-        dict-\n
-        tionary
+    Goal:
+        char-\n
+        acter
         -> dictionary
         open-\n
         source
@@ -79,7 +79,6 @@ def newline_hyphens(text: str, language_vocabulary: Set[str]) -> str:
     """
     text = text.lower()
     for match in re.findall(r"[\s]+(\S*-\n\S*)[\s]+", text, overlapped=True):
-
         new_match = match.replace("-\n", "")
         new_match = new_match.strip(string.punctuation)
         if new_match in language_vocabulary:
@@ -117,7 +116,7 @@ def english_words() -> Set[str]:
 
 def stopwords_and_more() -> Set[str]:
     """Return a set of stopwords from the nltk corpus "stopwords" including punctuation from
-    "string.punctuation".
+    string.punctuation".
 
     Returns:
         List of stopwords including punctuation.

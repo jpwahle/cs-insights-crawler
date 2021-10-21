@@ -54,19 +54,18 @@ def df_filter_options2(function: Callable):
 
 
 def mask_data(df_filtered: pd.DataFrame,
-              data_filter: str,
+              data_select: str,
               ) -> pd.DataFrame:
     """Mask the data (tiles/abstracts) in given dataframe based on given conditions.
 
     Args:
         df_filtered: Dataframe with the data to mask.
-        data_filter: Filter for the data.
+        data_select: Filter for the data.
 
     Returns:
         Dataframe with (partially) masked data.
     """
-    selection = set(attributes_to_list(str(data_filter)))
-    print("selection:", selection)
+    selection = set(attributes_to_list(str(data_select)))
     if "all" not in selection:
         if "titles" not in selection:
             df_filtered["AA title"] = np.nan
@@ -108,36 +107,36 @@ def get_filtered_df(
         sec = ""
     df_filtered = dataset_.load_dataset(original_dataset)
 
-    venues = filters["venues" + sec]
+    venues = filters.get("venues" + sec)
     if venues is not None:
         venues_list = set(attributes_to_list(str(venues)))
         df_filtered = df_filtered[df_filtered["NS venue name"].isin(venues_list)]
 
-    year = filters["year" + sec]
-    if year is not None:
+    year = filters.get("year" + sec)
+    if year:
         df_filtered = df_filtered[df_filtered["AA year of publication"] == year]
-    min_year = filters["min_year" + sec]
-    if min_year is not None:
+    min_year = filters.get("min_year" + sec)
+    if min_year:
         df_filtered = df_filtered[df_filtered["AA year of publication"] >= min_year]
-    max_year = filters["max_year" + sec]
-    if max_year is not None:
+    max_year = filters.get("max_year" + sec)
+    if max_year:
         df_filtered = df_filtered[df_filtered["AA year of publication"] <= max_year]
 
-    author = filters["author" + sec]
-    if author is not None:
+    author = filters.get("author" + sec)
+    if author:
         df_filtered = df_filtered[
             df_filtered["AA authors list"].str.contains(author, case=False)
         ]
 
-    fauthor = filters["fauthor" + sec]
-    if fauthor is not None:
+    fauthor = filters.get("fauthor" + sec)
+    if fauthor:
         df_filtered = df_filtered[
             df_filtered["AA first author full name"].str.lower() == str(fauthor).lower()
         ]
 
-    data_filter = filters["data" + sec]
-    if data_filter:
-        df_filtered = mask_data(df_filtered, str(data_filter))
+    data_select = filters.get("data" + sec)
+    if data_select:
+        df_filtered = mask_data(df_filtered, str(data_select))
 
     return df_filtered
 
