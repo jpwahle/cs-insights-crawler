@@ -1,16 +1,19 @@
-import pytest
-import nlpland.data.check as check_
+import os
+
 import pandas as pd
+from _pytest.capture import CaptureFixture
+from pytest_mock import MockerFixture
+
+import nlpland.data.check as check_
 from nlpland.constants import (
-    ABSTRACT_SOURCE_RULE,
     ABSTRACT_SOURCE_ANTHOLOGY,
+    ABSTRACT_SOURCE_RULE,
     COLUMN_ABSTRACT,
     COLUMN_ABSTRACT_SOURCE,
 )
-import os
 
 
-def test_print_null_values(capfd):
+def test_print_null_values(capfd: CaptureFixture) -> None:
     test_df = pd.DataFrame({"col": ["1", "2", "34", "2", None, pd.NA]})
     print(type(capfd))
     check_.print_null_values(test_df["col"])
@@ -19,7 +22,7 @@ def test_print_null_values(capfd):
     assert "5" not in capture.out
 
 
-def test_print_possible_values(capfd):
+def test_print_possible_values(capfd: CaptureFixture) -> None:
     test_df = pd.DataFrame({"col": ["1", "2", "34", "2", None, pd.NA]})
     check_.print_possible_values(test_df["col"])
     capture = capfd.readouterr()
@@ -31,7 +34,7 @@ def test_print_possible_values(capfd):
     assert "NA" not in capture.out
 
 
-def test_print_abstracts_per_year(capfd):
+def test_print_abstracts_per_year(capfd: CaptureFixture) -> None:
     test_df = pd.DataFrame(
         {
             COLUMN_ABSTRACT: ["1", "2", "34", "2", None, pd.NA],
@@ -57,7 +60,7 @@ def test_print_abstracts_per_year(capfd):
     assert "66.67%" in capture.out
 
 
-def test_check_dataset(mocker):
+def test_check_dataset(mocker: MockerFixture) -> None:
     test_df = pd.DataFrame(
         {
             COLUMN_ABSTRACT: ["1"],
@@ -80,7 +83,7 @@ def test_check_dataset(mocker):
     year.assert_called_once()
 
 
-def test_check_encoding_issues(capfd):
+def test_check_encoding_issues(capfd: CaptureFixture) -> None:
     test_df = pd.DataFrame(
         {
             "AA year of publication": [2000, 2000, 2000, 2001, 2001],
@@ -93,7 +96,7 @@ def test_check_encoding_issues(capfd):
     assert "3" in capture.out
 
 
-def test_check_paper_parsing(mocker, capfd):
+def test_check_paper_parsing(mocker: MockerFixture, capfd: CaptureFixture) -> None:
     text = "Hallo Welt!"
     paper_path = "hello.pdf"
     parser = mocker.patch("tika.parser.from_file", return_value={"content": "\n" + text})
@@ -104,7 +107,7 @@ def test_check_paper_parsing(mocker, capfd):
     parser.assert_called_once_with(paper_path)
 
 
-def test_count_anthology_abstracts(mocker, capfd):
+def test_count_anthology_abstracts(mocker: MockerFixture, capfd: CaptureFixture) -> None:
     dir_name = "tmp_xml"
     mocker.patch("os.getenv", return_value=dir_name)
 

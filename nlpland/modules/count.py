@@ -79,9 +79,7 @@ def token_frequencies(df_papers: pd.DataFrame, ngrams: str) -> pd.DataFrame:
     return df_freq
 
 
-def top_k_tokens(
-    k: int, df_papers: pd.DataFrame, ngrams: str
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def top_k_tokens(k: int, df_papers: pd.DataFrame, ngrams: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Extract the top k token from a dataframe both in regards to tf and tfidf score.
 
     Args:
@@ -99,7 +97,7 @@ def top_k_tokens(
     return count_top, tfidf_top
 
 
-def counts_over_time(  # pylint: disable=R0913, R0914
+def counts_over_time(
     df_papers: pd.DataFrame,
     k: int,
     ngrams: str,
@@ -107,8 +105,8 @@ def counts_over_time(  # pylint: disable=R0913, R0914
     tfidf: bool,
     filters: Dict[str, FILTER_DATATYPES],
 ) -> None:
-    """Plot the counts of all terms, that were in a top k in at least one year, over time. The time
-    can be selected via the filters.
+    """Plot the counts of all terms, that were in a top k in at least one year, over time.
+    The time can be selected via the filters.
 
     Args:
         df_papers: Dataframe with the papers to process.
@@ -118,7 +116,6 @@ def counts_over_time(  # pylint: disable=R0913, R0914
         tfidf: If True, will rank by tf-idf not tf scores.
         filters: Dict of filters applied.
     """
-
     if tfidf:
         mode = "tfidf"
         filters["tfidf"] = True

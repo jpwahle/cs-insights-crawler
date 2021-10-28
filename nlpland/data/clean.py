@@ -36,8 +36,7 @@ def preprocess_text(
     lemmatizer: nltk.WordNetLemmatizer,
     stopwords: Set[str],
 ) -> List[str]:
-    """Preprocess a given text by removing newline hyphens, tokenizing, lemmatizing and removing
-     stopwords.
+    r"""Preprocess a given text by removing "-\n", tokenizing, lemmatizing and removing stopwords.
 
     Args:
         text: Text to preprocess.
@@ -55,7 +54,7 @@ def preprocess_text(
 
 
 def newline_hyphens(text: str, language_vocabulary: Set[str]) -> str:
-    """Remove hyphens followed by a newline "-\n", if the sequence without hyphen is in the given
+    r"""Remove hyphens followed by a newline "-\n", if the sequence without hyphen is in the given
     vocabulary, otherwise leave the hyphen.
 
     Always remove the newline character "\n".
@@ -162,9 +161,7 @@ def remove_stopwords(tokens: List[str], stopwords: Set[str]) -> List[str]:
     Returns:
         List of tokens without stopwords.
     """
-    return [
-        token for token in tokens if token not in stopwords and not is_number(token)
-    ]
+    return [token for token in tokens if token not in stopwords and not is_number(token)]
 
 
 def nltk_resource(name: str) -> None:
