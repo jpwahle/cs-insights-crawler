@@ -1,5 +1,4 @@
 import os
-import urllib.error
 from collections import defaultdict
 from typing import List
 
@@ -10,6 +9,7 @@ from _pytest.capture import CaptureFixture
 from _pytest.monkeypatch import MonkeyPatch
 from mock import MagicMock
 from pytest_mock import MockerFixture
+from urllib.error import HTTPError
 
 from nlpland.constants import (
     ABSTRACT_SOURCE_ANTHOLOGY,
@@ -111,7 +111,7 @@ def test_download_papers_error(
     )
     urlretrieve = mocker.patch(
         "urllib.request.urlretrieve",
-        side_effect=[urllib.error.HTTPError("http://url.com", 404, "", {"": ""}, None)],
+        side_effect=[HTTPError("http://url.com", 404, "", {}, None)],  # type: ignore
     )
     open_ = mocker.mock_open(mock=mocker.patch("builtins.open"))
 
