@@ -27,7 +27,7 @@ def test_clean_venue_name(venue_name: str, expected: str) -> None:
     assert clean.clean_venue_name(venue_name) == expected
 
 
-def test_preprocess_text(mocker: MockerFixture):
+def test_preprocess_text(mocker: MockerFixture) -> None:
     text = "Hello wor-\nld!\n"
     text2 = "Hello world!"
     language_vocabulary = {"hello", "world"}
@@ -57,7 +57,7 @@ def test_preprocess_text(mocker: MockerFixture):
         (" open-source ", " open-source "),
     ],
 )
-def test_newline_hyphens(text: str, expected: str):
+def test_newline_hyphens(text: str, expected: str) -> None:
     vocabulary = {"character"}
     assert clean.newline_hyphens(text, vocabulary) == expected
 
@@ -71,18 +71,18 @@ def test_newline_hyphens(text: str, expected: str):
         ("Hello worlds", ["Hello", "world"]),
     ],
 )
-def test_tokenize_and_lemmatize(text: str, expected: str):
+def test_tokenize_and_lemmatize(text: str, expected: str) -> None:
     lemmatizer = clean.get_lemmatizer()
     assert clean.tokenize_and_lemmatize(text, lemmatizer) == expected
 
 
-def test_english_words():
+def test_english_words() -> None:
     words = clean.english_words()
     assert isinstance(words, set)
     assert "character" in words
 
 
-def test_stopwords_and_more():
+def test_stopwords_and_more() -> None:
     stopwords = clean.stopwords_and_more()
     assert isinstance(stopwords, set)
     assert "and" in stopwords
@@ -90,7 +90,7 @@ def test_stopwords_and_more():
     assert "to" in stopwords
 
 
-def test_get_lemmatizer():
+def test_get_lemmatizer() -> None:
     lemmatizer = clean.get_lemmatizer()
     assert isinstance(lemmatizer, nltk.stem.WordNetLemmatizer)
 
@@ -106,7 +106,7 @@ def test_get_lemmatizer():
         ("0.00", True),
     ],
 )
-def test_is_number(word: str, expected: bool):
+def test_is_number(word: str, expected: bool) -> None:
     assert clean.is_number(word) == expected
 
 
@@ -118,12 +118,12 @@ def test_is_number(word: str, expected: bool):
         (["hello", "world"], ["hello", "world"]),
     ],
 )
-def test_remove_stopwords(tokens: List[str], expected: List[str]):
+def test_remove_stopwords(tokens: List[str], expected: List[str]) -> None:
     stopwords = {"to", "be", "or", "not"}
     assert clean.remove_stopwords(tokens, stopwords) == expected
 
 
-def test_nltk_resource(mocker: MockerFixture):
+def test_nltk_resource(mocker: MockerFixture) -> None:
     find = mocker.patch("nltk.data.find")
     download = mocker.patch("nltk.download")
 

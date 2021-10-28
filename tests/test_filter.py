@@ -15,7 +15,7 @@ from nlpland.constants import (
 from nlpland.data import filter as filter_
 
 
-def test_mask_data():
+def test_mask_data() -> None:
     df_papers = pd.DataFrame(
         {
             "AA title": ["title1", "title2", "title3"],
@@ -73,7 +73,7 @@ def test_get_filtered_df(
     filters: Dict[str, FILTER_DATATYPES],
     second_df: bool,
     expected: int,
-):
+) -> None:
     df_papers = pd.DataFrame(
         {
             "NS venue name": ["ACL", "EMNLP"],
@@ -89,7 +89,7 @@ def test_get_filtered_df(
     load.assert_called_once_with(False)
 
 
-def test_get_filtered_df_call_mask(mocker: MockerFixture):
+def test_get_filtered_df_call_mask(mocker: MockerFixture) -> None:
     df_papers = pd.DataFrame({"NS venue name": ["ACL", "EMNLP"]})
     load = mocker.patch("nlpland.data.dataset.load_dataset", return_value=df_papers)
     mask = mocker.patch("nlpland.data.filter.mask_data")
@@ -103,7 +103,7 @@ def test_get_filtered_df_call_mask(mocker: MockerFixture):
     "attributes, expected",
     [("test, test1", ["test", "test1"]), ("test,test1", ["test", "test1"])],
 )
-def test_attribute_to_list(attributes: str, expected: List[str]):
+def test_attribute_to_list(attributes: str, expected: List[str]) -> None:
     assert filter_.attributes_to_list(attributes) == expected
 
 
@@ -121,5 +121,5 @@ def test_category_names(
     filters: Dict[str, FILTER_DATATYPES],
     second_df: bool,
     expected: List[FILTER_DATATYPES],
-):
+) -> None:
     assert filter_.category_names(filters, second_df=second_df) == expected

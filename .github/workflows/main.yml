@@ -52,7 +52,7 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       - name: Run linting
         run: |
-          poetry run pylint nlpland -j 4 --reports=y
+          poetry run flake8 .
   typing:
     runs-on: ubuntu-latest
     steps:

@@ -1,26 +1,27 @@
+from unittest.mock import MagicMock
+
 import pandas as pd
+import pytest
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
 from nlpland import cli
-import pytest
-
 
 df_filtered = pd.DataFrame({"AA url": ["a"]})
 df_full = pd.DataFrame({"AA url": ["a", "b"]})
 
 
 @pytest.fixture
-def filtered(mocker: MockerFixture):
+def filtered(mocker: MockerFixture) -> None:
     yield mocker.patch("nlpland.data.filter.get_filtered_df", return_value=df_filtered)
 
 
 @pytest.fixture
-def load(mocker: MockerFixture):
+def load(mocker: MockerFixture) -> None:
     yield mocker.patch("nlpland.data.dataset.load_dataset", return_value=df_full)
 
 
-def test_download(mocker: MockerFixture, filtered):
+def test_download(mocker: MockerFixture, filtered: MagicMock) -> None:
     download = mocker.patch("nlpland.data.dataset.download_papers")
 
     runner = CliRunner()
@@ -31,7 +32,7 @@ def test_download(mocker: MockerFixture, filtered):
     download.assert_called_once_with(df_filtered)
 
 
-def test_extract(mocker: MockerFixture, filtered):
+def test_extract(mocker: MockerFixture, filtered: MagicMock) -> None:
     load = mocker.patch("nlpland.data.dataset.load_dataset", return_value=df_full)
     rule = mocker.patch("nlpland.data.dataset.extract_abstracts_rulebased")
     anth = mocker.patch("nlpland.data.dataset.extract_abstracts_anthology")
@@ -54,7 +55,7 @@ def test_extract(mocker: MockerFixture, filtered):
     assert load.call_count == 3
 
 
-def test_checkencode(mocker: MockerFixture, load):
+def test_checkencode(mocker: MockerFixture, load: MagicMock) -> None:
     check = mocker.patch("nlpland.data.check.check_encoding_issues")
 
     runner = CliRunner()
@@ -64,7 +65,7 @@ def test_checkencode(mocker: MockerFixture, load):
     check.assert_called_once_with(df_full)
 
 
-def test_checkdataset(mocker: MockerFixture, load):
+def test_checkdataset(mocker: MockerFixture, load: MagicMock) -> None:
     check = mocker.patch("nlpland.data.check.check_dataset")
 
     runner = CliRunner()
@@ -74,7 +75,7 @@ def test_checkdataset(mocker: MockerFixture, load):
     check.assert_called_once_with(df_full)
 
 
-def test_checkpaper(mocker: MockerFixture):
+def test_checkpaper(mocker: MockerFixture) -> None:
     paper_path = "path"
     check = mocker.patch("nlpland.data.check.check_paper_parsing")
 
@@ -84,7 +85,7 @@ def test_checkpaper(mocker: MockerFixture):
     check.assert_called_once_with(paper_path)
 
 
-def test_countabstractsanth(mocker: MockerFixture):
+def test_countabstractsanth(mocker: MockerFixture) -> None:
     check = mocker.patch("nlpland.data.check.count_anthology_abstracts")
 
     runner = CliRunner()
@@ -93,7 +94,7 @@ def test_countabstractsanth(mocker: MockerFixture):
     check.assert_called_once()
 
 
-def test_count(mocker: MockerFixture, filtered):
+def test_count(mocker: MockerFixture, filtered: MagicMock) -> None:
     count = mocker.patch("nlpland.modules.count.top_k_tokens", return_value=(3, 4))
 
     runner = CliRunner()
@@ -104,7 +105,7 @@ def test_count(mocker: MockerFixture, filtered):
     count.assert_called_once_with(5, df_filtered, "1")
 
 
-def test_counts_time(mocker: MockerFixture, filtered):
+def test_counts_time(mocker: MockerFixture, filtered: MagicMock) -> None:
     count = mocker.patch("nlpland.modules.count.counts_over_time")
 
     runner = CliRunner()
@@ -115,7 +116,7 @@ def test_counts_time(mocker: MockerFixture, filtered):
     count.assert_called_once_with(df_filtered, 5, "1", None, False, filtered.call_args[0][0])
 
 
-def test_scatter(mocker: MockerFixture, filtered):
+def test_scatter(mocker: MockerFixture, filtered: MagicMock) -> None:
     df_y = pd.DataFrame({"AA url": ["b"]})
     df_x = pd.DataFrame({"AA url": ["a"]})
     filtered = mocker.patch("nlpland.data.filter.get_filtered_df", side_effect=[df_y, df_x])
@@ -129,7 +130,7 @@ def test_scatter(mocker: MockerFixture, filtered):
     scatter.assert_called_once_with(df_y, df_x, False, None, filtered.call_args[0][0])
 
 
-def test_topic_train(mocker: MockerFixture, filtered):
+def test_topic_train(mocker: MockerFixture, filtered: MagicMock) -> None:
     topic = mocker.patch("nlpland.modules.topic_model.topic")
 
     runner = CliRunner()
@@ -140,7 +141,7 @@ def test_topic_train(mocker: MockerFixture, filtered):
     topic.assert_called_once_with(df_filtered, 5, None)
 
 
-def test_fasttext(mocker: MockerFixture, filtered):
+def test_fasttext(mocker: MockerFixture, filtered: MagicMock) -> None:
     semantic = mocker.patch("nlpland.modules.semantic.semantic")
 
     runner = CliRunner()
@@ -151,9 +152,7 @@ def test_fasttext(mocker: MockerFixture, filtered):
     semantic.assert_called_once_with(df_filtered, False, None)
 
 
-def test_test():
+def test_test() -> None:
     runner = CliRunner()
     result = runner.invoke(cli.test, catch_exceptions=False)
     assert result.exit_code == 0
-
-
