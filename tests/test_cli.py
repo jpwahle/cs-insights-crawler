@@ -12,12 +12,12 @@ df_full = pd.DataFrame({"AA url": ["a", "b"]})
 
 
 @pytest.fixture
-def filtered(mocker: MockerFixture) -> None:
+def filtered(mocker: MockerFixture) -> MagicMock:
     yield mocker.patch("nlpland.data.filter.get_filtered_df", return_value=df_filtered)
 
 
 @pytest.fixture
-def load(mocker: MockerFixture) -> None:
+def load(mocker: MockerFixture) -> MagicMock:
     yield mocker.patch("nlpland.data.dataset.load_dataset", return_value=df_full)
 
 
