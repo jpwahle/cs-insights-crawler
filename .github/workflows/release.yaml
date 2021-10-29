@@ -1,21 +1,55 @@
-# Trigger the workflow on milestone events
-name: Milestone Closure
-on: 
-  milestone:
+name: Release and deploy
+on:
+  pull_request:
+    branches:
+      - main
     types: [closed]
+
 jobs:
-  tag-version:
+  fulltests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: pip install pipenv && pipenv install --dev
+      - name: Run tests
+        run: |
+          pipenv run tests
+      - name: Run linting
+        run: |
+          pipenv run linting
+      - name: Run typing
+        run: |
+          pipenv run typing
+  Release:
+    if: github.event.pull_request.merged == true
+    needs: [fulltests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: "0"
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
       - name: Bump version and push tag
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v5.6
+        uses: anothrNick/github-tag-action@1.36.0
+        id: tagging
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+      - name: Build Changelog
+        id: build_changelog
+        uses: mikepenz/release-changelog-builder-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        uses: actions/create-release@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create a GitHub release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ steps.tag_version.outputs.new_tag }}
-          name: Release ${{ steps.tag_version.outputs.new_tag }}
-          body: ${{ steps.tag_version.outputs.changelog }}
+          body: ${{steps.build_changelog.outputs.changelog}}
+          tag_name: ${{steps.tagging.outputs.tag}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
