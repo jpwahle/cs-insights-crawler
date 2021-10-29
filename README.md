@@ -1,15 +1,13 @@
 # NLPLand
 
 <p align="center">
-<a href="https://github.com/ag-gipp/NLPLand/actions/workflows/release.yml"><img alt="Actions Status" src="https://github.com/ag-gipp/NLPLand/actions/workflows/release.yml/main.svg">  
+<a href="https://github.com/ag-gipp/NLPLand/actions/workflows/release.yaml"><img alt="Actions Status" src="https://github.com/ag-gipp/NLPLand/actions/workflows/release.yaml/badge.svg">    
 <a href="https://github.com/ag-gipp/NLPLand/actions/workflows/main.yml"><img alt="Actions Status" src="https://github.com/ag-gipp/NLPLand/actions/workflows/main.yml/badge.svg?branch=main">
 <!-- Add when repo is public -->
 <!-- <a href="https://github.com/ag-gipp/NLP-Land-backend/releases"><img alt="Actions Status" src="https://img.shields.io/github/v/release/ag-gipp/NLP-Land-backend?sort=semver"></a> -->
 <a href="https://github.com/ag-gipp/NLPLand/blob/master/LICENSE"><img alt="License: MIT" src="https://black.readthedocs.io/en/stable/_static/license.svg"></a>
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
-
-[![Tests](https://github.com/ag-gipp/NLPLand/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/ag-gipp/NLPLand/actions/workflows/tests.yml)
 
 This repository is part of the project titled "NLPLand and its Secrets".
 The project is within the scope of the Information Retrieval course at the Bergische University of Wuppertal in the summer semester of 2021.
