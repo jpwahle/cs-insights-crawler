@@ -2,7 +2,7 @@
 
 <p align="center">
 <a href="https://github.com/ag-gipp/NLPLand/actions/workflows/release.yml"><img alt="Actions Status" src="https://github.com/ag-gipp/NLPLand/actions/workflows/release.yml/main.svg">  
-<a href="https://github.com/ag-gipp/NLPLand/actions/workflows/tests.yml"><img alt="Actions Status" src="https://github.com/ag-gipp/NLPLand/actions/workflows/tests.yml/badge.svg?branch=main">
+<a href="https://github.com/ag-gipp/NLPLand/actions/workflows/main.yml"><img alt="Actions Status" src="https://github.com/ag-gipp/NLPLand/actions/workflows/main.yml/badge.svg?branch=main">
 <!-- Add when repo is public -->
 <!-- <a href="https://github.com/ag-gipp/NLP-Land-backend/releases"><img alt="Actions Status" src="https://img.shields.io/github/v/release/ag-gipp/NLP-Land-backend?sort=semver"></a> -->
 <a href="https://github.com/ag-gipp/NLPLand/blob/master/LICENSE"><img alt="License: MIT" src="https://black.readthedocs.io/en/stable/_static/license.svg"></a>
