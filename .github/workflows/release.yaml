@@ -61,6 +61,7 @@ jobs:
       - name: Create Release
         uses: actions/create-release@v1
         with:
+          release_name: ${{steps.tagging.outputs.tag}}
           body: ${{steps.build_changelog.outputs.changelog}}
           tag_name: ${{steps.tagging.outputs.tag}}
         env:
