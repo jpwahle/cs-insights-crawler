@@ -26,11 +26,6 @@ jobs:
       - name: Run tests
         run: |
           poetry run py.test tests -s --cov=nlpland --cov-report=xml --cov-fail-under 97
-      - name: Upload coverage report
-        uses: codecov/codecov-action@v2
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.xml
 
   linting:
     runs-on: ubuntu-latest
