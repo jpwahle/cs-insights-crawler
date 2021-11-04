@@ -1,6 +1,7 @@
 import os
 from collections import defaultdict
 from typing import List
+from urllib.error import HTTPError
 
 import numpy as np
 import pandas as pd
@@ -9,7 +10,6 @@ from _pytest.capture import CaptureFixture
 from _pytest.monkeypatch import MonkeyPatch
 from mock import MagicMock
 from pytest_mock import MockerFixture
-from urllib.error import HTTPError
 
 from nlpland.constants import (
     ABSTRACT_SOURCE_ANTHOLOGY,
