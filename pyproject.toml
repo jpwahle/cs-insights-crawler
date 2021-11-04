@@ -23,6 +23,7 @@ gensim = "^3.8.1"
 pyLDAvis = "^3.3.1"
 spacy = "^3.1.0"
 llvmlite="^0.37.0"
+dask="^2021.10.0"
 umap-learn = {extras = ["plot"], version = "^0.5.1"}
 en-core-web-sm = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.1.0/en_core_web_sm-3.1.0-py3-none-any.whl"}
 # en-core-web-trf = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_trf-3.1.0/en_core_web_trf-3.1.0-py3-none-any.whl"}

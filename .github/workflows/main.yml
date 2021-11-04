@@ -1,9 +1,11 @@
-# .github/workflows/tests.yml
-name: Tests
-on: push
+name: CI
+on:
+  pull_request:
+    branches:
+      - dev
 jobs:
   tests:
-    runs-on: [self-hosted, dke]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -25,9 +27,10 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       - name: Run tests
         run: |
-          poetry run py.test tests -s --cov=nlpland --cov-report=term-missing --cov-fail-under 90
+          poetry run py.test tests -s --cov=nlpland --cov-report=xml --cov-fail-under 97
+
   linting:
-    runs-on: [self-hosted, dke]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -51,7 +54,7 @@ jobs:
         run: |
           poetry run pylint nlpland -j 4 --reports=y
   typing:
-    runs-on: [self-hosted, dke]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
