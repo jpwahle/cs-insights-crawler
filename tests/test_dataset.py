@@ -1,15 +1,16 @@
 import os
-import urllib.error
 from collections import defaultdict
-from unittest.mock import mock_open
+from typing import List
+from urllib.error import HTTPError
 
 import numpy as np
 import pandas as pd
 import pytest
-from mock import call
+from _pytest.capture import CaptureFixture
+from _pytest.monkeypatch import MonkeyPatch
+from mock import MagicMock
 from pytest_mock import MockerFixture
 
-from nlpland.data import dataset
 from nlpland.constants import (
     ABSTRACT_SOURCE_ANTHOLOGY,
     ABSTRACT_SOURCE_RULE,
@@ -17,31 +18,38 @@ from nlpland.constants import (
     COLUMN_ABSTRACT_SOURCE,
     MISSING_PAPERS,
 )
+from nlpland.data import dataset
 
 df_missing = pd.DataFrame([["c", "http://abc/c.pdf"]])
 
 
 @pytest.fixture()
-def mock_env_papers(monkeypatch):
+def mock_env_papers(monkeypatch: MonkeyPatch) -> None:
     monkeypatch.setenv("PATH_PAPERS", "papers")
 
 
 @pytest.fixture()
-def readcsv(mocker: MockerFixture):
+def readcsv(mocker: MockerFixture) -> MagicMock:
     yield mocker.patch("pandas.read_csv", return_value=df_missing)
 
 
 @pytest.fixture()
-def makedirs(mocker: MockerFixture):
+def makedirs(mocker: MockerFixture) -> MagicMock:
     yield mocker.patch("os.makedirs")
 
 
 @pytest.fixture()
-def urlretrieve(mocker: MockerFixture):
+def urlretrieve(mocker: MockerFixture) -> MagicMock:
     yield mocker.patch("urllib.request.urlretrieve")
 
 
-def test_download_papers(mock_env_papers, readcsv, makedirs, urlretrieve):
+def test_download_papers(
+    mocker: MockerFixture,
+    mock_env_papers: pytest.fixture,
+    readcsv: MagicMock,
+    makedirs: MagicMock,
+    urlretrieve: MagicMock,
+) -> None:
     df_papers = pd.DataFrame(
         {
             "AA year of publication": [2010, 2011],
@@ -54,20 +62,24 @@ def test_download_papers(mock_env_papers, readcsv, makedirs, urlretrieve):
     readcsv.assert_called()
 
     makedirs_calls = [
-        call("papers/2010/ACL", exist_ok=True),
-        call("papers/2011/EMNLP", exist_ok=True),
+        mocker.call("papers/2010/ACL", exist_ok=True),
+        mocker.call("papers/2011/EMNLP", exist_ok=True),
     ]
     makedirs.assert_has_calls(makedirs_calls)
     urlretrieve_calls = [
-        call("https://www.aclweb.org/anthology/a.pdf", "papers/2010/ACL/a.pdf"),
-        call("https://abc/b.pdf", "papers/2011/EMNLP/b.pdf"),
+        mocker.call("https://www.aclweb.org/anthology/a.pdf", "papers/2010/ACL/a.pdf"),
+        mocker.call("https://abc/b.pdf", "papers/2011/EMNLP/b.pdf"),
     ]
     urlretrieve.assert_has_calls(urlretrieve_calls)
 
 
 def test_download_papers_skip_request(
-    mocker: MockerFixture, mock_env_papers, readcsv, makedirs, urlretrieve
-):
+    mocker: MockerFixture,
+    mock_env_papers: MagicMock,
+    readcsv: MagicMock,
+    makedirs: MagicMock,
+    urlretrieve: MagicMock,
+) -> None:
     df_paper = pd.DataFrame(
         {
             "AA year of publication": [2010],
@@ -86,7 +98,9 @@ def test_download_papers_skip_request(
     urlretrieve.assert_not_called()
 
 
-def test_download_papers_error(mocker: MockerFixture, mock_env_papers, readcsv, makedirs):
+def test_download_papers_error(
+    mocker: MockerFixture, mock_env_papers: MagicMock, readcsv: MagicMock, makedirs: MagicMock
+) -> None:
     df_paper = pd.DataFrame(
         {
             "AA year of publication": [2010],
@@ -97,9 +111,9 @@ def test_download_papers_error(mocker: MockerFixture, mock_env_papers, readcsv, 
     )
     urlretrieve = mocker.patch(
         "urllib.request.urlretrieve",
-        side_effect=[urllib.error.HTTPError("http://url.com", 404, "", {"": ""}, None)],
+        side_effect=[HTTPError("http://url.com", 404, "", {}, None)],  # type: ignore
     )
-    open_ = mock_open(mock=mocker.patch("builtins.open"))
+    open_ = mocker.mock_open(mock=mocker.patch("builtins.open"))
 
     dataset.download_papers(df_paper)
 
@@ -108,7 +122,7 @@ def test_download_papers_error(mocker: MockerFixture, mock_env_papers, readcsv, 
     open_().write.assert_called_once_with("a\thttp://abc/a.pdf\n")
 
 
-def test_save_load_dataset(monkeypatch):
+def test_save_load_dataset(monkeypatch: MonkeyPatch) -> None:
     df_paper = pd.DataFrame(
         {
             "NS venue name": [np.nan],
@@ -126,7 +140,6 @@ def test_save_load_dataset(monkeypatch):
     assert df_paper_loaded.equals(df_paper)
 
     df_paper_loaded.at["a", COLUMN_ABSTRACT] = "test"
-    # df_paper_loaded[COLUMN_ABSTRACT] = df_paper_loaded[COLUMN_ABSTRACT].replace([])
     dataset.save_dataset(df_paper_loaded)
     df_paper_loaded2 = dataset.load_dataset(original_dataset=False)
     assert df_paper_loaded2.equals(df_paper_loaded)
@@ -142,13 +155,15 @@ def test_save_load_dataset(monkeypatch):
         ("cb ad", ["a", "c"], 0, "c"),
     ],
 )
-def test_determine_earliest_string(text, possible_strings, earliest_pos, earliest_string):
+def test_determine_earliest_string(
+    text: str, possible_strings: List[str], earliest_pos: int, earliest_string: str
+) -> None:
     assert (earliest_pos, earliest_string) == dataset.determine_earliest_string(
         text, possible_strings
     )
 
 
-def test_print_results_extract_abstracts_rulebased(capfd):
+def test_print_results_extract_abstracts_rulebased(capfd: CaptureFixture) -> None:
     duration = (1, 2, 3, 4, 5, 6, 7, 8, 9)
     count_dict: dict = defaultdict(int)
     count_dict["searched"] += 3
@@ -169,7 +184,7 @@ def test_print_results_extract_abstracts_rulebased(capfd):
         ("Abstract\ntext\n\nIntroduction\n\n", "text"),
     ],
 )
-def test_helper_abstracts_rulebased(mocker, text, expected):
+def test_helper_abstracts_rulebased(mocker: MockerFixture, text: str, expected: str) -> None:
     df_paper = pd.DataFrame(
         {"NS venue name": ["ACL"], "AA year of publication": [2010]}, index=["a"]
     )
@@ -187,7 +202,9 @@ def test_helper_abstracts_rulebased(mocker, text, expected):
     "overwrite, calls",
     [(False, 1), (True, 2)],
 )
-def test_extract_abstracts_rulebased(mocker, monkeypatch, overwrite, calls):
+def test_extract_abstracts_rulebased(
+    mocker: MockerFixture, monkeypatch: MonkeyPatch, overwrite: bool, calls: int
+) -> None:
     df_full = pd.DataFrame({})
     df_return = pd.DataFrame({}, index=["z"])
     df_select = pd.DataFrame(
@@ -214,7 +231,7 @@ def test_extract_abstracts_rulebased(mocker, monkeypatch, overwrite, calls):
     assert helper.call_count == calls
 
 
-def test_extract_abstracts_anthology(monkeypatch):
+def test_extract_abstracts_anthology(monkeypatch: MonkeyPatch) -> None:
     xml1 = """
     <collection id="2010.abc">
       <volume id="1">
