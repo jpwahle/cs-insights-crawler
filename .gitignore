@@ -70,6 +70,8 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+# pdoc documentation
+docs/
 
 # PyBuilder
 .pybuilder/
@@ -147,3 +149,4 @@ output/
 resources/
 poetry.lock
 .coverage
+.DS_Store

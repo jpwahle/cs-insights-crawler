@@ -194,9 +194,6 @@ def fasttext(train: bool, name: str, **kwargs: FILTER_DATATYPES) -> None:
         train: If True, retrain the model with the given data.
         name: Name of the model.
         **kwargs: Dict of filter to apply to the data before analyzing the data.
-
-    Returns:
-
     """
     df_filtered = filter_.get_filtered_df(kwargs)
     semantic_.semantic(df_filtered, train, name)

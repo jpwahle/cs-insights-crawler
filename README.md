@@ -168,7 +168,7 @@ The filters to specify the subsets are mentioned further down.
 
 The option `--fast` uses the spacy model `en_core_web_sm` instead of `en_core_web_trf`.
 It will be faster, but less accurate.
-Some lemmas might be incorrect.
+Some lemmas might be incorrect. Warning: currently the use of `--fast` is required.
 
 The option `--name <name>` or `-n` allows to name the file the plot will be saved to.
 

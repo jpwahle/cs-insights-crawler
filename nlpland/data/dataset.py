@@ -1,30 +1,29 @@
 """This module offers functions to create the dataset (download papers, extract abstracts), save and
-load it."""
+load it.
+"""
 import os
 import time
 import urllib.error
 import urllib.request
 from collections import defaultdict
-from typing import List, Tuple, Dict
-from lxml import etree
+from typing import Dict, List, Tuple
 
-
+import lxml.etree
 import pandas as pd
 import tika
+from lxml import etree
 from tika import parser
 from tqdm import tqdm
-
-# from collections import defaultdict
 
 from nlpland.constants import (
     ABSTRACT_SOURCE_ANTHOLOGY,
     ABSTRACT_SOURCE_RULE,
     COLUMN_ABSTRACT,
     COLUMN_ABSTRACT_SOURCE,
-    MISSING_PAPERS,
-    START_STRINGS,
     END_STRINGS_1,
     END_STRINGS_2,
+    MISSING_PAPERS,
+    START_STRINGS,
 )
 from nlpland.data.clean import clean_paper_id, clean_venue_name
 
@@ -122,14 +121,9 @@ def print_results_extract_abstracts_rulebased(
     Args:
         count_dict: Dict containing all counts
         duration: Duration the procedure took
-
-    Returns:
-        None
     """
     print(f"Papers iterated: {count_dict['iterated']} matching filters")
-    print(
-        f"Abstracts searched: {count_dict['searched']} abstracts searched"
-    )
+    print(f"Abstracts searched: {count_dict['searched']} abstracts searched")
     print(f"Abstracts skipped: {count_dict['skipped']} already existed")
     print(f"none: {count_dict['nones']} texts of papers are None")
     print(f"index: {count_dict['index_err']} abstracts not found")
@@ -141,7 +135,7 @@ def print_results_extract_abstracts_rulebased(
 def helper_abstracts_rulebased(
     index: str, count_dict: Dict[str, int], path_papers: str, df_full: pd.DataFrame
 ) -> pd.DataFrame:
-    """Helper function for the abstract extraction method
+    """Helper function for the abstract extraction method.
 
     Args:
         index: The current index.
@@ -232,7 +226,7 @@ def extract_abstracts_rulebased(
 
 
 def helper_abstracts_anthology(
-    volume,
+    volume: lxml.etree.Element,
     df_papers: pd.DataFrame,
     counter_dict: Dict[str, int],
     collection_id: str,
@@ -250,6 +244,10 @@ def helper_abstracts_anthology(
         counter_dict: The count dict for all counts.
         collection_id: The current collection id.
         volume_id: The current volume id.
+
+    Returns:
+        Filled counter_dict.
+        Filled dataframe with papers.
     """
     for paper in volume.iter("paper"):
         children = paper.getchildren()
