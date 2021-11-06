@@ -29,10 +29,10 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       - name: Run linting
         run: |
-          poetry run pylint nlpland -j 4 --reports=y
+          poetry run flake8 .
       - name: Run tests
         run: |
-          poetry run py.test tests -s --cov=nlpland --cov-report=term-missing --cov-fail-under 97
+          poetry run py.test tests -s --cov=nlpland --cov-report=xml --cov-fail-under 97
       - name: Upload coverage report
         uses: codecov/codecov-action@v2
         with:
