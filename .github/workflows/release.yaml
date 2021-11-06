@@ -71,3 +71,20 @@ jobs:
           tag_name: ${{steps.tagging.outputs.tag}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  Docs:
+    name: Push docs to release Branch
+    needs: [fulltests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Checkout
+        run: |
+          poetry run pdoc --output-dir docs --html nlpland
+
+      - name: Deploy docs 🚀
+        uses: JamesIves/github-pages-deploy-action@4.0.0
+        with:
+          branch: docs
+          folder: ./docs/nlpland
