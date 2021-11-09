@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import nlpland.data.check as check_
 import nlpland.data.dataset as dataset_
 import nlpland.data.filter as filter_
+import nlpland.dblp.download as download_
 import nlpland.modules.count as count_
 import nlpland.modules.scatter as scatter_
 import nlpland.modules.semantic as semantic_
@@ -208,6 +209,11 @@ def fasttext(train: bool, name: str, **kwargs: FILTER_DATATYPES) -> None:
 # def umap(**kwargs: FILTER_DATATYPES) -> None:
 #     df_filtered = filter_.get_filtered_df(kwargs)
 #     semantic_.plot(df)
+
+
+@cli.command()
+def dblp() -> None:
+    download_.download()
 
 
 @cli.command()
