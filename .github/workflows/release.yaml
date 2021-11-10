@@ -29,10 +29,10 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       - name: Run linting
         run: |
-          poetry run pylint nlpland -j 4 --reports=y
+          poetry run flake8 .
       - name: Run tests
         run: |
-          poetry run py.test tests -s --cov=nlpland --cov-report=term-missing --cov-fail-under 97
+          poetry run py.test tests -s --cov=nlpland --cov-report=xml --cov-fail-under 97
       - name: Upload coverage report
         uses: codecov/codecov-action@v2
         with:
@@ -71,3 +71,32 @@ jobs:
           tag_name: ${{steps.tagging.outputs.tag}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  Docs:
+    name: Push docs to release Branch
+    needs: [fulltests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v2
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Install dependencies
+        run: poetry install
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      - name: Generate docs
+        run: |
+          poetry run pdoc --output-dir docs --html nlpland
+      - name: Deploy docs 🚀
+        uses: JamesIves/github-pages-deploy-action@4.0.0
+        with:
+          branch: docs
+          folder: ./docs/nlpland

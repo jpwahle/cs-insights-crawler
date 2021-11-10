@@ -1,5 +1,6 @@
 """This module includes multiple functions to analyze the consistency and amount of metadata
-(especially abstracts) of a given dataset."""
+(especially abstracts) of a given dataset.
+"""
 import os
 
 import numpy as np

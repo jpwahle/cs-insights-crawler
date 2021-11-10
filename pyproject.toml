@@ -26,7 +26,7 @@ llvmlite="^0.37.0"
 dask="^2021.10.0"
 umap-learn = {extras = ["plot"], version = "^0.5.1"}
 en-core-web-sm = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.1.0/en_core_web_sm-3.1.0-py3-none-any.whl"}
-en-core-web-trf = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_trf-3.1.0/en_core_web_trf-3.1.0-py3-none-any.whl"}
+# en-core-web-trf = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_trf-3.1.0/en_core_web_trf-3.1.0-py3-none-any.whl"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
@@ -34,8 +34,16 @@ pytest-cov = "^3.0.0"
 black = "^21.9b0"
 isort = "^5.9.3"
 pyright = "^0.0.10"
-pylint = "^2.11.1"
 pytest-mock = "^3.6.1"
+flake8 = "^4.0.1"
+flake8-black = "^0.2.3"
+flake8-isort = "^4.1.1"
+flake8-annotations = "^2.7.0"
+flake8-docstrings = "^1.6.0"
+flake8-bugbear = "^21.9.2"
+flake8-comprehensions = "^3.7.0"
+darglint = "^1.8.1"
+pdoc3 = "^0.10.0"
 
 [tool.poetry.scripts]
 cli = "nlpland.cli:cli"
@@ -43,6 +51,9 @@ cli = "nlpland.cli:cli"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
 
 [tool.black]
 line-length = 100

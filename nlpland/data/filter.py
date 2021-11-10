@@ -15,7 +15,7 @@ from nlpland.constants import (
 )
 
 
-def df_filter_options(function: Callable, second_df: bool = False):
+def df_filter_options(function: Callable, second_df: bool = False) -> Callable:
     """Combine multiple CLI filter options in one annotation.
 
     The use of second_df enables the use of a second set of the same filters.
@@ -41,7 +41,7 @@ def df_filter_options(function: Callable, second_df: bool = False):
     return function
 
 
-def df_filter_options2(function: Callable):
+def df_filter_options2(function: Callable) -> Callable:
     """Provide an annotation for a second set of the same CLI filter options.
 
     Args:
@@ -53,9 +53,7 @@ def df_filter_options2(function: Callable):
     return df_filter_options(function, second_df=True)
 
 
-def mask_data(df_filtered: pd.DataFrame,
-              data_select: str,
-              ) -> pd.DataFrame:
+def mask_data(df_filtered: pd.DataFrame, data_select: str) -> pd.DataFrame:
     """Mask the data (tiles/abstracts) in given dataframe based on given conditions.
 
     Args:
@@ -124,9 +122,7 @@ def get_filtered_df(
 
     author = filters.get("author" + sec)
     if author:
-        df_filtered = df_filtered[
-            df_filtered["AA authors list"].str.contains(author, case=False)
-        ]
+        df_filtered = df_filtered[df_filtered["AA authors list"].str.contains(author, case=False)]
 
     fauthor = filters.get("fauthor" + sec)
     if fauthor:
@@ -155,9 +151,7 @@ def attributes_to_list(attributes: str) -> List[str]:
     return attributes_list
 
 
-def category_names(
-    filters: Dict[str, FILTER_DATATYPES], second_df: bool = False
-) -> List[str]:
+def category_names(filters: Dict[str, FILTER_DATATYPES], second_df: bool = False) -> List[str]:
     """Turn the dict of filters into a list of attributes of the set filters to name a category.
 
     Ignore the second set of filters, which options end with "2", unless specified.
@@ -171,9 +165,7 @@ def category_names(
     """
     category_name = []
     for key, value in filters.items():
-        if value is not None and (
-            ("2" in key and second_df) or ("2" not in key and not second_df)
-        ):
+        if value is not None and (("2" in key and second_df) or ("2" not in key and not second_df)):
             if not isinstance(value, bool):
                 category_name.append(value)
             elif value:

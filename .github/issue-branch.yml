@@ -1,0 +1,3 @@
+branchName: short
+defaultBranch: 'dev'
+autoCloseIssue: true
