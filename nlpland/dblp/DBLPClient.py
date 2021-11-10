@@ -6,6 +6,8 @@ from typing import Optional, List
 
 import requests
 from bs4 import BeautifulSoup
+from lxml import etree
+from lxml.etree import XMLSyntaxError
 from tqdm import tqdm
 
 
@@ -45,9 +47,21 @@ class DBLPClient:
 
         return file_list
 
-    def latest_url_for_extension(self, extension: str) -> str:
-        latest_url = next(url for url in self.releases if url.endswith(extension))
+    def latest_url_for_extension(self, extension: str, n: int = 1) -> str:
+        iterator = (url for i, url in enumerate(self.releases) if url.endswith(extension))
+        latest_url = ""
+        for i in range(n):
+            latest_url = next(iterator)
+            print(latest_url)
         return latest_url
+
+    # def second_latest_url_for_extension(self, extension: str) -> str:
+    #     first = True
+    #     for url in self.releases:
+    #         if url.endswith(extension):
+    #             if first:
+    #                 first = False
+    #     latest_url = [i for i, n in enumerate(a) if n == 's'][0]
 
     def check_md5(self, filepath: str, md5: str) -> bool:
         return self.local_md5(filepath) == md5
@@ -100,7 +114,7 @@ class DBLPClient:
                 print("Hash of downloaded file does not match. Please try again.")
         return file_path
 
-    def unzip_xml_gz(self, file_path_in: str) -> None:
+    def unzip_xml_gz(self, file_path_in: str) -> str:
         # Unzip the dataset if zipped
         if file_path_in.endswith(".gz"):
             file_path_out = file_path_in[:-3]
@@ -110,6 +124,29 @@ class DBLPClient:
                 with gzip.open(file_path_in, "rb") as f_in, open(file_path_out, "wb") as f_out:
                     shutil.copyfileobj(f_in, f_out)
                 print(f"Saved file {file_path_out}")
+            return file_path_out
+
+    def validate_xml(self, file_path_xml: str) -> None:
+        # dtd needs to be in the same directory as the xml
+        try:
+            parser = etree.XMLParser(dtd_validation=True)
+            etree.parse(file_path_xml, parser)
+            print("XML matches DTD.")
+        except XMLSyntaxError as e:
+            print("XML does not match DTD.")
+            print(e)
+
+    def create_diff(self, file_path_1, file_path_2):
+        if os.path.isfile(file_path_2):
+            # from lxml import etree
+            from xmldiff import main, formatting
+
+            diff = main.diff_files(file_path_1, file_path_2,
+                                   formatter=formatting.XMLFormatter())
+            print(diff)
+        else:
+            # first run, everything is new
+            pass
 
     def download_paper(self):
         pass
