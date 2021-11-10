@@ -76,20 +76,14 @@ act -j linting -P self-hosted=nektos/act-environments-ubuntu:18.04
 
 ### Deploys and naming conventions
   
-Each feature request, bug, enhancement, etc. has to be related to an issue. We have templates for bugs and features requests when you create an issue on GitHub.
-An issue should be a closed component that can be implemented by one developer in 1 day. If the issue is larger than that, split it into smaller components.
-To identify the issue, we use labels such as `bug` or `enhancement`.
-
-When you assign an issue to yourself, a branch is created automatically from the dev branch. When you are done developing, you can create a pull request to the dev branch. When multiple issues are merged, and Owner will merge the dev branch into the main branch which will trigger a release and deploy automatically.
+New Git and GitHub deploys, releases, as well as changelogs are automatically created and deployed when a pull request is merged from the `dev` into the `main` branch.
+Every time you want to develop a new feature, create an issue and assign yourself to that issue. This will trigger a GitHub action that creates a new issue from the dev branch.
+When you are done developing, create a commit with a message that includes "#patch", "#minor", or "#major" according to the semantic versioning [specification](https://semver.org/).
+Next, create a pull request to the `dev` branch. Assign the pull request one of the labels "fix", "feature", or "test" so they appear correctly later in the changelogs.
   
-We group issues using a task list in another issue that has the `Epic` label. These issues are larger components that need to be developed.
-Each issue with the `Epic` label has a task list with each element of the task list being a issue (e.g., this one [#47](https://github.com/ag-gipp/NLPLand/issues/47)). Whenever a pull request with the above convention gets merged, the corresponding issue gets closed, and the task in the Epic gets checked.
-
-To indicate whether a commit is a patch, minor, or major update, please use #patch, #minor, #major in the commit message.
-See [here](https://github.com/anothrNick/github-tag-action) for more information what that means.
-
-To build changelogs, each pull-request needs one of the labels "fix", "feature", or "test". See [here](https://github.com/mikepenz/release-changelog-builder-action) for more information.
-
+Also, we group issues using a task list in another issue that has the `Epic` label. These issues are larger components that need to be developed.
+Each issue with the `Epic` label has a task list with each element of the task list being a issue (e.g., this one [#47](https://github.com/ag-gipp/NLPLand/issues/47)).
+  
 ### Paths
   
 `PATH_DATASET` is the path to the `.txt` file of the [NLP Scholar dataset](http://saifmohammad.com/WebPages/nlpscholar.html).
