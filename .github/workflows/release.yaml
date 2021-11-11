@@ -61,8 +61,8 @@ jobs:
         run: poetry install
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       - name: Run tests
-      run: |
-        poetry run py.test tests -s --cov=nlpland --cov-report=xml --cov-fail-under 97
+        run: |
+          poetry run py.test tests -s --cov=nlpland --cov-report=xml --cov-fail-under 97
       - name: Upload coverage report
         uses: codecov/codecov-action@v2
         with:
