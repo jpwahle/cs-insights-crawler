@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 from lxml import etree
 from lxml.etree import XMLSyntaxError
 from tqdm import tqdm
+from xmldiff import main, formatting
 
 
 class DBLPClient:
@@ -54,14 +55,6 @@ class DBLPClient:
             latest_url = next(iterator)
             print(latest_url)
         return latest_url
-
-    # def second_latest_url_for_extension(self, extension: str) -> str:
-    #     first = True
-    #     for url in self.releases:
-    #         if url.endswith(extension):
-    #             if first:
-    #                 first = False
-    #     latest_url = [i for i, n in enumerate(a) if n == 's'][0]
 
     def check_md5(self, filepath: str, md5: str) -> bool:
         return self.local_md5(filepath) == md5
@@ -138,9 +131,6 @@ class DBLPClient:
 
     def create_diff(self, file_path_1, file_path_2):
         if os.path.isfile(file_path_2):
-            # from lxml import etree
-            from xmldiff import main, formatting
-
             diff = main.diff_files(file_path_1, file_path_2,
                                    formatter=formatting.XMLFormatter())
             print(diff)
