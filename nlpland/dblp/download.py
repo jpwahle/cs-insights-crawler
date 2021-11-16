@@ -1,4 +1,4 @@
-from nlpland.dblp.DBLPClient import DBLPClient
+from nlpland.dblp.dblpclient import DBLPClient
 
 
 def download():

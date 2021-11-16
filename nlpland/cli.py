@@ -227,8 +227,6 @@ def test() -> None:
         "one two, three.\n four-five, se-\nven, open-\nsource, se-\nve.n, ",
     ]
     print(corpus)
-    # import nltk
-    # print(nltk.stem.WordNetLemmatizer().lemmatize("models"))
 
 
 if __name__ == "__main__":
