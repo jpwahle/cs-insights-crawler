@@ -6,7 +6,7 @@ on:
     types: [closed]
 
 jobs:
-  fulltests:
+  Fulltests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -33,17 +33,13 @@ jobs:
       - name: Run tests
         run: |
           poetry run py.test tests -s --cov=nlpland --cov-report=xml --cov-fail-under 97
-      - name: Upload coverage report
-        uses: codecov/codecov-action@v2
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.xml
       - name: Run typing
         run: |
           poetry run pyright nlpland
+
   Release:
     if: github.event.pull_request.merged == true
-    needs: [fulltests]
+    needs: [Fulltests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -63,6 +59,20 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update package version to git tag
+        run: |
+          poetry version $(git describe --tags --abbrev=0)
+      - name: Commit files
+        run: |
+          git config --local user.email "jan.philip.wahle@gmail.com"
+          git config --local user.name "github-actions[bot]"
+          git add package.json
+          git commit -m "[release-bot] Update pyproject.toml version"
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.ACCESS_TOKEN }}
+          branch: ${{ github.ref }}
       - name: Create Release
         uses: actions/create-release@v1
         with:
@@ -71,9 +81,38 @@ jobs:
           tag_name: ${{steps.tagging.outputs.tag}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  Coverage:
+    if: github.event.pull_request.merged == true
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+    - name: Install poetry
+      uses: snok/install-poetry@v1
+      with:
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v2
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+    - name: Install dependencies
+      run: poetry install
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+    - name: Run tests
+      run: |
+        poetry run py.test tests -s --cov=nlpland --cov-report=xml --cov-fail-under 97
+    - name: Upload coverage report
+      uses: codecov/codecov-action@v2
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+
   Docs:
-    name: Push docs to release Branch
-    needs: [fulltests]
+    needs: [Fulltests]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
