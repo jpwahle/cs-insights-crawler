@@ -6,7 +6,7 @@ on:
     types: [closed]
 
 jobs:
-  fulltests:
+  Fulltests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -33,17 +33,13 @@ jobs:
       - name: Run tests
         run: |
           poetry run py.test tests -s --cov=nlpland --cov-report=xml --cov-fail-under 97
-      - name: Upload coverage report
-        uses: codecov/codecov-action@v2
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.xml
       - name: Run typing
         run: |
           poetry run pyright nlpland
+
   Release:
     if: github.event.pull_request.merged == true
-    needs: [fulltests]
+    needs: [Fulltests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -85,9 +81,38 @@ jobs:
           tag_name: ${{steps.tagging.outputs.tag}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  Coverage:
+    if: github.event.pull_request.merged == true
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+    - name: Install poetry
+      uses: snok/install-poetry@v1
+      with:
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v2
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+    - name: Install dependencies
+      run: poetry install
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+    - name: Run tests
+      run: |
+        poetry run py.test tests -s --cov=nlpland --cov-report=xml --cov-fail-under 97
+    - name: Upload coverage report
+      uses: codecov/codecov-action@v2
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+
   Docs:
-    name: Push docs to release Branch
-    needs: [fulltests]
+    needs: [Fulltests]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
