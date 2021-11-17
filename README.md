@@ -13,13 +13,18 @@
 
 ### poetry
 
-First download poetry as explained here: https://python-poetry.org/docs/#installation
+First download poetry as explained [here](https://python-poetry.org/docs/#installation) or run
 
-Also make sure you have python 3.7 installed.
+```console
+pip install poetry
+```
 
-Next, clone the repository and navigate to the root folder `NLPLand` in a shell.
-Execute `poetry install` there.
-This will install all the dependencies this project needs.
+Then install dependencies with
+
+```console
+poetry install
+```
+
 If you are in a virtual environment it will install all dependencies there, otherwise it will create a new one.
 (Should poetry not be able to find a python 3.7 installation, specify the python path using `poetry env use <path>` to create a venv based on the given python version.)
 
@@ -49,9 +54,9 @@ We also use naming conventions for branches, commits, and pull requests to lever
 
 In the following we will describe how to run checks locally and which naming conventions we use.
 
-### CI locally
+### CI
 
-To run the test pipeline locally, make sure to install act from [here](https://github.com/nektos/act).
+To run the CI pipeline locally, make sure to install act from [here](https://github.com/nektos/act).
 
 To run the full check suite, execute:
 
@@ -69,22 +74,17 @@ act -j linting -P self-hosted=nektos/act-environments-ubuntu:18.04
 
 Each feature request, bug, enhancement, etc. has to be related to an issue. We have templates for bugs and features requests when you create an issue on GitHub.
 An issue should be a closed component that can be implemented by one developer in 1 day. If the issue is larger than that, split it into smaller components.
-To identify the issue, we use labels such as `bug` or `enhancement`.
-
-To start a new branch, please use the naming convention `{issue_number}`\_`{short_issue_acronym}`. When you are done working on the branch, include the following text in the last commit message `fixes {issue_numer}`. Then create a pull request including the text `resolves {issue_number}`.
 
 We group issues using a task list in another issue that has the `Epic` label. These issues are larger components that need to be developed.
 Each issue with the `Epic` label has a task list with each element of the task list being a issue (e.g., this one [#47](https://github.com/ag-gipp/NLPLand/issues/47)).
 Whenever a pull request with the above convention gets merged, the corresponding issue gets closed, and the task in the Epic gets checked.
 
+When a branch is assigned to you, a new issue will be created from the `dev` branch including the issue number.
+
 To indicate whether the PR is a patch, minor, or major update, please use #patch, #minor, #major in the last commit message of the PR and in the PR description.
 See [here](https://github.com/anothrNick/github-tag-action) for more information.
 
 To build changelogs, each pull-request needs one of the labels "fix", "feature", or "test". See [here](https://github.com/mikepenz/release-changelog-builder-action) for more information.
-
-`PATH_DATASET` is the path to the `.txt` file of the [NLP Scholar dataset](http://saifmohammad.com/WebPages/nlpscholar.html).
-
-`PATH_DATASET_EXPANDED` is the path to the `.txt` file of the expanded dataset or where it is supposed to be created.
 
 ## Contributing
 
