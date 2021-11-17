@@ -1,5 +1,3 @@
-# Package **NLP-Land-crawler**
-
 The NLP-Land-crawler provides information retrieval functionalities for [dblp](https://dblp.org/), extracting and pre-processing abstracts, and storing data to the [NLP-Land-backend](https://github.com/ag-gipp/NLP-Land-backend).
 
 The package provides the following funcitonalities:
