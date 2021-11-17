@@ -63,6 +63,20 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update package version to git tag
+        run: |
+          poetry version $(git describe --tags --abbrev=0)
+      - name: Commit files
+        run: |
+          git config --local user.email "jan.philip.wahle@gmail.com"
+          git config --local user.name "github-actions[bot]"
+          git add package.json
+          git commit -m "[release-bot] Update pyproject.toml version"
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.ACCESS_TOKEN }}
+          branch: ${{ github.ref }}
       - name: Create Release
         uses: actions/create-release@v1
         with:
