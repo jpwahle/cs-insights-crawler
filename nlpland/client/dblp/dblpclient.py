@@ -1,18 +1,33 @@
+from datetime import datetime
 import gzip
 import hashlib
 from io import BufferedReader
 import os
 import shutil
-from typing import Optional, List
+from typing import Optional, List, Union
 
 import requests
 from bs4 import BeautifulSoup
 from lxml import etree
-from lxml.etree import XMLSyntaxError
 from tqdm import tqdm
-from xmldiff import main, formatting
+
+from nlpland.log.logger import LogMixin
 
 # region helpers
+
+
+def local_md5(filepath: str) -> str:
+    with open(filepath, "rb") as f:
+        return md5_in_chunks(f)
+
+
+def remote_md5(file_url: str) -> str:
+    md5_url = file_url + ".md5"
+    page = requests.get(md5_url).text
+    md5 = page.partition(" ")[0]
+    return md5
+
+
 def md5_in_chunks(file: BufferedReader, block_size=2 ** 20):
     md5 = hashlib.md5()
     while True:
@@ -23,10 +38,26 @@ def md5_in_chunks(file: BufferedReader, block_size=2 ** 20):
     return md5.hexdigest()
 
 
+def download_in_chunks(url: str, file_path: str, chunk_size: int = 1024) -> None:
+    response = requests.get(url, stream=True)
+    total_size_in_bytes = int(response.headers.get("content-length", 0))
+
+    progress_bar = tqdm(unit="B", total=total_size_in_bytes)
+    with open(file_path, "wb") as file:
+        for chunk in response.iter_content(chunk_size=chunk_size):
+            if chunk:
+                progress_bar.update(len(chunk))
+                file.write(chunk)
+
+
+def compare_md5(md5_1: str, md5_2: str) -> bool:
+    return md5_1 == md5_2
+
+
 # endregion
 
 
-class DBLPClient:
+class DBLPClient(LogMixin):
     def __init__(
         self,
         cache_dir: str,
@@ -57,6 +88,28 @@ class DBLPClient:
     def releases(self, new_releases: List[str]) -> None:
         self._releases = new_releases
 
+    def download_and_filter_release(self, from_timestamp: Union[str, int, datetime.date]) -> None:
+        # TODO implement
+        # 1. fetch latest release
+        # 2. Filter XML for all files that have not been touched after `from_timestamp`
+        # 3. Return a dataset with all entities in a geberic format
+
+        # download latest dtd
+        dtd_url = self.get_latest_release_file(extension=".dtd")
+        file_path_dtd = self.download_dtd(dtd_url)
+
+        # download latest xml.gz
+        xml_gz_url = self.get_latest_release_file(extension=".xml.gz")
+        file_path_gz = self.download_xml(xml_gz_url)
+        file_path_xml = self.unzip_xml_gz(file_path_gz)
+
+        # TODO: load xml in memory and validate against dtd schema
+        xml = self.load_xml(file_path_xml)
+
+        # TODO: filter xml according to `from_timestamp`
+
+        # TODO: return an instance of a XMLDataset
+
     def fetch_releases(self, desc: bool = True) -> List[str]:
         url = f"{self.base_url}/release"
         page = requests.get(url).text
@@ -70,7 +123,7 @@ class DBLPClient:
 
         return file_list
 
-    def latest_url_for_extension(self, extension: str, n: int = 1) -> str:
+    def get_latest_release_file(self, extension: str, n: int = 1) -> str:
         iterator = (url for url in self.releases if url.endswith(extension))
         latest_url = ""
         for _ in range(n):
@@ -78,100 +131,48 @@ class DBLPClient:
             print(latest_url)
         return latest_url
 
-    def check_md5(self, filepath: str, md5: str) -> bool:
-        return self.local_md5(filepath) == md5
-
-    def local_md5(self, filepath: str) -> str:
-        with open(filepath, "rb") as f:
-            return md5_in_chunks(f)
-
-    def remote_md5(self, file_url: str) -> str:
-        md5_url = file_url + ".md5"
-        page = requests.get(md5_url).text
-        md5 = page.partition(" ")[0]
-        return md5
-
-    def download_in_chunks(self, url: str, file_path: str, chunk_size: int = 1024) -> None:
-        response = requests.get(url, stream=True)
-        total_size_in_bytes = int(response.headers.get("content-length", 0))
-
-        progress_bar = tqdm(unit="B", total=total_size_in_bytes)
-        with open(file_path, "wb") as file:
-            for chunk in response.iter_content(chunk_size=chunk_size):
-                if chunk:
-                    progress_bar.update(len(chunk))
-                    file.write(chunk)
-
     def download_dtd(self, dtd_url: str) -> str:
         # If cached file is already there, skip
         dtd_name = dtd_url.rpartition("/")[-1]
         file_path = os.path.join(self.cache_dir, dtd_name)
         if os.path.isfile(file_path):
-            print("No .dtd downloaded, file already exists.")
+            self.logger.info(f"No .dtd downloaded, file already exists at {file_path}.")
         else:
             file_path = os.path.join(self.cache_dir, dtd_name)
-            self.download_in_chunks(dtd_url, file_path)
-            print(f"Saved file {file_path}")
+            download_in_chunks(dtd_url, file_path)
+            self.logger.info(f"Saved file {file_path}")
 
         return file_path
 
     def download_xml(self, file_url: str) -> Optional[str]:
         file_name = file_url.rpartition("/")[-1]
         file_path = os.path.join(self.cache_dir, file_name)
-        md5 = self.remote_md5(file_url)
+        md5_remote = remote_md5(file_url)
         # If cached file is already there and has correct md5, skip
-        if os.path.isfile(file_path) and self.check_md5(file_path, md5):
-            print("No .xml.gz downloaded, file already exists and md5 matches.")
+        if os.path.isfile(file_path) and compare_md5(local_md5(file_path), md5_remote):
+            self.logger.info("No .xml.gz downloaded, file already exists and md5 matches.")
         else:
             # Download the dataset
-            self.download_in_chunks(file_url, file_path)
-            print(f"Saved file {file_path}")
-            if not self.check_md5(file_path, md5):
-                print("Hash of downloaded file does not match.")
+            download_in_chunks(file_url, file_path)
+            self.logger.info(f"Saved file {file_path}")
+            if not compare_md5(local_md5(file_path), md5_remote):
+                self.logger.info("MD5 of downloaded file does not match.")
         return file_path
 
     def unzip_xml_gz(self, file_path_in: str) -> str:
+
         # Unzip the dataset if zipped
-        print("Unzipping file...")
+        self.logger.info("Unzipping file...")
         if file_path_in.endswith(".gz"):
             file_path_out = file_path_in[:-3]
-            # Always unzip only then it is guranteed that the md5 was matched
+            # Always unzip. Only then it is guranteed that the md5 was matched
             # Otherwise when the process is canceled we can not guarantee the file is not corrupted
             with gzip.open(file_path_in, "rb") as f_in, open(file_path_out, "wb") as f_out:
                 shutil.copyfileobj(f_in, f_out)
-            print(f"Saved file {file_path_out}")
+            self.logger.info(f"Saved file {file_path_out}")
             return file_path_out
 
-    def validate_xml(self, file_path_xml: str) -> None:
+    def load_xml(self, file_path_xml: str) -> Optional[etree.XML]:
         # dtd needs to be in the same directory as the xml
-        try:
-            parser = etree.XMLParser(dtd_validation=True)
-            etree.parse(file_path_xml, parser)
-            print("XML matches DTD.")
-        except XMLSyntaxError as e:
-            print("XML does not match DTD.")
-            print(e)
-
-    def create_diff(self, file_path_1, file_path_2):
-        # Main calculation of diff
-
-        # Apply all filters before the actual diff to save time
-
-        if os.path.isfile(file_path_2):
-            diff = main.diff_files(file_path_1, file_path_2, formatter=formatting.XMLFormatter())
-            print(diff)
-        else:
-            # first run, everything is new
-            pass
-
-    def download_paper(self):
-        pass
-
-    def get_author_by_id(self):
-        pass
-
-    def get_venue_by_id(self):
-        pass
-
-    def get_paper_by_id(self):
-        pass
+        parser = etree.XMLParser(dtd_validation=True)
+        return etree.parse(file_path_xml, parser=parser)
