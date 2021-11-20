@@ -2,15 +2,15 @@
 webpage or, if not available, from pdfs.
 """
 import asyncio
+import multiprocessing
 import os
+import random
 import shutil
 import urllib.parse
 from pathlib import Path
 from typing import Any, Callable, List, Optional, Type, TypeVar
 from urllib.parse import urljoin
 
-import multiprocessing
-import random
 import aiofiles
 import aiohttp
 from bs4 import BeautifulSoup
@@ -143,6 +143,8 @@ class DocumentCrawler(LogMixin):
             previous_request_process = current_request_process
             # Work on the data that the previous process crawled while the current process crawls the current chunk
             process_process_pdf.start()
+
+        current_request_process.join()
 
         for pdf_process in pdf_processes:
             pdf_process.join()
