@@ -1,9 +1,13 @@
-"""This module provides the entry points for the CLI commands."""
+"""This module provides the entry points for CLI commands."""
+import logging
+from typing import Any
+
 import click
 from click.testing import CliRunner
-from dotenv import load_dotenv
 
-load_dotenv()
+import nlpland.process.continous as continous_
+
+logger = logging.getLogger("nlp-land-crawler")
 
 
 @click.group()
@@ -11,9 +15,18 @@ def cli() -> None:
     """Executed before every command."""
 
 
-if __name__ == "__main__":
-    # this is for debugging via IDE
+@cli.command()
+@continous_.filter_options
+def continous(**kwargs: Any) -> None:
+    """Download the papers that match the given filters.
 
+    Args:
+        **kwargs(Any): Command line arguments for the process.
+    """
+    continous_.main(**kwargs)
+
+
+if __name__ == "__main__":
+    """Main routine for the CLI. Only for debugging purposes"""
     runner = CliRunner()
-    result = runner.invoke(count, args=["5"], catch_exceptions=False)
-    # traceback.print_exception(*result.exc_info)
+    continous(["--use_authors", "--use_affiliations"])

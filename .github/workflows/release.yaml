@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.9
       - name: Install poetry
         uses: snok/install-poetry@v1
         with:
@@ -29,13 +29,13 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       - name: Run linting
         run: |
-          poetry run flake8 .
+          poetry run poe lint
       - name: Run tests
         run: |
-          poetry run py.test tests -s --cov=nlpland --cov-report=xml --cov-fail-under 97
+          poetry run poe test
       - name: Run typing
         run: |
-          poetry run pyright nlpland
+          poetry run poe type
 
   Release:
     if: github.event.pull_request.merged == true
@@ -87,7 +87,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
       with:
-        python-version: 3.7
+        python-version: 3.9
     - name: Install poetry
       uses: snok/install-poetry@v1
       with:
@@ -104,7 +104,7 @@ jobs:
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
     - name: Run tests
       run: |
-        poetry run py.test tests -s --cov=nlpland --cov-report=xml --cov-fail-under 97
+        poetry run poe test
     - name: Upload coverage report
       uses: codecov/codecov-action@v2
       with:
@@ -133,7 +133,7 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       - name: Generate docs
         run: |
-          poetry run pdoc --output-dir docs --html nlpland
+          poetry run poe doc
       - name: Deploy docs 🚀
         uses: JamesIves/github-pages-deploy-action@4.0.0
         with:

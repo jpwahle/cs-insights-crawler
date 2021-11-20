@@ -11,41 +11,37 @@
 
 ## Installation & Setup
 
-### poetry
+### Production
 
-First download poetry as explained [here](https://python-poetry.org/docs/#installation) or run
-
-```console
-pip install poetry
-```
-
-Then install dependencies with
+To spin up the production version of this project, switch into the root directory of this project and run:
 
 ```console
-poetry install
+docker-compose up --build
 ```
 
-If you are in a virtual environment it will install all dependencies there, otherwise it will create a new one.
-(Should poetry not be able to find a python 3.7 installation, specify the python path using `poetry env use <path>` to create a venv based on the given python version.)
+### Development
 
-If you were not already in a venv, execute `poetry shell` to activate the newly created one.
-(If the command does not work, try to activate the venv manually or try another shell.)
+For development install the package in editable mode locally:
 
-### .env
+```console
+pip install -e .
+```
 
-You have to rename the file `empty.env` to `.env`. In this file you have to set your variables. (Hint: All path variables can be either an absolute or relative path.)
+Then you can use the cli like this:
 
-`PATH_PAPERS` is the path to the directory with the downloaded papers.
-(Only used in abstract extraction)
+```console
+python -m nlpland.cli continous --use_authors --use_publications
+```
 
-`PATH_ANTHOLOGY` is the path to the `xml` [directory in the ACL Anthology](https://github.com/acl-org/acl-anthology/tree/master/data/xml).
-(Only used in abstract extraction)
+For help run:
 
-`PATH_DATASET` is the path to the `.txt` file of the NLP Scholar dataset.
+```console
+python -m nlpland.cli -h
+```
 
-`PATH_DATASET_EXPANDED` is the path to the `.txt` file of the expanded dataset or where it is supposed to be created.
+If you are using VSCode, you can also run debugging using the `.vscode/launch.json`.
 
-## Code quality and checks
+## Code quality and tests
 
 To maintain a consistent and well-tested repository, we use unit tests, linting, and typing checkers with GitHub actions. We use pytest for testing, pylint for linting, and pyright for typing.
 Every time code gets pushed to our repository these checks are executed and have to fullfill certain requirements before you can merge the code to our master branch.
@@ -56,18 +52,38 @@ In the following we will describe how to run checks locally and which naming con
 
 ### CI
 
-To run the CI pipeline locally, make sure to install act from [here](https://github.com/nektos/act).
+Whenever you create a pull request against the default branch, GitHub actions will create a CI job executing unit tests and linting.
+
+### Pre-commit
+
+To make sure the code requirements are satisfied before you push code to the repository, we use pre-commit hooks.
+
+Install the pre-commit hooks using:
+
+```console
+poetry run pre-commit install
+```
+
+These hooks are automatically checked before you make a commit. To manually run the pre-commit checks, run:
+
+```console
+poetry run pre-commit run --all-files
+```
+
+### Replicate CI locally
+
+If you want to replicate the exact same pipeline that runs on GitHub actions, install act from [here](https://github.com/nektos/act).
 
 To run the full check suite, execute:
 
 ```sh
-act -P self-hosted=nektos/act-environments-ubuntu:18.04
+act -j Fulltests
 ```
 
 To run a single check from the pipeline such as linting, execute:
 
 ```sh
-act -j linting -P self-hosted=nektos/act-environments-ubuntu:18.04
+act -j Lint
 ```
 
 ### Repository and naming conventions
