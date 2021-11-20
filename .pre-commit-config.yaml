@@ -1,0 +1,32 @@
+- repo: https://github.com/pycqa/isort
+  rev: 5.10.1
+  hooks:
+    - id: isort
+      name: isort (python)
+
+- repo: local
+  hooks:
+    - id: type
+      name: type (python)
+      entry: poetry run poe type
+      language: system
+      types: [python]
+      pass_filenames: false
+    - id: lint
+      name: lint (python)
+      entry: poetry run poe lint
+      language: system
+      types: [python]
+      pass_filenames: false
+    - id: test
+      name: test (python)
+      entry: poetry run poe test
+      language: system
+      types: [python]
+      pass_filenames: false
+    - id: doc
+      name: doc (python)
+      entry: poetry run poe doc
+      language: system
+      types: [python]
+      pass_filenames: false

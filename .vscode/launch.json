@@ -1,20 +1,25 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "NLPLand: cli dblp",
-            "type": "python",
-            "request": "launch",
-            "module": "poetry",
-            "args": [
-                "run",
-                "cli",
-                "dblp"
-            ],
-            "console": "integratedTerminal"
-        }
-    ]
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Test Documentcrawler",
+      "type": "python",
+      "request": "launch",
+      "module": "nlpland.crawl.documentcrawler",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python: CLI Continous",
+      "type": "python",
+      "request": "launch",
+      "module": "nlpland.cli",
+      "args": ["--use_authors"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+  ]
 }
