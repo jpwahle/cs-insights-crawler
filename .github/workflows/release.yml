@@ -6,13 +6,13 @@ on:
     types: [closed]
 
 jobs:
-  Fulltests:
+  Test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: 3.8
       - name: Install poetry
         uses: snok/install-poetry@v1
         with:
@@ -29,17 +29,11 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       - name: Run linting
         run: |
-          poetry run poe lint
-      - name: Run tests
-        run: |
-          poetry run poe test
-      - name: Run typing
-        run: |
-          poetry run poe type
+          poetry run poe alltests
 
   Release:
     if: github.event.pull_request.merged == true
-    needs: [Fulltests]
+    needs: [Test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -83,11 +77,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   Coverage:
+    needs: [Test]
     if: github.event.pull_request.merged == true
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
       with:
-        python-version: 3.9
+        python-version: 3.8
     - name: Install poetry
       uses: snok/install-poetry@v1
       with:
@@ -112,7 +107,7 @@ jobs:
         file: ./coverage.xml
 
   Docs:
-    needs: [Fulltests]
+    needs: [Test]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

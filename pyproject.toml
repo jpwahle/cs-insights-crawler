@@ -50,6 +50,7 @@ lint = "flake8 ."
 type = "mypy ."
 test = "py.test tests -s --cov=nlpland --cov-report=xml --cov-fail-under 100"
 doc = "pdoc --output-dir docs --html nlpland"
+alltest = ["lint", "type", "test"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
