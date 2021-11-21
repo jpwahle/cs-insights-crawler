@@ -86,6 +86,15 @@ To run a single check from the pipeline such as linting, execute:
 act -j Lint
 ```
 
+You can also run each of the commands checked in `.github/workflows/main.yml`:
+
+```console
+poetry run poe lint
+poetry run poe type
+poetry run poe doc
+poetry run poe test
+```
+
 ### Repository and naming conventions
 
 Each feature request, bug, enhancement, etc. has to be related to an issue. We have templates for bugs and features requests when you create an issue on GitHub.
