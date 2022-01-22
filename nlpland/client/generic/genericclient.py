@@ -1,13 +1,16 @@
+"""This module implements a generic API client used by the `backend` and `grobid` clients."""
 from copy import deepcopy
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple, TypeVar
 from urllib.parse import urljoin
 
 import requests
 
 from nlpland.types import Url
 
+T = TypeVar("T", bound="GenericApiClient")
 
-class ApiClient(object):
+
+class GenericApiClient(object):
     """Generic client to interact with a generic Rest API.
 
     Subclasses should implement functionality accordingly with the provided service methods, i.e.
@@ -19,12 +22,12 @@ class ApiClient(object):
     accept_type = "application/json"
 
     def __init__(
-        self,
+        self: T,
         base_url: Url,
         api_token: Optional[str] = None,
         status_endpoint: Optional[str] = None,
-        timeout: int = 60,
-    ):
+        timeout: int = 3600,
+    ) -> None:
         """Initialise client.
 
         Args:
@@ -38,7 +41,7 @@ class ApiClient(object):
         self.status_endpoint = urljoin(self.base_url, status_endpoint)
         self.timeout = timeout
 
-    def get_auth_header(self) -> Dict[str, str]:
+    def get_auth_header(self: T) -> Dict[str, str]:
         """Returns parameters to be added to authenticate the request.
 
         This lives on its own to make it easier to re-implement it if needed.
@@ -49,7 +52,7 @@ class ApiClient(object):
         return {"Authorization": f"Bearer {self.api_token}"}
 
     def call_api(
-        self,
+        self: T,
         method: str,
         url: Url,
         headers: Optional[Dict[str, Any]] = None,
@@ -75,7 +78,6 @@ class ApiClient(object):
             ResultParser or ErrorParser.
         """
         headers = deepcopy(headers) or {}
-        headers["Accept"] = self.accept_type
         params = deepcopy(params) or {}
         data = data or {}
         files = files or {}
@@ -92,7 +94,7 @@ class ApiClient(object):
         return r, r.status_code
 
     def get(
-        self, url: Url, params: Optional[Dict[str, Any]] = None, **kwargs: Any
+        self: T, url: Url, params: Optional[Dict[str, Any]] = None, **kwargs: Any
     ) -> Tuple[requests.Response, int]:
         """Call the API with a GET request.
 
@@ -107,7 +109,7 @@ class ApiClient(object):
         return self.call_api("GET", url, params=params, **kwargs)
 
     def delete(
-        self, url: Url, params: Optional[Dict[str, Any]] = None, **kwargs: Any
+        self: T, url: Url, params: Optional[Dict[str, Any]] = None, **kwargs: Any
     ) -> Tuple[requests.Response, int]:
         """Call the API with a DELETE request.
 
@@ -121,7 +123,7 @@ class ApiClient(object):
         return self.call_api("DELETE", url, params=params, **kwargs)
 
     def patch(
-        self,
+        self: T,
         url: Url,
         params: Optional[Dict[str, Any]] = None,
         data: Optional[Dict[str, Any]] = None,
@@ -134,7 +136,7 @@ class ApiClient(object):
             url (str): Resource location relative to the base URL.
             params (dict or None): Query-string parameters.
             data (dict or None): Request body contents.
-            files (dict or None: Files to be passed to the request.
+            files (dict or None): Files to be passed to the request.
 
         Returns:
             An instance of ResultParser or ErrorParser.
@@ -142,7 +144,7 @@ class ApiClient(object):
         return self.call_api("PATCH", url, params=params, data=data, files=files, **kwargs)
 
     def put(
-        self,
+        self: T,
         url: Url,
         params: Optional[Dict[str, Any]] = None,
         data: Optional[Dict[str, Any]] = None,
@@ -150,18 +152,20 @@ class ApiClient(object):
         **kwargs: Any,
     ) -> Tuple[requests.Response, int]:
         """Call the API with a PUT request.
+
         Args:
             url (str): Resource location relative to the base URL.
             params (dict or None): Query-string parameters.
             data (dict or None): Request body contents.
             files (dict or None: Files to be passed to the request.
+
         Returns:
             An instance of ResultParser or ErrorParser.
         """
         return self.call_api("PUT", url, params=params, data=data, files=files, **kwargs)
 
     def post(
-        self,
+        self: T,
         url: Url,
         params: Optional[Dict[str, Any]] = None,
         data: Optional[Dict[str, Any]] = None,
@@ -183,7 +187,7 @@ class ApiClient(object):
             method="POST", url=url, params=params, data=data, files=files, **kwargs
         )
 
-    def service_status(self, **kwargs: Any) -> Tuple[requests.Response, int]:
+    def service_status(self: T, **kwargs: Any) -> Tuple[requests.Response, int]:
         """Call the API to get the status of the service.
 
         Returns:

@@ -28,4 +28,4 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       - name: Run tests
         run: |
-          poetry run poe alltests
+          poetry run poe alltest

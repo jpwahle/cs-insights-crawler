@@ -1,4 +1,17 @@
-from nlpland.client.backend.backendclient import BackendClient  # type: ignore
-from nlpland.client.backend.schemas import backend_schemas  # type: ignore
+from .backendclient import BackendClient
+from .schemas import (
+    AffiliationSchema,
+    AuthorSchema,
+    BackendSchema,
+    PublicationSchema,
+    VenueSchema,
+)
 
-__all__ = ["BackendClient", "backend_schemas"]
+__all__ = [
+    "BackendClient",
+    "AuthorSchema",
+    "VenueSchema",
+    "PublicationSchema",
+    "AffiliationSchema",
+    "BackendSchema",
+]

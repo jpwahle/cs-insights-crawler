@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  api:
+    build: .
+    depends_on:
+      - grobid
+    command: poetry run cli continous
+    ports:
+      - 3000:3000
+    restart: on-failure
+
+  grobid:
+    image: lfoppiano/grobid:0.7.0
+    restart: always
+    expose:
+      - 8070
+    volumes:
+      - ./grobid.yaml:/opt/grobid/grobid-home/config/grobid.yaml
+
+  backend:
+    image: jpelhaw/nlp-land-backend:latest
+    restart: always
+    expose:
+      - 8000

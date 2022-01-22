@@ -11,7 +11,11 @@
 
 ## Installation & Setup
 
-### Production
+We are providing two ways to setup this project.
+
+<details> <summary> Production </summary>
+<br/>
+In production mode an instance of the NLP-Land-backend and grobid server are created in Docker and the contionous crawling process of this repository is running.
 
 To spin up the production version of this project, switch into the root directory of this project and run:
 
@@ -19,27 +23,65 @@ To spin up the production version of this project, switch into the root director
 docker-compose up --build
 ```
 
-### Development
+</details>
 
-For development install the package in editable mode locally:
+<details> <summary> Development </summary>
+<br/>
+If you want to actively develop this project, you need to install the project and dependencies locally.
+
+First install the package manager [poetry](https://python-poetry.org/):
 
 ```console
-pip install -e .
+pip install poetry
 ```
 
-Then you can use the cli like this:
+Then run:
 
 ```console
-python -m nlpland.cli continous --use_authors --use_publications
+poetry install
+```
+
+Spin up an instance of GROBID with docker or follow the steps to run GROBID locally [here](https://grobid.readthedocs.io/en/latest/Install-Grobid/).
+
+```console
+docker run -t --init \
+-p 8070:8070 \
+-p 8071:8071 \
+-v ./grobid.yaml:/opt/grobid/grobid-home/config/grobid.yaml
+--name grobid \
+lfoppiano/grobid:0.7.0
+```
+
+Although in production docker is used, it might make sense to run GROBID locally for performance reasons.
+
+> Note: If you are using MacOS or Windows without WSL, local builds are highly recommended because translation to linux kernels is too slow and will cause timeouted requests.
+
+> If you are using MacOS, it is recommended to use JDK 15 with Gradle 7.
+
+Next, spin up an instance of the NLP-Land-backend
+
+```console
+docker run --init \
+-p 800:8000 \
+--name nlp-land-backend \
+jpelhaw/nlp-land-backend:latest
+```
+
+Then you can run the cli which automatically connects to those services like this:
+
+```console
+poetry run python -m nlpland.cli continous --use_authors --use_publications
 ```
 
 For help run:
 
 ```console
-python -m nlpland.cli -h
+poetry run python -m nlpland.cli -h
 ```
 
-If you are using VSCode, you can also run debugging using the `.vscode/launch.json`.
+If you are using VSCode, you can also run debugging using the configurations in `.vscode/launch.json`.
+
+</details>
 
 ## Code quality and tests
 
@@ -72,12 +114,14 @@ poetry run pre-commit run --all-files
 
 ### Replicate CI locally
 
+<details> <summary> Recommended: Replicate GitHub action pipeline with Docker </summary>
+
 If you want to replicate the exact same pipeline that runs on GitHub actions, install act from [here](https://github.com/nektos/act).
 
 To run the full check suite, execute:
 
 ```sh
-act -j Fulltests
+act -j Test
 ```
 
 To run a single check from the pipeline such as linting, execute:
@@ -85,6 +129,9 @@ To run a single check from the pipeline such as linting, execute:
 ```sh
 act -j Lint
 ```
+
+</details>
+<details> <summary> Not Recommended: run it locally on host OS </summary>
 
 You can also run each of the commands checked in `.github/workflows/main.yml`:
 
@@ -94,6 +141,8 @@ poetry run poe type
 poetry run poe doc
 poetry run poe test
 ```
+
+</details>
 
 ### Repository and naming conventions
 

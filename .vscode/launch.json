@@ -17,7 +17,7 @@
       "type": "python",
       "request": "launch",
       "module": "nlpland.cli",
-      "args": ["--use_authors"],
+      "args": ["continous"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal"
     }

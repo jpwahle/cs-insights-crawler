@@ -4,9 +4,15 @@
   "python.linting.mypyEnabled": true,
   "python.linting.flake8Enabled": true,
   "python.formatting.provider": "black",
+  "python.linting.ignorePatterns": [
+    "**/site-packages/**/*.py",
+    ".vscode/*.py",
+    "/Users/jp/Library/**/*"
+  ],
+  "mypy.runUsingActiveInterpreter": true,
   "python.formatting.blackArgs": [
     "--line-length",
-    "99",
+    "100",
     "--experimental-string-processing"
   ],
   "editor.formatOnSave": true,

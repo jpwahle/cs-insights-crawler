@@ -3,5 +3,5 @@ exclude = .venv, venv/
 docstring-convention = google
 max-line-length = 100
 
-ignore = D104, D205, D415
+ignore = D104, D205, D415, W503
 per-file-ignores = tests/*: D1

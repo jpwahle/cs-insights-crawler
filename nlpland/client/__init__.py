@@ -1,6 +1,25 @@
 """.. include:: CLIENT.md"""
 
-from nlpland.client.backend import BackendClient, backend_schemas  # type: ignore
-from nlpland.client.dblp import DBLPClient  # type: ignore
+from .backend import (
+    AffiliationSchema,
+    AuthorSchema,
+    BackendClient,
+    BackendSchema,
+    PublicationSchema,
+    VenueSchema,
+)
+from .dblp import DBLPClient
+from .generic import GenericApiClient
+from .grobid import GrobidClient
 
-__all__ = ["DBLPClient", "BackendClient", "backend_schemas"]
+__all__ = [
+    "BackendClient",
+    "DBLPClient",
+    "GrobidClient",
+    "AuthorSchema",
+    "VenueSchema",
+    "PublicationSchema",
+    "AffiliationSchema",
+    "BackendSchema",
+    "GenericApiClient",
+]

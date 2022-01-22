@@ -1,3 +1,3 @@
-from nlpland.client.dblp.dblpclient import DBLPClient  # type: ignore
+from .dblpclient import DBLPClient
 
 __all__ = ["DBLPClient"]
