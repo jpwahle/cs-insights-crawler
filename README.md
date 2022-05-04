@@ -260,3 +260,17 @@ In the NLP Scholar dataset nearly all authors are saved like `<lastname>, <first
 `--fauthor <name>` selects the papers where the author is the first author.
 
 Example: `cli count 10 --author "manning, christopher"` will count all words from papers Christopher Manning worked on.
+
+  ### Citation
+  ```bib
+  @inproceedings{Wahle2022c,
+    title        = {D3: A Massive Dataset of Scholarly Metadata for Analyzing the State of Computer Science Research},
+    author       = {Wahle, Jan Philip and Ruas, Terry and Mohammad, Saif M. and Gipp, Bela},
+    year         = {2022},
+    month        = {July},
+    booktitle    = {Proceedings of The 13th Language Resources and Evaluation Conference},
+    publisher    = {European Language Resources Association},
+    address      = {Marseille, France},
+    doi          = {},
+}
+  ```
