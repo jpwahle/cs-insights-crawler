@@ -1,4 +1,4 @@
-# NLPLand
+# cs-insights-crawler
 
 <p align="center">
 <a href="https://codecov.io/gh/gipplab/NLP-Land-crawler"><img src="https://codecov.io/gh/gipplab/NLP-Land-crawler/branch/main/graph/badge.svg?token=7CL6B5LNKP"/></a>    
