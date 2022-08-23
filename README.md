@@ -144,22 +144,6 @@ poetry run poe test
 
 </details>
 
-### Repository and naming conventions
-
-Each feature request, bug, enhancement, etc. has to be related to an issue. We have templates for bugs and features requests when you create an issue on GitHub.
-An issue should be a closed component that can be implemented by one developer in 1 day. If the issue is larger than that, split it into smaller components.
-
-We group issues using a task list in another issue that has the `Epic` label. These issues are larger components that need to be developed.
-Each issue with the `Epic` label has a task list with each element of the task list being a issue (e.g., this one [#47](https://github.com/ag-gipp/NLPLand/issues/47)).
-Whenever a pull request with the above convention gets merged, the corresponding issue gets closed, and the task in the Epic gets checked.
-
-When a branch is assigned to you, a new issue will be created from the `dev` branch including the issue number.
-
-To indicate whether the PR is a patch, minor, or major update, please use #patch, #minor, #major in the last commit message of the PR and in the PR description.
-See [here](https://github.com/anothrNick/github-tag-action) for more information.
-
-To build changelogs, each pull-request needs one of the labels "fix", "feature", or "test". See [here](https://github.com/mikepenz/release-changelog-builder-action) for more information.
-
 ## Contributing
 
 Fork the repo, make changes and send a PR. We'll review it together!
