@@ -1,8 +1,11 @@
 [tool.poetry]
-name = "NLPLand"
+name = "csinsights"
 version = "v0.2.1"
-description = "This repository implements the interaction with DBLP, information extraction and pre-processing of papers, and a client to store data to the NLP-Land-backend."
+description = "This repository implements the interaction with DBLP, information extraction with GROBID, and processing of metadata with S2ORC doc2json format."
 authors = ["Jan Philip Wahle <wahle@uni-wuppertal.de>", "Lennart Kuell <lennart.kuell@gmail.com>", "Terry Ruas <ruas@uni-wuppertal.de>"]
+
+[tool.poetry.scripts]
+cli = "csinsights.cli:cli"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
@@ -17,11 +20,10 @@ aiofiles = "^0.7.0"
 requests = "^2.26.0"
 GitPython = "^3.1.24"
 dacite = "^1.6.0"
+Scrapy = "^2.6.2"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
-pytest-cov = "^3.0.0"
-black = "^21.9b0"
+black = { version = "^22.1.0", allow-prereleases = true }
 isort = "^5.9.3"
 pytest-mock = "^3.6.1"
 flake8 = "^4.0.1"
@@ -39,16 +41,12 @@ types-appdirs = "^1.4.1"
 types-beautifulsoup4 = "^4.10.5"
 types-click = "^7.1.8"
 
-[tool.poetry.scripts]
-cli = "nlpland.cli:cli"
-
 [tool.poe.tasks]
 lint = "flake8 ."
 type = "mypy ."
-test = "py.test tests -s --cov=nlpland --cov-report=xml --cov-fail-under 100"
-doc = "pdoc --output-dir docs --html nlpland"
-alltest = ["lint", "type", "test"]
+alltest = ["lint", "type"]
 isort = "isort ."
+black = "black ."
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -61,4 +59,4 @@ profile = "black"
 line-length = 100
 
 [package]
-include = ["nlpland/*.py"]
+include = ["csinsights/*.py"]

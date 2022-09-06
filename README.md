@@ -1,11 +1,10 @@
-# NLPLand
+# cs-insights-crawler
 
 <p align="center">
-<a href="https://codecov.io/gh/ag-gipp/NLPLand"><img src="https://codecov.io/gh/ag-gipp/NLPLand/branch/main/graph/badge.svg?token=7CL6B5LNKP"/></a>    
-<a href="https://github.com/ag-gipp/NLPLand/actions/workflows/release.yaml"><img alt="Actions Status" src="https://github.com/ag-gipp/NLPLand/actions/workflows/release.yaml/badge.svg">    
-<a href="https://github.com/ag-gipp/NLPLand/actions/workflows/main.yml"><img alt="Actions Status" src="https://github.com/ag-gipp/NLPLand/actions/workflows/main.yml/badge.svg?branch=main">
-<a href="https://github.com/ag-gipp/NLPLand/releases"><img alt="Actions Status" src="https://img.shields.io/github/v/release/ag-gipp/NLPLand?sort=semver"></a>
-<a href="https://github.com/ag-gipp/NLPLand/blob/master/LICENSE"><img alt="License: MIT" src="https://black.readthedocs.io/en/stable/_static/license.svg"></a>
+<a href="https://github.com/gipplab/cs-insights-crawler/actions/workflows/release.yaml"><img alt="Actions Status" src="https://github.com/gipplab/NLPLand/actions/workflows/release.yaml/badge.svg">    
+<a href="https://github.com/gipplab/cs-insights-crawler/actions/workflows/main.yml"><img alt="Actions Status" src="https://github.com/gipplab/NLPLand/actions/workflows/main.yml/badge.svg?branch=main">
+<a href="https://github.com/gipplab/cs-insights-crawler/releases"><img alt="Actions Status" src="https://img.shields.io/github/v/release/gipplab/cs-insights-crawler?sort=semver"></a>
+<a href="https://github.com/gipplab/cs-insights-crawler/blob/master/LICENSE"><img alt="License: MIT" src="https://black.readthedocs.io/en/stable/_static/license.svg"></a>
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
 
@@ -58,28 +57,17 @@ Although in production docker is used, it might make sense to run GROBID locally
 
 > If you are using MacOS, it is recommended to use JDK 15 with Gradle 7.
 
-Next, spin up an instance of the NLP-Land-backend
-
-```console
-docker run --init \
--p 800:8000 \
---name nlp-land-backend \
-jpelhaw/nlp-land-backend:latest
-```
-
 Then you can run the cli which automatically connects to those services like this:
 
 ```console
-poetry run python -m nlpland.cli continous --use_authors --use_publications
+poetry run cli main
 ```
 
 For help run:
 
 ```console
-poetry run python -m nlpland.cli -h
+poetry run cli main --help
 ```
-
-If you are using VSCode, you can also run debugging using the configurations in `.vscode/launch.json`.
 
 </details>
 
@@ -95,22 +83,6 @@ In the following we will describe how to run checks locally and which naming con
 ### CI
 
 Whenever you create a pull request against the default branch, GitHub actions will create a CI job executing unit tests and linting.
-
-### Pre-commit
-
-To make sure the code requirements are satisfied before you push code to the repository, we use pre-commit hooks.
-
-Install the pre-commit hooks using:
-
-```console
-poetry run pre-commit install
-```
-
-These hooks are automatically checked before you make a commit. To manually run the pre-commit checks, run:
-
-```console
-poetry run pre-commit run --all-files
-```
 
 ### Replicate CI locally
 
@@ -136,10 +108,7 @@ act -j Lint
 You can also run each of the commands checked in `.github/workflows/main.yml`:
 
 ```console
-poetry run poe lint
-poetry run poe type
-poetry run poe doc
-poetry run poe test
+poetry run poe alltest
 ```
 
 </details>
@@ -156,4 +125,18 @@ This project is licensed under the terms of MIT license. For more information, p
 
 If you use this repository, or use our tool for analysis, please cite our work:
 
-TODO: Add citation here and as CITATION.cff file when paper is out.
+## Citation
+If you use this repository, or use our tool for analysis, please cite our work:
+
+```bib
+@inproceedings{Wahle2022c,
+  title        = {D3: A Massive Dataset of Scholarly Metadata for Analyzing the State of Computer Science Research},
+  author       = {Wahle, Jan Philip and Ruas, Terry and Mohammad, Saif M. and Gipp, Bela},
+  year         = {2022},
+  month        = {July},
+  booktitle    = {Proceedings of The 13th Language Resources and Evaluation Conference},
+  publisher    = {European Language Resources Association},
+  address      = {Marseille, France},
+  doi          = {},
+}
+```

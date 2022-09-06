@@ -5,19 +5,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python: Test Documentcrawler",
-      "type": "python",
-      "request": "launch",
-      "module": "nlpland.crawl.documentcrawler",
-      "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal"
-    },
-    {
       "name": "Python: CLI Continous",
       "type": "python",
       "request": "launch",
-      "module": "nlpland.cli",
-      "args": ["continous"],
+      "module": "poetry",
+      "args": ["run", "cli", "main"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal"
     }

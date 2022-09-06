@@ -1,2 +1,2 @@
 [run]
-omit = ./nlpland/modules/*
+omit = ./csinsights/modules/*
