@@ -6,7 +6,7 @@ from typing import Any, Callable, Dict, List, Optional
 # region exceptions
 
 
-class ServerUnavailableException(Exception):
+class ServerUnavailableError(Exception):
     """An exception when the grobid server is not running.
 
     Args:
@@ -54,10 +54,10 @@ class PaperType(str, Enum):
 class ValidGrobidServices(str, Enum):
     """Enum of valid services"""
 
-    processFulltextDocument = "processFulltextDocument"
-    processHeaderDocument = "processHeaderDocument"
-    processReferences = "processReferences"
-    processCitationList = "processCitationList"
+    process_fulltext_document = "processFulltextDocument"
+    process_header_document = "processHeaderDocument"
+    process_references = "processReferences"
+    process_citation_list = "processCitationList"
 
 
 # endregion
