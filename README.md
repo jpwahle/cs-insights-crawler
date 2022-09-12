@@ -1,7 +1,7 @@
 # cs-insights-crawler
 
 <p align="center">
-<a href="https://github.com/gipplab/cs-insights-crawler/actions/workflows/release.yaml"><img alt="Actions Status" src="https://github.com/gipplab/NLPLand/actions/workflows/release.yaml/badge.svg">    
+<a href="https://github.com/gipplab/cs-insights-crawler/actions/workflows/release.yml"><img alt="Actions Status" src="https://github.com/gipplab/NLPLand/actions/workflows/release.yaml/badge.svg">    
 <a href="https://github.com/gipplab/cs-insights-crawler/actions/workflows/main.yml"><img alt="Actions Status" src="https://github.com/gipplab/NLPLand/actions/workflows/main.yml/badge.svg?branch=main">
 <a href="https://github.com/gipplab/cs-insights-crawler/releases"><img alt="Actions Status" src="https://img.shields.io/github/v/release/gipplab/cs-insights-crawler?sort=semver"></a>
 <a href="https://github.com/gipplab/cs-insights-crawler/blob/master/LICENSE"><img alt="License: MIT" src="https://black.readthedocs.io/en/stable/_static/license.svg"></a>
