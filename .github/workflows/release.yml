@@ -63,7 +63,6 @@ jobs:
           github_token: ${{ secrets.ACCESS_TOKEN }}
           branch: ${{ github.ref }}
       - name: 🔨 Create Release
-        if: startsWith(github.ref, 'refs/tags/v')
         uses: ncipollo/release-action@v1.10.0
         with:
           generateReleaseNotes: true
