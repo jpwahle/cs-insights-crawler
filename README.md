@@ -12,6 +12,7 @@
 
 > Starting from version 1.0.0, this project is using [semantic versioning](https://semver.org/), and supports [SemanticScholar](https://semanticscholar.org). For more info about the features supported, see the [releases](https://github.com/gipplab/cs-insights-crawler/releases).
 
+
 ## Installation & Setup
 
 First install the package manager [poetry](https://python-poetry.org/):
