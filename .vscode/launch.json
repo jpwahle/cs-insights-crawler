@@ -9,9 +9,9 @@
       "type": "python",
       "request": "launch",
       "module": "poetry",
-      "args": ["run", "cli", "main"],
+      "args": ["run", "cli", "main", "--s2_use_papers", "--s2_use_abstracts", "--s2_use_authors" , "--s2_filter_dblp"],
       "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
     }
   ]
 }

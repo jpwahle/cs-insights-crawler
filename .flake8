@@ -1,5 +1,5 @@
 [flake8]
-exclude = .venv, venv/, csinsights/grobid2json, csinsights/utils, csinsights/s2orc.py, csinsights/crawler
+exclude = .venv, venv/
 docstring-convention = google
 max-line-length = 100
 

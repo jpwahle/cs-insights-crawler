@@ -10,12 +10,10 @@ from gzip import GzipFile
 from pathlib import Path
 from typing import Any, BinaryIO, Dict, List, Optional, Set, Tuple, TypeVar, Union
 
-import requests
+import requests  # type: ignore
 import xmltodict  # type: ignore
 from bs4 import BeautifulSoup  # type: ignore
 from lxml import etree
-
-# Check if types are available soon https://github.com/tqdm/tqdm/issues/260
 from tqdm import tqdm  # type: ignore
 
 from csinsights.log import LogMixin
@@ -48,7 +46,7 @@ def remote_md5(file_url: Url) -> str:
     """
     md5_url = file_url + ".md5"
     page = requests.get(md5_url).text
-    md5 = page.partition(" ")[0]
+    md5 = str(page.partition(" ")[0])
     return md5
 
 
@@ -82,7 +80,7 @@ def download_in_chunks(url: str, file_path: Path, chunk_size: int = 1024) -> Non
     response = requests.get(url, stream=True)
     total_size_in_bytes = int(response.headers.get("content-length", 0))
 
-    progress_bar = tqdm(unit="B", total=total_size_in_bytes)
+    progress_bar = tqdm(unit="B", total=total_size_in_bytes)  # type: ignore
     with open(file_path, "wb") as file:
         for chunk in response.iter_content(chunk_size=chunk_size):
             if chunk:

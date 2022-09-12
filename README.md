@@ -8,25 +8,11 @@
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
 
+> This is the official crawler implementation for the [d3 dataset](https://github.com/gipplab/d3-dataset) in almost pure python. The crawler is also used for the [cs-insights project](https://github.com/gipplab/cs-insights-main).
+
+> Starting from version 1.0.0, this project is using [semantic versioning](https://semver.org/), and supports [SemanticScholar](https://semanticscholar.org). For more info about the features supported, see the [releases](https://github.com/gipplab/cs-insights-crawler/releases).
+
 ## Installation & Setup
-
-We are providing two ways to setup this project.
-
-<details> <summary> Production </summary>
-<br/>
-In production mode an instance of the NLP-Land-backend and grobid server are created in Docker and the contionous crawling process of this repository is running.
-
-To spin up the production version of this project, switch into the root directory of this project and run:
-
-```console
-docker-compose up --build
-```
-
-</details>
-
-<details> <summary> Development </summary>
-<br/>
-If you want to actively develop this project, you need to install the project and dependencies locally.
 
 First install the package manager [poetry](https://python-poetry.org/):
 
@@ -40,27 +26,10 @@ Then run:
 poetry install
 ```
 
-Spin up an instance of GROBID with docker or follow the steps to run GROBID locally [here](https://grobid.readthedocs.io/en/latest/Install-Grobid/).
+To start the crawling process, run:
 
 ```console
-docker run -t --init \
--p 8070:8070 \
--p 8071:8071 \
--v ./grobid.yaml:/opt/grobid/grobid-home/config/grobid.yaml
---name grobid \
-lfoppiano/grobid:0.7.0
-```
-
-Although in production docker is used, it might make sense to run GROBID locally for performance reasons.
-
-> Note: If you are using MacOS or Windows without WSL, local builds are highly recommended because translation to linux kernels is too slow and will cause timeouted requests.
-
-> If you are using MacOS, it is recommended to use JDK 15 with Gradle 7.
-
-Then you can run the cli which automatically connects to those services like this:
-
-```console
-poetry run cli main
+poetry run cli main --s2_use_papers --s2_use_abstracts --s2_filter_acl
 ```
 
 For help run:
@@ -69,49 +38,18 @@ For help run:
 poetry run cli main --help
 ```
 
-</details>
-
 ## Code quality and tests
 
 To maintain a consistent and well-tested repository, we use unit tests, linting, and typing checkers with GitHub actions. We use pytest for testing, pylint for linting, and pyright for typing.
 Every time code gets pushed to our repository these checks are executed and have to fullfill certain requirements before you can merge the code to our master branch.
 
-We also use naming conventions for branches, commits, and pull requests to leverage GitHub workflow automation and keep the repository clean.
-
-In the following we will describe how to run checks locally and which naming conventions we use.
-
-### CI
-
 Whenever you create a pull request against the default branch, GitHub actions will create a CI job executing unit tests and linting.
 
-### Replicate CI locally
-
-<details> <summary> Recommended: Replicate GitHub action pipeline with Docker </summary>
-
-If you want to replicate the exact same pipeline that runs on GitHub actions, install act from [here](https://github.com/nektos/act).
-
-To run the full check suite, execute:
-
-```sh
-act -j Test
-```
-
-To run a single check from the pipeline such as linting, execute:
-
-```sh
-act -j Lint
-```
-
-</details>
-<details> <summary> Not Recommended: run it locally on host OS </summary>
-
-You can also run each of the commands checked in `.github/workflows/main.yml`:
+To run all tests that are tested during CI locally, run:
 
 ```console
 poetry run poe alltest
 ```
-
-</details>
 
 ## Contributing
 
@@ -140,3 +78,39 @@ If you use this repository, or use our tool for analysis, please cite our work:
   doi          = {},
 }
 ```
+
+Also make sure to cite the following papers if you use SemanticScholar data:
+
+```bib
+@inproceedings{ammar-etal-2018-construction,
+    title = "Construction of the Literature Graph in Semantic Scholar",
+    author = "Ammar, Waleed  and
+      Groeneveld, Dirk  and
+      Bhagavatula, Chandra  and
+      Beltagy, Iz",
+    booktitle = "Proceedings of the 2018 Conference of the North {A}merican Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 3 (Industry Papers)",
+    month = jun,
+    year = "2018",
+    address = "New Orleans - Louisiana",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/N18-3011",
+    doi = "10.18653/v1/N18-3011",
+    pages = "84--91",
+}
+```
+
+```bib
+@inproceedings{lo-wang-2020-s2orc,
+    title = "{S}2{ORC}: The Semantic Scholar Open Research Corpus",
+    author = "Lo, Kyle  and Wang, Lucy Lu  and Neumann, Mark  and Kinney, Rodney  and Weld, Daniel",
+    booktitle = "Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics",
+    month = jul,
+    year = "2020",
+    address = "Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://www.aclweb.org/anthology/2020.acl-main.447",
+    doi = "10.18653/v1/2020.acl-main.447",
+    pages = "4969--4983"
+}
+```
+

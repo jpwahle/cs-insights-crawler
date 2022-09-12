@@ -19,7 +19,7 @@ def set_glob_logger(verbose: bool, **kwargs: bool) -> None:
         format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s] - %(module)s -  %(message)s",
         handlers=[
             logging.StreamHandler(stream=sys.stdout),
-            logging.FileHandler("{0}/{1}.log".format(__TOP_LEVEL_PATH, "trading_engine")),
+            logging.FileHandler("{0}/{1}.log".format(__TOP_LEVEL_PATH, "csinsights")),
         ],
     )
 
