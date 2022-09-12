@@ -144,9 +144,9 @@ cython_debug/
 .venv/
 venv/
 .env
-data/
 output/
 resources/
 poetry.lock
 .coverage
 .DS_Store
+coverage/
