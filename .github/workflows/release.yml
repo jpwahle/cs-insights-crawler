@@ -35,23 +35,11 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: "3.10"
-      - name: 🏷 Semantic Version
-        id: semver
-        uses: PaulHatch/semantic-version@v5.0.0-alpha2
-      - name: ✅ tag-exists-action
-        uses: mukunku/tag-exists-action@v1.0.0
-        id: checkTag
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.0
         with:
-          tag: ${{ steps.semver.outputs.version }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: 🏷 Bump version and push tag
-        if: ${{ steps.checkTag.outputs.exists }} == 'false'
-        uses: anothrNick/github-tag-action@1.36.0
-        id: tagging
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CUSTOM_TAG: ${{steps.semver.outputs.version}}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: 💿 Install poetry
         uses: snok/install-poetry@v1
         with:
@@ -81,3 +69,6 @@ jobs:
           generateReleaseNotes: true
           draft: true
           token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
