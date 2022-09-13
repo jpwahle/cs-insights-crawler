@@ -1,3 +1,4 @@
+<br/>
 <div align="center">
   <a href="https://cs-insights.uni-goettingen.de">
     <img src="logo.png" alt="Logo" width="500">
@@ -11,6 +12,7 @@
 <a href="https://github.com/gipplab/cs-insights-crawler/blob/master/LICENSE"><img alt="License: MIT" src="https://black.readthedocs.io/en/stable/_static/license.svg"></a>
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
+<br/>
 
 > This is the official crawler implementation for the [d3 dataset](https://github.com/gipplab/d3-dataset) in almost pure python. The crawler is also used for the [cs-insights project](https://github.com/gipplab/cs-insights-main).
 
