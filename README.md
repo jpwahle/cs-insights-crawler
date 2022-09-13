@@ -1,5 +1,9 @@
-# cs-insights-crawler
-
+<div align="center">
+  <a href="https://cs-insights.uni-goettingen.de">
+    <img src="logo.png" alt="Logo" width="500">
+  </a>
+</div>
+<br/>
 <p align="center">
 <a href="https://github.com/gipplab/cs-insights-crawler/actions/workflows/release.yml"><img alt="Actions Status" src="https://github.com/gipplab/cs-insights-crawler/actions/workflows/release.yml/badge.svg">    
 <a href="https://github.com/gipplab/cs-insights-crawler/actions/workflows/main.yml"><img alt="Actions Status" src="https://github.com/gipplab/NLPLand/actions/workflows/main.yml/badge.svg?branch=main">
