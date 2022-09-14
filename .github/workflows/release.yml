@@ -10,16 +10,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-python@v2
         with:
           python-version: "3.10"
+
       - name: 💿 Install poetry
         uses: snok/install-poetry@v1
         with:
           virtualenvs-create: true
           virtualenvs-in-project: true
+
       - name: 📦 Install dependencies
         run: poetry install
+
       - name: 🧪 Run tests
         run: |
           poetry run poe alltest
@@ -32,36 +36,44 @@ jobs:
         with:
           fetch-depth: "0"
           persist-credentials: false
+
       - uses: actions/setup-python@v2
         with:
           python-version: "3.10"
-      - name: Bump version and push tag
+
+      - name: 🏷 Bump version and push tag
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: 💿 Install poetry
         uses: snok/install-poetry@v1
         with:
           virtualenvs-create: true
           virtualenvs-in-project: true
+
       - name: 📦 Install dependencies
         run: poetry install
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+
       - name: ⬆ Update package version to git tag
         run: |
           poetry version $(git describe --tags --abbrev=0)
+
       - name: ➕ Commit files
         run: |
           git config --local user.email "jan.philip.wahle@gmail.com"
           git config --local user.name "github-actions[bot]"
           git add pyproject.toml
           git commit -m "[release-bot] Update pyproject.toml version"
+
       - name: 💨 Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.ACCESS_TOKEN }}
           branch: ${{ github.ref }}
+
       - name: 🔨 Create Release
         uses: ncipollo/release-action@v1.10.0
         with:
