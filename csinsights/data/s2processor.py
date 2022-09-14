@@ -22,6 +22,8 @@ s2filters = {
     "pubmedcentral": "PubMedCentral",
 }
 
+unsupported_filters: List[str] = []
+
 
 class SemanticScholarDataProcessor(LogMixin):
     """A data processor for
