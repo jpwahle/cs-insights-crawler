@@ -22,12 +22,6 @@ s2filters = {
     "pubmedcentral": "PubMedCentral",
 }
 
-unsupported_filters = [
-    "s2_filter_pubmed",
-    "s2_filter_pubmedcentral",
-    "s2_filter_arxiv",
-]
-
 
 class SemanticScholarDataProcessor(LogMixin):
     """A data processor for
