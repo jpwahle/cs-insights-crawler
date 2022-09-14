@@ -62,6 +62,8 @@ poetry run poe alltest
 
 Fork the repo, make changes and send a PR. We'll review it together!
 
+Commit messages should follow [Angular's conventions](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular).
+
 ## License
 
 This project is licensed under the terms of MIT license. For more information, please see the [LICENSE](LICENSE) file.
