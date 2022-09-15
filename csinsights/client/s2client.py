@@ -151,8 +151,6 @@ class SemanticScholarClient(LogMixin):
         # Get all files
         res = requests.get(target_url, headers=self.headers)
         for index, download_link in enumerate(res.json()["files"]):
-            if index > 1:
-                break
             path = Path(os.path.join(self.cache_dir, f"{dataset}_{index}.jsonl.gz"))
             download_in_chunks(download_link, path)
             file_paths.append(path)
