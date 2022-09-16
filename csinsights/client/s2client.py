@@ -162,5 +162,12 @@ class SemanticScholarClient(LogMixin):
         releases: List[str] = list(requests.get(target_url, headers=self.headers).json())
         # Sort list according to name which results in accoring to date
         releases.sort(reverse=True)
-        # Return list of release links
-        return releases[0]
+        # Select the latest release from the last month. This is guaranteed to have all metadata
+        # The most recent release might not have all metadata yet.
+        latest_prefix = "-".join(releases[0].split("-")[:1])  # What is the latest (e.g., 2020-10)
+        # Get a list of everything from before the latest release
+        filtered_releases = [
+            release for release in releases if not release.startswith(latest_prefix)
+        ]
+        # Get the latest release from before the latest release
+        return filtered_releases[0]
