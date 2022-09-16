@@ -164,7 +164,7 @@ class SemanticScholarClient(LogMixin):
         releases.sort(reverse=True)
         # Select the latest release from the last month. This is guaranteed to have all metadata
         # The most recent release might not have all metadata yet.
-        latest_prefix = "-".join(releases[0].split("-")[:1])  # What is the latest (e.g., 2020-10)
+        latest_prefix = "-".join(releases[0].split("-")[:2])  # What is the latest (e.g., 2020-10)
         # Get a list of everything from before the latest release
         filtered_releases = [
             release for release in releases if not release.startswith(latest_prefix)
