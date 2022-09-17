@@ -1,16 +1,22 @@
-# cs-insights-crawler
-
+<br/>
+<div align="center">
+  <a href="https://cs-insights.uni-goettingen.de">
+    <img src="logo.png" alt="Logo" width="500">
+  </a>
+</div>
+<br/>
 <p align="center">
-<a href="https://github.com/gipplab/cs-insights-crawler/actions/workflows/release.yaml"><img alt="Actions Status" src="https://github.com/gipplab/NLPLand/actions/workflows/release.yaml/badge.svg">    
+<a href="https://github.com/gipplab/cs-insights-crawler/actions/workflows/release.yml"><img alt="Actions Status" src="https://github.com/gipplab/cs-insights-crawler/actions/workflows/release.yml/badge.svg">    
 <a href="https://github.com/gipplab/cs-insights-crawler/actions/workflows/main.yml"><img alt="Actions Status" src="https://github.com/gipplab/NLPLand/actions/workflows/main.yml/badge.svg?branch=main">
 <a href="https://github.com/gipplab/cs-insights-crawler/releases"><img alt="Actions Status" src="https://img.shields.io/github/v/release/gipplab/cs-insights-crawler?sort=semver"></a>
 <a href="https://github.com/gipplab/cs-insights-crawler/blob/master/LICENSE"><img alt="License: MIT" src="https://black.readthedocs.io/en/stable/_static/license.svg"></a>
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
+<br/>
 
 > This is the official crawler implementation for the [d3 dataset](https://github.com/gipplab/d3-dataset) in almost pure python. The crawler is also used for the [cs-insights project](https://github.com/gipplab/cs-insights-main).
 
-> Starting from version 1.0.0, this project is using [semantic versioning](https://semver.org/), and supports [SemanticScholar](https://semanticscholar.org). For more info about the features supported, see the [releases](https://github.com/gipplab/cs-insights-crawler/releases).
+> Starting from version 1.0.2, this project is using [semantic versioning](https://semver.org/), and supports [SemanticScholar](https://semanticscholar.org). For more info about the features supported, see the [releases](https://github.com/gipplab/cs-insights-crawler/releases).
 
 
 ## Installation & Setup
