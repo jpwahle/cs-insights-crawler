@@ -14,7 +14,7 @@
 </p>
 <br/>
 
-> This is the official crawler implementation for the [d3 dataset](https://github.com/gipplab/d3-dataset) in almost pure python. The crawler is also used for the [cs-insights project](https://github.com/gipplab/cs-insights-main).
+> This is the official crawler implementation for the [D3 Dataset](https://github.com/gipplab/d3-dataset) in almost pure python. The crawler is also used for the [cs-insights project](https://github.com/gipplab/cs-insights-main).
 
 > Starting from version 1.0.2, this project is using [semantic versioning](https://semver.org/), and supports [SemanticScholar](https://semanticscholar.org). For more info about the features supported, see the [releases](https://github.com/gipplab/cs-insights-crawler/releases).
 
