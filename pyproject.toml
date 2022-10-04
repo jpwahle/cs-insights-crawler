@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "csinsights"
-version = "v1.1.0"
+version = "v1.1.1"
 description = "This repository implements the interaction with DBLP, information extraction with GROBID, and processing of metadata with S2ORC doc2json format."
 authors = ["Jan Philip Wahle <wahle@uni-wuppertal.de>", "Terry Ruas <ruas@uni-wuppertal.de>"]
 
