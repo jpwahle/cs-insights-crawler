@@ -36,7 +36,7 @@ poetry install
 To start the crawling process, run:
 
 ```console
-poetry run cli main --s2_use_papers --s2_use_abstracts --s2_filter_acl
+poetry run cli main --s2_use_papers --s2_use_abstracts --s2_filter_dblp
 ```
 
 For help run:
